@@ -1,0 +1,49 @@
+{
+  "budget": {
+    "epochs": 3,
+    "train_examples": 2000,
+    "validation_examples": 500
+  },
+  "experiment": "frozen_atom_transfer",
+  "schema_version": 1,
+  "seed": 17,
+  "source_four_task_result": "results\\followups\\shared_prefixes\\prefix_4\\seed_17\\metrics_by_task.json",
+  "source_tasks": [
+    "sst2",
+    "mrpc",
+    "rte",
+    "qnli"
+  ],
+  "strong_result": {
+    "fewer_new_parameters": true,
+    "new_parameter_ratio": 0.0666054203031695,
+    "quality_passed": false,
+    "quality_ratio": 0.9084936900479857,
+    "quality_threshold": 0.95,
+    "strong_transfer": false
+  },
+  "systems": {
+    "fresh_lora": {
+      "new_parameters": 4354,
+      "result": "results\\independent_lora\\seed_17\\qqp\\metrics.json",
+      "score": 0.670429906542056
+    },
+    "head_only": {
+      "new_parameters": 258,
+      "result": "results\\followups\\transfer\\head_only\\seed_17\\qqp\\metrics.json",
+      "score": 0.626
+    },
+    "random_frozen_atoms": {
+      "new_parameters": 290,
+      "result": "results\\followups\\frozen_atom_transfer\\random_frozen_atoms\\metrics.json",
+      "score": 0.6266901408450705
+    },
+    "transferred_frozen_atoms": {
+      "new_parameters": 290,
+      "result": "results\\followups\\frozen_atom_transfer\\transferred_frozen_atoms\\metrics.json",
+      "reused_dictionary_parameters": 8192,
+      "score": 0.6090813397129187
+    }
+  },
+  "target_task": "qqp"
+}

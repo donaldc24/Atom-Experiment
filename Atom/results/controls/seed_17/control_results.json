@@ -1,0 +1,392 @@
+{
+  "controls": {
+    "average_independent_loras": {
+      "checkpoint": {
+        "bytes_by_component": {
+          "adapter": 20633,
+          "heads": 9541
+        },
+        "dtype": "torch.float32",
+        "format": "torch.save",
+        "paths": {
+          "adapter": "results\\controls\\average_independent_loras\\seed_17\\adapter.pt",
+          "heads": "results\\controls\\average_independent_loras\\seed_17\\heads.pt"
+        },
+        "total_bytes": 30174
+      },
+      "compact_state_only": true,
+      "control_id": "average_independent_loras",
+      "design": {
+        "additional_training_updates": 0,
+        "average_space": "effective_delta_weight",
+        "classification_heads": "each target task's own selected core head",
+        "formula": "mean_t(B_t @ A_t)",
+        "model": "one_shared_rank4_lora",
+        "rank": 4,
+        "rank_projection": "deterministic truncated SVD"
+      },
+      "mean_primary_score": 0.6391244424015727,
+      "result_path": "results\\controls\\average_independent_loras\\seed_17\\control_result.json",
+      "rules_out": "simple adapter averaging",
+      "seed": 17,
+      "status": "complete",
+      "task_primary_scores": {
+        "mrpc": 0.7534829721362228,
+        "qnli": 0.648,
+        "qqp": 0.5554027777777778,
+        "rte": 0.5487364620938628,
+        "sst2": 0.69
+      },
+      "title": "Average independent LoRA effective updates"
+    },
+    "nearest_other_task_lora": {
+      "checkpoints_by_target": {
+        "mrpc": {
+          "bytes_by_component": {
+            "adapter": 20569,
+            "heads": 3173
+          },
+          "dtype": "torch.float32",
+          "format": "torch.save",
+          "paths": {
+            "adapter": "results\\controls\\nearest_other_task_lora\\seed_17\\mrpc\\adapter.pt",
+            "heads": "results\\controls\\nearest_other_task_lora\\seed_17\\mrpc\\heads.pt"
+          },
+          "total_bytes": 23742
+        },
+        "qnli": {
+          "bytes_by_component": {
+            "adapter": 20569,
+            "heads": 3173
+          },
+          "dtype": "torch.float32",
+          "format": "torch.save",
+          "paths": {
+            "adapter": "results\\controls\\nearest_other_task_lora\\seed_17\\qnli\\adapter.pt",
+            "heads": "results\\controls\\nearest_other_task_lora\\seed_17\\qnli\\heads.pt"
+          },
+          "total_bytes": 23742
+        },
+        "qqp": {
+          "bytes_by_component": {
+            "adapter": 20569,
+            "heads": 3173
+          },
+          "dtype": "torch.float32",
+          "format": "torch.save",
+          "paths": {
+            "adapter": "results\\controls\\nearest_other_task_lora\\seed_17\\qqp\\adapter.pt",
+            "heads": "results\\controls\\nearest_other_task_lora\\seed_17\\qqp\\heads.pt"
+          },
+          "total_bytes": 23742
+        },
+        "rte": {
+          "bytes_by_component": {
+            "adapter": 20569,
+            "heads": 3173
+          },
+          "dtype": "torch.float32",
+          "format": "torch.save",
+          "paths": {
+            "adapter": "results\\controls\\nearest_other_task_lora\\seed_17\\rte\\adapter.pt",
+            "heads": "results\\controls\\nearest_other_task_lora\\seed_17\\rte\\heads.pt"
+          },
+          "total_bytes": 23742
+        },
+        "sst2": {
+          "bytes_by_component": {
+            "adapter": 20569,
+            "heads": 3173
+          },
+          "dtype": "torch.float32",
+          "format": "torch.save",
+          "paths": {
+            "adapter": "results\\controls\\nearest_other_task_lora\\seed_17\\sst2\\adapter.pt",
+            "heads": "results\\controls\\nearest_other_task_lora\\seed_17\\sst2\\heads.pt"
+          },
+          "total_bytes": 23742
+        }
+      },
+      "compact_state_only": true,
+      "control_id": "nearest_other_task_lora",
+      "design": {
+        "additional_training_updates": 0,
+        "candidate_pool": "all four other tasks; target adapter excluded",
+        "classification_heads": "target task's own selected core head",
+        "model": "one_retrieved_independent_rank4_lora_per_target",
+        "retrieval_query": "target task's selected independent LoRA",
+        "similarity": "cosine of concatenated effective B @ A updates",
+        "tie_break": "locked task order"
+      },
+      "mean_primary_score": 0.6346505477293782,
+      "result_path": "results\\controls\\nearest_other_task_lora\\seed_17\\control_result.json",
+      "retrieval": {
+        "mrpc": {
+          "similarities": {
+            "qnli": 0.13086606730091135,
+            "qqp": 0.09723799966774334,
+            "rte": 0.013792843967276178,
+            "sst2": 0.010953783374585703
+          },
+          "source_task": "qnli"
+        },
+        "qnli": {
+          "similarities": {
+            "mrpc": 0.13086606730091135,
+            "qqp": 0.07822533514251959,
+            "rte": 0.04103167263785298,
+            "sst2": 0.0034184564205166417
+          },
+          "source_task": "mrpc"
+        },
+        "qqp": {
+          "similarities": {
+            "mrpc": 0.09723799966774334,
+            "qnli": 0.07822533514251959,
+            "rte": -0.03205530705014588,
+            "sst2": 0.031055293435559697
+          },
+          "source_task": "mrpc"
+        },
+        "rte": {
+          "similarities": {
+            "mrpc": 0.013792843967276178,
+            "qnli": 0.04103167263785298,
+            "qqp": -0.03205530705014588,
+            "sst2": 0.0103259234548688
+          },
+          "source_task": "qnli"
+        },
+        "sst2": {
+          "similarities": {
+            "mrpc": 0.010953783374585703,
+            "qnli": 0.0034184564205166417,
+            "qqp": 0.031055293435559697,
+            "rte": 0.0103259234548688
+          },
+          "source_task": "qqp"
+        }
+      },
+      "rules_out": "memorized task lookup or nearest-adapter reuse",
+      "seed": 17,
+      "status": "complete",
+      "task_primary_scores": {
+        "mrpc": 0.7480253018237863,
+        "qnli": 0.668,
+        "qqp": 0.5760000000000001,
+        "rte": 0.5812274368231047,
+        "sst2": 0.6
+      },
+      "title": "Nearest other-task LoRA retrieval"
+    },
+    "random_frozen_atoms": {
+      "checkpoint": {
+        "bytes_by_component": {
+          "atoms": 37181,
+          "coefficients": 3571,
+          "heads": 9477
+        },
+        "dtype": "torch.float32",
+        "format": "torch.save",
+        "paths": {
+          "atoms": "results\\controls\\random_frozen_atoms\\seed_17\\atoms.pt",
+          "coefficients": "results\\controls\\random_frozen_atoms\\seed_17\\coefficients.pt",
+          "heads": "results\\controls\\random_frozen_atoms\\seed_17\\heads.pt"
+        },
+        "total_bytes": 50229
+      },
+      "compact_state_only": true,
+      "control_id": "random_frozen_atoms",
+      "design": {
+        "active_atoms_for_evaluation": 4,
+        "atom_count": 8,
+        "atoms_frozen": true,
+        "coefficients_trainable": true,
+        "heads_trainable": true,
+        "model": "shared_atom_dictionary",
+        "multitask_schedule": "seeded balanced complete pass",
+        "sparsity_lambda": 1e-05,
+        "training_labels_shuffled": false
+      },
+      "mean_primary_score": 0.6558197720815286,
+      "result_path": "results\\controls\\random_frozen_atoms\\seed_17\\control_result.json",
+      "rules_out": "random projection capacity",
+      "seed": 17,
+      "status": "complete",
+      "task_primary_scores": {
+        "mrpc": 0.7654930452061599,
+        "qnli": 0.634,
+        "qqp": 0.6143783783783784,
+        "rte": 0.5812274368231047,
+        "sst2": 0.684
+      },
+      "title": "Random frozen atoms + trained coefficients/heads"
+    },
+    "shared_atoms_no_sparsity": {
+      "checkpoint": {
+        "bytes_by_component": {
+          "atoms": 37181,
+          "coefficients": 3571,
+          "heads": 9477
+        },
+        "dtype": "torch.float32",
+        "format": "torch.save",
+        "paths": {
+          "atoms": "results\\controls\\shared_atoms_no_sparsity\\seed_17\\atoms.pt",
+          "coefficients": "results\\controls\\shared_atoms_no_sparsity\\seed_17\\coefficients.pt",
+          "heads": "results\\controls\\shared_atoms_no_sparsity\\seed_17\\heads.pt"
+        },
+        "total_bytes": 50229
+      },
+      "compact_state_only": true,
+      "control_id": "shared_atoms_no_sparsity",
+      "design": {
+        "active_atoms_for_evaluation": 4,
+        "atom_count": 8,
+        "atoms_frozen": false,
+        "coefficients_trainable": true,
+        "heads_trainable": true,
+        "model": "shared_atom_dictionary",
+        "multitask_schedule": "seeded balanced complete pass",
+        "sparsity_lambda": 0.0,
+        "training_labels_shuffled": false
+      },
+      "mean_primary_score": 0.6659575070180506,
+      "result_path": "results\\controls\\shared_atoms_no_sparsity\\seed_17\\control_result.json",
+      "rules_out": "an overly strong sparsity penalty",
+      "seed": 17,
+      "status": "complete",
+      "task_primary_scores": {
+        "mrpc": 0.7673324553702078,
+        "qnli": 0.66,
+        "qqp": 0.6276680761099366,
+        "rte": 0.5667870036101083,
+        "sst2": 0.708
+      },
+      "title": "Shared atoms without coefficient sparsity"
+    },
+    "shared_atoms_shuffled_labels": {
+      "checkpoint": {
+        "bytes_by_component": {
+          "atoms": 37181,
+          "coefficients": 3571,
+          "heads": 9477
+        },
+        "dtype": "torch.float32",
+        "format": "torch.save",
+        "paths": {
+          "atoms": "results\\controls\\shared_atoms_shuffled_labels\\seed_17\\atoms.pt",
+          "coefficients": "results\\controls\\shared_atoms_shuffled_labels\\seed_17\\coefficients.pt",
+          "heads": "results\\controls\\shared_atoms_shuffled_labels\\seed_17\\heads.pt"
+        },
+        "total_bytes": 50229
+      },
+      "compact_state_only": true,
+      "control_id": "shared_atoms_shuffled_labels",
+      "design": {
+        "active_atoms_for_evaluation": 4,
+        "atom_count": 8,
+        "atoms_frozen": false,
+        "coefficients_trainable": true,
+        "heads_trainable": true,
+        "label_shuffle_seed_by_task": {
+          "mrpc": 50018,
+          "qnli": 50020,
+          "qqp": 50021,
+          "rte": 50019,
+          "sst2": 50017
+        },
+        "model": "shared_atom_dictionary",
+        "multitask_schedule": "seeded balanced complete pass",
+        "sparsity_lambda": 1e-05,
+        "training_labels_shuffled": true
+      },
+      "mean_primary_score": 0.5314541578376815,
+      "result_path": "results\\controls\\shared_atoms_shuffled_labels\\seed_17\\control_result.json",
+      "rules_out": "data-independent capacity or leakage",
+      "seed": 17,
+      "status": "complete",
+      "task_primary_scores": {
+        "mrpc": 0.7480253018237863,
+        "qnli": 0.54,
+        "qqp": 0.325,
+        "rte": 0.516245487364621,
+        "sst2": 0.528
+      },
+      "title": "Shared atoms with deterministically shuffled labels"
+    },
+    "shared_multitask_lora": {
+      "checkpoint": {
+        "bytes_by_component": {
+          "adapter": 20569,
+          "heads": 9477
+        },
+        "dtype": "torch.float32",
+        "format": "torch.save",
+        "paths": {
+          "adapter": "results\\controls\\shared_multitask_lora\\seed_17\\adapter.pt",
+          "heads": "results\\controls\\shared_multitask_lora\\seed_17\\heads.pt"
+        },
+        "total_bytes": 30046
+      },
+      "compact_state_only": true,
+      "control_id": "shared_multitask_lora",
+      "design": {
+        "alpha": 4,
+        "checkpoint_selection": "earliest epoch with highest unweighted mean task score",
+        "model": "one_shared_lora_bank_plus_five_task_heads",
+        "multitask_schedule": "seeded balanced complete pass",
+        "rank": 4,
+        "updates": 3750
+      },
+      "mean_primary_score": 0.6856146984487012,
+      "result_path": "results\\controls\\shared_multitask_lora\\seed_17\\control_result.json",
+      "rules_out": "ordinary multitask sharing without atom composition",
+      "seed": 17,
+      "status": "complete",
+      "task_primary_scores": {
+        "mrpc": 0.7636554621848739,
+        "qnli": 0.698,
+        "qqp": 0.6792411347517731,
+        "rte": 0.5631768953068592,
+        "sst2": 0.724
+      },
+      "title": "One shared balanced multitask LoRA"
+    }
+  },
+  "controls_completed": [
+    "random_frozen_atoms",
+    "average_independent_loras",
+    "nearest_other_task_lora",
+    "shared_multitask_lora",
+    "shared_atoms_shuffled_labels",
+    "shared_atoms_no_sparsity"
+  ],
+  "controls_missing": [],
+  "controls_requested": [
+    "random_frozen_atoms",
+    "average_independent_loras",
+    "nearest_other_task_lora",
+    "shared_multitask_lora",
+    "shared_atoms_shuffled_labels",
+    "shared_atoms_no_sparsity"
+  ],
+  "followup": "roadmap_chunk_25_controls",
+  "interpretation": "These are diagnostic controls and do not replace or alter the preregistered H1 decision.",
+  "locked_budget": {
+    "batch_size": 8,
+    "epochs": 3,
+    "tasks": [
+      "sst2",
+      "mrpc",
+      "rte",
+      "qnli",
+      "qqp"
+    ],
+    "train_examples_per_task": 2000,
+    "validation_examples_per_task": 500
+  },
+  "schema_version": 1,
+  "seed": 17,
+  "status": "complete"
+}

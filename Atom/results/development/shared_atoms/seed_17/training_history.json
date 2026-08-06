@@ -1,0 +1,480 @@
+{
+  "best_epoch": 2,
+  "best_score": 0.6616420118343195,
+  "best_validation": {
+    "mrpc": {
+      "batches": 25,
+      "examples": 200,
+      "loss": 0.6084086453914642,
+      "metrics": {
+        "accuracy": 0.69,
+        "f1": 0.8165680473372781,
+        "primary_score": 0.753284023668639
+      }
+    },
+    "sst2": {
+      "batches": 25,
+      "examples": 200,
+      "loss": 0.6821109867095947,
+      "metrics": {
+        "accuracy": 0.57,
+        "primary_score": 0.57
+      }
+    }
+  },
+  "epochs": [
+    {
+      "diagnostics": {
+        "atom_gradient_l2_norm_last_step": 0.00038411344134252074,
+        "atom_parameter_l2_norm": 1.860611432365281,
+        "tasks": {
+          "mrpc": {
+            "coefficient_count": 32,
+            "coefficient_l2_norm": 0.02252883091568947,
+            "coefficient_near_zero_count": 0,
+            "top_used_atoms_by_layer": {
+              "encoder.encoder.layer.0.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.012649438343942165,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.01069831382483244,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.0050219884142279625,
+                  "atom_index": 0
+                },
+                {
+                  "absolute_coefficient": 0.004156836308538914,
+                  "atom_index": 1
+                }
+              ],
+              "encoder.encoder.layer.0.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.004304767586290836,
+                  "atom_index": 7
+                },
+                {
+                  "absolute_coefficient": 0.003304456127807498,
+                  "atom_index": 1
+                },
+                {
+                  "absolute_coefficient": 0.0018000990385189652,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.0017110321205109358,
+                  "atom_index": 0
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.0056057642214000225,
+                  "atom_index": 0
+                },
+                {
+                  "absolute_coefficient": 0.005282907281070948,
+                  "atom_index": 3
+                },
+                {
+                  "absolute_coefficient": 0.003331741550937295,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.0026046151760965586,
+                  "atom_index": 5
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.004644532222300768,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.002553386613726616,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.002322506159543991,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.0015920681180432439,
+                  "atom_index": 1
+                }
+              ]
+            }
+          },
+          "sst2": {
+            "coefficient_count": 32,
+            "coefficient_l2_norm": 0.034786440432071686,
+            "coefficient_near_zero_count": 0,
+            "top_used_atoms_by_layer": {
+              "encoder.encoder.layer.0.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.01079647708684206,
+                  "atom_index": 1
+                },
+                {
+                  "absolute_coefficient": 0.009653018787503242,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.007492507807910442,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.0044656661339104176,
+                  "atom_index": 3
+                }
+              ],
+              "encoder.encoder.layer.0.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.010851961560547352,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.008628949522972107,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.007451615761965513,
+                  "atom_index": 3
+                },
+                {
+                  "absolute_coefficient": 0.005571245681494474,
+                  "atom_index": 5
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.009032131172716618,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.007075333036482334,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.005822713952511549,
+                  "atom_index": 3
+                },
+                {
+                  "absolute_coefficient": 0.005774341523647308,
+                  "atom_index": 0
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.009438790380954742,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.009237674064934254,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.008001630194485188,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.007736483123153448,
+                  "atom_index": 7
+                }
+              ]
+            }
+          }
+        }
+      },
+      "elapsed_seconds": 4.411951000103727,
+      "epoch": 1,
+      "global_training": {
+        "batches": 126,
+        "classification_loss": 0.6722428877353668,
+        "examples": 1000,
+        "loss": 0.6722429013252258,
+        "optimizer_steps": 126,
+        "regularization_loss": 2.4756792011970674e-08
+      },
+      "selection_score": 0.6316420118343196,
+      "training": {
+        "mrpc": {
+          "batches": 63,
+          "classification_loss": 0.6511345047950745,
+          "examples": 500,
+          "loss": 0.6511345076560974,
+          "optimizer_steps": 63,
+          "regularization_loss": 2.2149611638155875e-08
+        },
+        "sst2": {
+          "batches": 63,
+          "classification_loss": 0.6933512706756592,
+          "examples": 500,
+          "loss": 0.6933512949943542,
+          "optimizer_steps": 63,
+          "regularization_loss": 2.7363972385785474e-08
+        }
+      },
+      "validation": {
+        "mrpc": {
+          "batches": 25,
+          "examples": 200,
+          "loss": 0.6144715940952301,
+          "metrics": {
+            "accuracy": 0.69,
+            "f1": 0.8165680473372781,
+            "primary_score": 0.753284023668639
+          }
+        },
+        "sst2": {
+          "batches": 25,
+          "examples": 200,
+          "loss": 0.7051773834228515,
+          "metrics": {
+            "accuracy": 0.51,
+            "primary_score": 0.51
+          }
+        }
+      }
+    },
+    {
+      "diagnostics": {
+        "atom_gradient_l2_norm_last_step": 0.0015971802570910942,
+        "atom_parameter_l2_norm": 2.229262632164154,
+        "tasks": {
+          "mrpc": {
+            "coefficient_count": 32,
+            "coefficient_l2_norm": 0.060253847390413284,
+            "coefficient_near_zero_count": 0,
+            "top_used_atoms_by_layer": {
+              "encoder.encoder.layer.0.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.030256515368819237,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.02441428042948246,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.01963479071855545,
+                  "atom_index": 0
+                },
+                {
+                  "absolute_coefficient": 0.013452733866870403,
+                  "atom_index": 7
+                }
+              ],
+              "encoder.encoder.layer.0.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.01677657850086689,
+                  "atom_index": 7
+                },
+                {
+                  "absolute_coefficient": 0.011805637739598751,
+                  "atom_index": 1
+                },
+                {
+                  "absolute_coefficient": 0.008938883431255817,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.008487199433147907,
+                  "atom_index": 4
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.01269634161144495,
+                  "atom_index": 0
+                },
+                {
+                  "absolute_coefficient": 0.011900021694600582,
+                  "atom_index": 3
+                },
+                {
+                  "absolute_coefficient": 0.007003817707300186,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.0029466955456882715,
+                  "atom_index": 7
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.010488864965736866,
+                  "atom_index": 1
+                },
+                {
+                  "absolute_coefficient": 0.006494130007922649,
+                  "atom_index": 5
+                },
+                {
+                  "absolute_coefficient": 0.0053007029928267,
+                  "atom_index": 7
+                },
+                {
+                  "absolute_coefficient": 0.00470483023673296,
+                  "atom_index": 4
+                }
+              ]
+            }
+          },
+          "sst2": {
+            "coefficient_count": 32,
+            "coefficient_l2_norm": 0.1185503900051117,
+            "coefficient_near_zero_count": 0,
+            "top_used_atoms_by_layer": {
+              "encoder.encoder.layer.0.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.032084692269563675,
+                  "atom_index": 1
+                },
+                {
+                  "absolute_coefficient": 0.02564612589776516,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.024151640012860298,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.017799369990825653,
+                  "atom_index": 0
+                }
+              ],
+              "encoder.encoder.layer.0.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.034326475113630295,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.031219910830259323,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.029454899951815605,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.027527794241905212,
+                  "atom_index": 5
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.query": [
+                {
+                  "absolute_coefficient": 0.026276806369423866,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.01919291913509369,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.017958050593733788,
+                  "atom_index": 5
+                },
+                {
+                  "absolute_coefficient": 0.017029181122779846,
+                  "atom_index": 3
+                }
+              ],
+              "encoder.encoder.layer.1.attention.self.value": [
+                {
+                  "absolute_coefficient": 0.033806826919317245,
+                  "atom_index": 4
+                },
+                {
+                  "absolute_coefficient": 0.03371436893939972,
+                  "atom_index": 6
+                },
+                {
+                  "absolute_coefficient": 0.028086215257644653,
+                  "atom_index": 2
+                },
+                {
+                  "absolute_coefficient": 0.024848947301506996,
+                  "atom_index": 5
+                }
+              ]
+            }
+          }
+        }
+      },
+      "elapsed_seconds": 4.1793392999097705,
+      "epoch": 2,
+      "global_training": {
+        "batches": 126,
+        "classification_loss": 0.6512755749225616,
+        "examples": 1000,
+        "loss": 0.6512756545543671,
+        "optimizer_steps": 126,
+        "regularization_loss": 7.827683627681382e-08
+      },
+      "selection_score": 0.6616420118343195,
+      "training": {
+        "mrpc": {
+          "batches": 63,
+          "classification_loss": 0.6350931062698364,
+          "examples": 500,
+          "loss": 0.6350931630134583,
+          "optimizer_steps": 63,
+          "regularization_loss": 5.36553322092459e-08
+        },
+        "sst2": {
+          "batches": 63,
+          "classification_loss": 0.6674580435752868,
+          "examples": 500,
+          "loss": 0.6674581460952759,
+          "optimizer_steps": 63,
+          "regularization_loss": 1.0289834034438172e-07
+        }
+      },
+      "validation": {
+        "mrpc": {
+          "batches": 25,
+          "examples": 200,
+          "loss": 0.6084086453914642,
+          "metrics": {
+            "accuracy": 0.69,
+            "f1": 0.8165680473372781,
+            "primary_score": 0.753284023668639
+          }
+        },
+        "sst2": {
+          "batches": 25,
+          "examples": 200,
+          "loss": 0.6821109867095947,
+          "metrics": {
+            "accuracy": 0.57,
+            "primary_score": 0.57
+          }
+        }
+      }
+    }
+  ],
+  "final_validation": {
+    "mrpc": {
+      "batches": 25,
+      "examples": 200,
+      "loss": 0.6084086453914642,
+      "metrics": {
+        "accuracy": 0.69,
+        "f1": 0.8165680473372781,
+        "primary_score": 0.753284023668639
+      }
+    },
+    "sst2": {
+      "batches": 25,
+      "examples": 200,
+      "loss": 0.6821109867095947,
+      "metrics": {
+        "accuracy": 0.57,
+        "primary_score": 0.57
+      }
+    }
+  }
+}

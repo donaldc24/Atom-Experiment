@@ -1,0 +1,154 @@
+{
+  "atom_count": 8,
+  "masks": {
+    "mrpc": {
+      "encoder.encoder.layer.0.attention.self.query": [
+        1,
+        2,
+        5,
+        6
+      ],
+      "encoder.encoder.layer.0.attention.self.value": [
+        1,
+        3,
+        5,
+        6
+      ],
+      "encoder.encoder.layer.1.attention.self.query": [
+        0,
+        2,
+        3,
+        6
+      ],
+      "encoder.encoder.layer.1.attention.self.value": [
+        1,
+        2,
+        4,
+        6
+      ]
+    },
+    "sst2": {
+      "encoder.encoder.layer.0.attention.self.query": [
+        3,
+        4,
+        6,
+        7
+      ],
+      "encoder.encoder.layer.0.attention.self.value": [
+        0,
+        2,
+        3,
+        6
+      ],
+      "encoder.encoder.layer.1.attention.self.query": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "encoder.encoder.layer.1.attention.self.value": [
+        0,
+        2,
+        4,
+        6
+      ]
+    }
+  },
+  "schema_version": 1,
+  "seed": 17,
+  "system": "shared_atoms",
+  "tasks": {
+    "mrpc": {
+      "batches": 2,
+      "examples": 16,
+      "labels": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "loss": 0.6049410700798035,
+      "metrics": {
+        "accuracy": 0.6875,
+        "f1": 0.8148148148148148,
+        "primary_score": 0.7511574074074074
+      },
+      "predictions": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1
+      ]
+    },
+    "sst2": {
+      "batches": 2,
+      "examples": 16,
+      "labels": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "loss": 0.7274496853351593,
+      "metrics": {
+        "accuracy": 0.5,
+        "primary_score": 0.5
+      },
+      "predictions": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ]
+    }
+  },
+  "top_k": 4
+}

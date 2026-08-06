@@ -1,0 +1,476 @@
+{
+  "aggregate": {
+    "fresh_lora_mean": 0.6852092517757681,
+    "head_only_mean": 0.6550647461485782,
+    "learned_all8_mean": 0.6602757529892773,
+    "learned_minus_head_only": 0.001594935553736021,
+    "learned_minus_random_frozen": 1.5740944661168932e-05,
+    "learned_top4_mean": 0.6566596817023143,
+    "matched_random_top4_mean": 0.6566439407576531
+  },
+  "aggregation_rule": "mean over seeds per held-out target, then unweighted mean over the five targets",
+  "artifacts_by_target_seed": {
+    "mrpc": {
+      "17": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\source_learned_atoms\\seed_17\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\source_learned_atoms\\seed_17",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_17\\source_learned_atoms\\seed_17\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_17\\mrpc\\metrics.json"
+      },
+      "29": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\source_learned_atoms\\seed_29\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\source_learned_atoms\\seed_29",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_29\\source_learned_atoms\\seed_29\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_29\\mrpc\\metrics.json"
+      },
+      "43": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\source_learned_atoms\\seed_43\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\source_learned_atoms\\seed_43",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_mrpc\\seed_43\\source_learned_atoms\\seed_43\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_43\\mrpc\\metrics.json"
+      }
+    },
+    "qnli": {
+      "17": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\source_learned_atoms\\seed_17\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\source_learned_atoms\\seed_17",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_17\\source_learned_atoms\\seed_17\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_17\\qnli\\metrics.json"
+      },
+      "29": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\source_learned_atoms\\seed_29\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\source_learned_atoms\\seed_29",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_29\\source_learned_atoms\\seed_29\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_29\\qnli\\metrics.json"
+      },
+      "43": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\source_learned_atoms\\seed_43\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\source_learned_atoms\\seed_43",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_qnli\\seed_43\\source_learned_atoms\\seed_43\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_43\\qnli\\metrics.json"
+      }
+    },
+    "qqp": {
+      "17": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\source_learned_atoms\\seed_17\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\source_learned_atoms\\seed_17",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_17\\source_learned_atoms\\seed_17\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_17\\qqp\\metrics.json"
+      },
+      "29": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\source_learned_atoms\\seed_29\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\source_learned_atoms\\seed_29",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_29\\source_learned_atoms\\seed_29\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_29\\qqp\\metrics.json"
+      },
+      "43": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\source_learned_atoms\\seed_43\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\source_learned_atoms\\seed_43",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_qqp\\seed_43\\source_learned_atoms\\seed_43\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_43\\qqp\\metrics.json"
+      }
+    },
+    "rte": {
+      "17": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\source_learned_atoms\\seed_17\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\source_learned_atoms\\seed_17",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_17\\source_learned_atoms\\seed_17\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_17\\rte\\metrics.json"
+      },
+      "29": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\source_learned_atoms\\seed_29\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\source_learned_atoms\\seed_29",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_29\\source_learned_atoms\\seed_29\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_29\\rte\\metrics.json"
+      },
+      "43": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\source_learned_atoms\\seed_43\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\source_learned_atoms\\seed_43",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_rte\\seed_43\\source_learned_atoms\\seed_43\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_43\\rte\\metrics.json"
+      }
+    },
+    "sst2": {
+      "17": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\source_learned_atoms\\seed_17\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\source_learned_atoms\\seed_17",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_17\\source_learned_atoms\\seed_17\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_17\\sst2\\metrics.json"
+      },
+      "29": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\source_learned_atoms\\seed_29\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\source_learned_atoms\\seed_29",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_29\\source_learned_atoms\\seed_29\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_29\\sst2\\metrics.json"
+      },
+      "43": {
+        "cell_result": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\cell_result.json",
+        "head_only_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\head_only",
+        "head_only_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\head_only\\metrics.json",
+        "learned_transfer_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\learned_atom_transfer",
+        "learned_transfer_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\learned_atom_transfer\\metrics.json",
+        "matched_random_transfer_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\matched_random_transfer",
+        "matched_random_transfer_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\matched_random_transfer\\metrics.json",
+        "source_atoms": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\source_learned_atoms\\seed_43\\atoms.pt",
+        "source_checkpoint_directory": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\source_learned_atoms\\seed_43",
+        "source_record": "results\\atom_validation\\cross_transfer\\target_sst2\\seed_43\\source_learned_atoms\\seed_43\\metrics_by_task.json",
+        "strict_core_lora_record": "results\\independent_lora\\seed_43\\sst2\\metrics.json"
+      }
+    }
+  },
+  "by_seed": {
+    "17": {
+      "fresh_lora_mean": 0.6835456453863629,
+      "head_only_mean": 0.6554583056993972,
+      "learned_all8_mean": 0.6570794622095748,
+      "learned_top4_mean": 0.6539422572256878,
+      "matched_random_top4_mean": 0.6577623988503608,
+      "retention": 0.9566914245442347
+    },
+    "29": {
+      "fresh_lora_mean": 0.697482516952263,
+      "head_only_mean": 0.6665818483158624,
+      "learned_all8_mean": 0.6740851930178154,
+      "learned_top4_mean": 0.6696558582778037,
+      "matched_random_top4_mean": 0.6709743535584182,
+      "retention": 0.9601041488522876
+    },
+    "43": {
+      "fresh_lora_mean": 0.6745995929886782,
+      "head_only_mean": 0.6431540844304752,
+      "learned_all8_mean": 0.6496626037404415,
+      "learned_top4_mean": 0.6463809296034514,
+      "matched_random_top4_mean": 0.6411950698641803,
+      "retention": 0.958169759249024
+    }
+  },
+  "by_target": {
+    "mrpc": {
+      "fresh_lora_mean": 0.7649359968334185,
+      "head_only_mean": 0.7557734166709084,
+      "learned_all8_mean": 0.7591031043709382,
+      "learned_minus_head_only": 0.0028051880309770683,
+      "learned_minus_random_frozen": 0.0007060671040118871,
+      "learned_top4_mean": 0.7585786047018854,
+      "matched_random_top4_mean": 0.7578725375978735,
+      "retention": 0.9916889881534526,
+      "seed_scores": {
+        "17": {
+          "fresh_lora": 0.7596304503536575,
+          "head_only": 0.7565045248868778,
+          "learned_all8": 0.7604638009049773,
+          "learned_top4": 0.7586227261989134,
+          "matched_random_top4": 0.7565045248868778
+        },
+        "29": {
+          "fresh_lora": 0.7728708047636232,
+          "head_only": 0.7584227561039186,
+          "learned_all8": 0.7584227561039186,
+          "learned_top4": 0.7584227561039186,
+          "matched_random_top4": 0.7584227561039186
+        },
+        "43": {
+          "fresh_lora": 0.7623067353829749,
+          "head_only": 0.7523929690219283,
+          "learned_all8": 0.7584227561039186,
+          "learned_top4": 0.7586903318028242,
+          "matched_random_top4": 0.7586903318028242
+        }
+      }
+    },
+    "qnli": {
+      "fresh_lora_mean": 0.6773333333333333,
+      "head_only_mean": 0.6506666666666666,
+      "learned_all8_mean": 0.6573333333333333,
+      "learned_minus_head_only": -0.002666666666666595,
+      "learned_minus_random_frozen": -0.0013333333333332975,
+      "learned_top4_mean": 0.648,
+      "matched_random_top4_mean": 0.6493333333333333,
+      "retention": 0.9566929133858267,
+      "seed_scores": {
+        "17": {
+          "fresh_lora": 0.674,
+          "head_only": 0.658,
+          "learned_all8": 0.662,
+          "learned_top4": 0.656,
+          "matched_random_top4": 0.658
+        },
+        "29": {
+          "fresh_lora": 0.702,
+          "head_only": 0.662,
+          "learned_all8": 0.674,
+          "learned_top4": 0.668,
+          "matched_random_top4": 0.666
+        },
+        "43": {
+          "fresh_lora": 0.656,
+          "head_only": 0.632,
+          "learned_all8": 0.636,
+          "learned_top4": 0.62,
+          "matched_random_top4": 0.624
+        }
+      }
+    },
+    "qqp": {
+      "fresh_lora_mean": 0.6677360141513183,
+      "head_only_mean": 0.616486535491959,
+      "learned_all8_mean": 0.6279916653889256,
+      "learned_minus_head_only": 0.00742941753553672,
+      "learned_minus_random_frozen": 0.003112709821460058,
+      "learned_top4_mean": 0.6239159530274957,
+      "matched_random_top4_mean": 0.6208032432060356,
+      "retention": 0.9343751719315047,
+      "seed_scores": {
+        "17": {
+          "fresh_lora": 0.670429906542056,
+          "head_only": 0.626,
+          "learned_all8": 0.61892628992629,
+          "learned_top4": 0.6090813397129187,
+          "matched_random_top4": 0.6266901408450705
+        },
+        "29": {
+          "fresh_lora": 0.6744840182648402,
+          "head_only": 0.6556994818652849,
+          "learned_all8": 0.6655555555555556,
+          "learned_top4": 0.6658493150684932,
+          "matched_random_top4": 0.6688316831683168
+        },
+        "43": {
+          "fresh_lora": 0.6582941176470589,
+          "head_only": 0.5677601246105919,
+          "learned_all8": 0.5994931506849315,
+          "learned_top4": 0.5968172043010753,
+          "matched_random_top4": 0.5668879056047198
+        }
+      }
+    },
+    "rte": {
+      "fresh_lora_mean": 0.5860409145607702,
+      "head_only_mean": 0.5703971119133574,
+      "learned_all8_mean": 0.5776173285198557,
+      "learned_minus_head_only": 0.002406738868832692,
+      "learned_minus_random_frozen": -0.002406738868832803,
+      "learned_top4_mean": 0.5728038507821901,
+      "matched_random_top4_mean": 0.5752105896510229,
+      "retention": 0.97741273100616,
+      "seed_scores": {
+        "17": {
+          "fresh_lora": 0.5956678700361011,
+          "head_only": 0.5667870036101083,
+          "learned_all8": 0.5740072202166066,
+          "learned_top4": 0.5740072202166066,
+          "matched_random_top4": 0.5776173285198556
+        },
+        "29": {
+          "fresh_lora": 0.592057761732852,
+          "head_only": 0.5667870036101083,
+          "learned_all8": 0.5884476534296029,
+          "learned_top4": 0.5740072202166066,
+          "matched_random_top4": 0.5776173285198556
+        },
+        "43": {
+          "fresh_lora": 0.5703971119133574,
+          "head_only": 0.5776173285198556,
+          "learned_all8": 0.5703971119133574,
+          "learned_top4": 0.5703971119133574,
+          "matched_random_top4": 0.5703971119133574
+        }
+      }
+    },
+    "sst2": {
+      "fresh_lora_mean": 0.73,
+      "head_only_mean": 0.682,
+      "learned_all8_mean": 0.6793333333333335,
+      "learned_minus_head_only": -0.0020000000000000018,
+      "learned_minus_random_frozen": 0.0,
+      "learned_top4_mean": 0.68,
+      "matched_random_top4_mean": 0.68,
+      "retention": 0.9315068493150686,
+      "seed_scores": {
+        "17": {
+          "fresh_lora": 0.718,
+          "head_only": 0.67,
+          "learned_all8": 0.67,
+          "learned_top4": 0.672,
+          "matched_random_top4": 0.67
+        },
+        "29": {
+          "fresh_lora": 0.746,
+          "head_only": 0.69,
+          "learned_all8": 0.684,
+          "learned_top4": 0.682,
+          "matched_random_top4": 0.684
+        },
+        "43": {
+          "fresh_lora": 0.726,
+          "head_only": 0.686,
+          "learned_all8": 0.684,
+          "learned_top4": 0.686,
+          "matched_random_top4": 0.686
+        }
+      }
+    }
+  },
+  "cell_count": 15,
+  "diagnostics": {
+    "every_target_seed_mean_retention_at_least_0_90": {
+      "minimum_observed": 0.9315068493150686,
+      "passed": true,
+      "threshold": 0.9
+    },
+    "learned_mean_exceeds_head_only_by_0_005": {
+      "observed_difference": 0.001594935553736021,
+      "passed": false,
+      "threshold": 0.005
+    },
+    "learned_mean_exceeds_random_frozen_by_0_005": {
+      "observed_difference": 1.5740944661168932e-05,
+      "passed": false,
+      "threshold": 0.005
+    },
+    "marginal_new_parameters_at_most_10_percent_fresh_task_state": {
+      "maximum_observed_ratio": 0.0666054203031695,
+      "passed": true,
+      "threshold": 0.1
+    }
+  },
+  "experiment": "validation_cross_transfer",
+  "locked_budget": {
+    "all8_active_atoms": 8,
+    "atom_count": 8,
+    "epochs": 3,
+    "lora_rank": 4,
+    "primary_top4_active_atoms": 4,
+    "train_examples_per_task": 2000,
+    "validation_examples_per_task": 500
+  },
+  "output_root": "results\\atom_validation\\cross_transfer",
+  "parameter_accounting": {
+    "fresh_lora_task_state": 4354,
+    "learned_dictionary": 8192,
+    "learned_target_marginal": 290,
+    "learned_target_total_with_dictionary": 8482,
+    "marginal_ratio": 0.0666054203031695
+  },
+  "predeclared_before_live_training": true,
+  "primary_strong_transfer": {
+    "aggregate_retention": 0.9583345233598852,
+    "criterion": "aggregate learned-top4 mean / aggregate fresh-LoRA mean >= 0.95",
+    "passed": true,
+    "threshold": 0.95
+  },
+  "protocol": "results\\atom_validation\\cross_transfer\\cross_transfer_protocol.json",
+  "schema_version": 1,
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "status": "complete",
+  "strong_reusable_basis_support": false,
+  "targets": [
+    "sst2",
+    "mrpc",
+    "rte",
+    "qnli",
+    "qqp"
+  ]
+}

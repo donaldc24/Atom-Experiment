@@ -1,0 +1,652 @@
+{
+  "active_capacity_ablation": {
+    "checkpoint_atom_count": 8,
+    "question_answers": {
+      "active_compute_is_linear_in_k": true,
+      "adapter_operations_per_token_per_active_atom": 1024.0,
+      "best_mean_quality": 0.6767568144996197,
+      "best_mean_quality_active_atoms": 8,
+      "persistent_storage_changes_with_k": false,
+      "smallest_active_atoms_within_0_005_of_best": 8
+    },
+    "rows": [
+      {
+        "active_adapter_operations_per_token": 1024,
+        "active_atoms": 1,
+        "checkpoint_bytes": 50229,
+        "checkpoint_source_directory": "results\\shared_atoms\\seed_17",
+        "mean_quality": 0.6517375414367532,
+        "mean_quality_delta_from_k4": -0.013750757138971004,
+        "persistent_adaptation_parameters": 9642,
+        "quality_retention_vs_independent_rank4": 0.9534660133316618,
+        "relative_active_compute_to_all_8_atoms": 0.125,
+        "relative_active_compute_to_independent_rank4": 0.25,
+        "relative_storage_to_independent_rank4": 0.4429030776297657,
+        "retrained": false,
+        "task_scores": {
+          "mrpc": 0.7553056727815577,
+          "qnli": 0.616,
+          "qqp": 0.619764705882353,
+          "rte": 0.5776173285198556,
+          "sst2": 0.69
+        },
+        "variant_directory": "results\\followup_ablations\\active_atoms\\top_k_1\\seed_17",
+        "worst_task_score": 0.5776173285198556
+      },
+      {
+        "active_adapter_operations_per_token": 2048,
+        "active_atoms": 2,
+        "checkpoint_bytes": 50229,
+        "checkpoint_source_directory": "results\\shared_atoms\\seed_17",
+        "mean_quality": 0.6592436742539013,
+        "mean_quality_delta_from_k4": -0.006244624321822934,
+        "persistent_adaptation_parameters": 9642,
+        "quality_retention_vs_independent_rank4": 0.9644471860855389,
+        "relative_active_compute_to_all_8_atoms": 0.25,
+        "relative_active_compute_to_independent_rank4": 0.5,
+        "relative_storage_to_independent_rank4": 0.4429030776297657,
+        "retrained": false,
+        "task_scores": {
+          "mrpc": 0.7586903318028242,
+          "qnli": 0.638,
+          "qqp": 0.6287410358565737,
+          "rte": 0.5667870036101083,
+          "sst2": 0.704
+        },
+        "variant_directory": "results\\followup_ablations\\active_atoms\\top_k_2\\seed_17",
+        "worst_task_score": 0.5667870036101083
+      },
+      {
+        "active_adapter_operations_per_token": 4096,
+        "active_atoms": 4,
+        "checkpoint_bytes": 50229,
+        "checkpoint_source_directory": "results\\shared_atoms\\seed_17",
+        "mean_quality": 0.6654882985757242,
+        "mean_quality_delta_from_k4": 0.0,
+        "persistent_adaptation_parameters": 9642,
+        "quality_retention_vs_independent_rank4": 0.9735828222555174,
+        "relative_active_compute_to_all_8_atoms": 0.5,
+        "relative_active_compute_to_independent_rank4": 1.0,
+        "relative_storage_to_independent_rank4": 0.4429030776297657,
+        "retrained": false,
+        "task_scores": {
+          "mrpc": 0.7673324553702078,
+          "qnli": 0.656,
+          "qqp": 0.6293220338983051,
+          "rte": 0.5667870036101083,
+          "sst2": 0.708
+        },
+        "variant_directory": "results\\followup_ablations\\active_atoms\\top_k_4\\seed_17",
+        "worst_task_score": 0.5667870036101083
+      },
+      {
+        "active_adapter_operations_per_token": 8192,
+        "active_atoms": 8,
+        "checkpoint_bytes": 50229,
+        "checkpoint_source_directory": "results\\shared_atoms\\seed_17",
+        "mean_quality": 0.6767568144996197,
+        "mean_quality_delta_from_k4": 0.011268515923895439,
+        "persistent_adaptation_parameters": 9642,
+        "quality_retention_vs_independent_rank4": 0.9900682113439463,
+        "relative_active_compute_to_all_8_atoms": 1.0,
+        "relative_active_compute_to_independent_rank4": 2.0,
+        "relative_storage_to_independent_rank4": 0.4429030776297657,
+        "retrained": false,
+        "task_scores": {
+          "mrpc": 0.7649612693653174,
+          "qnli": 0.686,
+          "qqp": 0.660035799522673,
+          "rte": 0.5667870036101083,
+          "sst2": 0.706
+        },
+        "variant_directory": "results\\followup_ablations\\active_atoms\\top_k_8\\seed_17",
+        "worst_task_score": 0.5667870036101083
+      }
+    ],
+    "training_runs": 0,
+    "values": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "varied_field": "active_atoms_at_evaluation"
+  },
+  "atom_count_ablation": {
+    "coefficient_usage_definitions": {
+      "dead_atom": "maximum across tasks of the per-task mean absolute coefficient across adapted layers is <= dead_atom_threshold",
+      "dead_atom_threshold": 1e-06,
+      "distinction": "a non-dead atom may still be top-k unused; dead and top-k unused are not interchangeable",
+      "top_k_unused_atom": "selected by zero tasks under the per-task mean-absolute-coefficient top-k usage analysis"
+    },
+    "evaluation_rule": "top min(4, atom_count) atoms",
+    "question_answers": {
+      "extra_atoms_become_task_private": {
+        "answer": true,
+        "core_atom_count": 8,
+        "core_task_private_atom_count": 0,
+        "larger_dictionary_private_counts": {
+          "12": 3,
+          "16": 9
+        },
+        "maximum_additional_private_atoms": 9
+      },
+      "quality_saturation": {
+        "absolute_tolerance": 0.005,
+        "atom_count": 2,
+        "atom_counts_within_tolerance": [
+          2,
+          4,
+          6,
+          8
+        ],
+        "best_observed_mean_quality": 0.6704601753823861,
+        "conventional_rise_then_plateau_observed": false,
+        "definition": "operational near-best rule: smallest atom count whose mean top-k quality is within 0.005 absolute score of the best observed mean",
+        "interpretation": "The operational count is a compact near-best selection, not by itself evidence that quality rose and then saturated.",
+        "operational_near_best_atom_count": 2,
+        "quality_curve_pattern": "non_monotonic"
+      },
+      "reuse_with_dictionary_size": {
+        "absolute_count_pattern": "non_monotonic",
+        "absolute_count_trend": "non_monotonic",
+        "interpretation": "Report the complete curve: endpoint comparisons alone can hide a mid-curve peak or reversal.",
+        "largest_dictionary_reuse_fraction": 0.25,
+        "largest_dictionary_reused_atoms": 4,
+        "peak_reused_atom_count": 7,
+        "peak_reused_atom_counts": [
+          8,
+          12
+        ],
+        "reuse_fraction_by_atom_count": {
+          "12": 0.5833333333333334,
+          "16": 0.25,
+          "2": 1.0,
+          "4": 1.0,
+          "6": 0.8333333333333334,
+          "8": 0.875
+        },
+        "reuse_fraction_pattern": "non_monotonic",
+        "reuse_fraction_trend": "non_monotonic",
+        "reused_atom_count_by_atom_count": {
+          "12": 7,
+          "16": 4,
+          "2": 2,
+          "4": 4,
+          "6": 5,
+          "8": 7
+        },
+        "smallest_dictionary_reuse_fraction": 1.0,
+        "smallest_dictionary_reused_atoms": 2
+      },
+      "storage_below_independent_baseline": {
+        "answer": true,
+        "largest_relative_storage": 0.826550298576022,
+        "variants_not_below": []
+      }
+    },
+    "rows": [
+      {
+        "active_adapter_operations_per_token": 2048,
+        "atom_count": 2,
+        "atom_utilization_count": [
+          5,
+          5
+        ],
+        "checkpoint_bytes": 25141,
+        "dead_atom_count": 0,
+        "dead_atom_fraction": 0.0,
+        "dead_atoms": [],
+        "evaluation_top_k": 2,
+        "mean_quality": 0.6704601753823861,
+        "persistent_adaptation_parameters": 3378,
+        "relative_storage_to_independent_rank4": 0.1551676619200735,
+        "reuse_fraction": 1.0,
+        "reused_atom_count": 2,
+        "reused_atoms": [
+          0,
+          1
+        ],
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\atom_count\\atoms_2\\seed_17",
+        "storage_below_independent_baseline": true,
+        "task_private_atom_count": 0,
+        "task_private_atoms": [],
+        "task_private_fraction": 0.0,
+        "task_scores": {
+          "mrpc": 0.7631208171891511,
+          "qnli": 0.664,
+          "qqp": 0.6491728395061729,
+          "rte": 0.5740072202166066,
+          "sst2": 0.702
+        },
+        "top_k_unused_atom_count": 0,
+        "variant_directory": "results\\followup_ablations\\atom_count\\atoms_2\\seed_17",
+        "worst_task_score": 0.5740072202166066
+      },
+      {
+        "active_adapter_operations_per_token": 4096,
+        "atom_count": 4,
+        "atom_utilization_count": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "checkpoint_bytes": 33589,
+        "dead_atom_count": 0,
+        "dead_atom_fraction": 0.0,
+        "dead_atoms": [],
+        "evaluation_top_k": 4,
+        "mean_quality": 0.6692082036677641,
+        "persistent_adaptation_parameters": 5466,
+        "relative_storage_to_independent_rank4": 0.2510794671566376,
+        "reuse_fraction": 1.0,
+        "reused_atom_count": 4,
+        "reused_atoms": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\atom_count\\atoms_4\\seed_17",
+        "storage_below_independent_baseline": true,
+        "task_private_atom_count": 0,
+        "task_private_atoms": [],
+        "task_private_fraction": 0.0,
+        "task_scores": {
+          "mrpc": 0.7689115001322868,
+          "qnli": 0.664,
+          "qqp": 0.6491728395061729,
+          "rte": 0.555956678700361,
+          "sst2": 0.708
+        },
+        "top_k_unused_atom_count": 0,
+        "variant_directory": "results\\followup_ablations\\atom_count\\atoms_4\\seed_17",
+        "worst_task_score": 0.555956678700361
+      },
+      {
+        "active_adapter_operations_per_token": 4096,
+        "atom_count": 6,
+        "atom_utilization_count": [
+          5,
+          2,
+          4,
+          4,
+          5,
+          0
+        ],
+        "checkpoint_bytes": 42037,
+        "dead_atom_count": 0,
+        "dead_atom_fraction": 0.0,
+        "dead_atoms": [],
+        "evaluation_top_k": 4,
+        "mean_quality": 0.6696986470840463,
+        "persistent_adaptation_parameters": 7554,
+        "relative_storage_to_independent_rank4": 0.34699127239320166,
+        "reuse_fraction": 0.8333333333333334,
+        "reused_atom_count": 5,
+        "reused_atoms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\atom_count\\atoms_6\\seed_17",
+        "storage_below_independent_baseline": true,
+        "task_private_atom_count": 0,
+        "task_private_atoms": [],
+        "task_private_fraction": 0.0,
+        "task_scores": {
+          "mrpc": 0.7581535947712419,
+          "qnli": 0.658,
+          "qqp": 0.6539425287356322,
+          "rte": 0.5703971119133574,
+          "sst2": 0.708
+        },
+        "top_k_unused_atom_count": 1,
+        "variant_directory": "results\\followup_ablations\\atom_count\\atoms_6\\seed_17",
+        "worst_task_score": 0.5703971119133574
+      },
+      {
+        "active_adapter_operations_per_token": 4096,
+        "atom_count": 8,
+        "atom_utilization_count": [
+          2,
+          2,
+          4,
+          3,
+          0,
+          2,
+          3,
+          4
+        ],
+        "checkpoint_bytes": 50229,
+        "dead_atom_count": 0,
+        "dead_atom_fraction": 0.0,
+        "dead_atoms": [],
+        "evaluation_top_k": 4,
+        "mean_quality": 0.6654882985757242,
+        "persistent_adaptation_parameters": 9642,
+        "relative_storage_to_independent_rank4": 0.4429030776297657,
+        "reuse_fraction": 0.875,
+        "reused_atom_count": 7,
+        "reused_atoms": [
+          0,
+          1,
+          2,
+          3,
+          5,
+          6,
+          7
+        ],
+        "reused_core_run": true,
+        "source_directory": "results\\shared_atoms\\seed_17",
+        "storage_below_independent_baseline": true,
+        "task_private_atom_count": 0,
+        "task_private_atoms": [],
+        "task_private_fraction": 0.0,
+        "task_scores": {
+          "mrpc": 0.7673324553702078,
+          "qnli": 0.656,
+          "qqp": 0.6293220338983051,
+          "rte": 0.5667870036101083,
+          "sst2": 0.708
+        },
+        "top_k_unused_atom_count": 1,
+        "variant_directory": "results\\followup_ablations\\atom_count\\atoms_8\\seed_17",
+        "worst_task_score": 0.5667870036101083
+      },
+      {
+        "active_adapter_operations_per_token": 4096,
+        "atom_count": 12,
+        "atom_utilization_count": [
+          2,
+          1,
+          3,
+          3,
+          1,
+          2,
+          0,
+          0,
+          1,
+          3,
+          2,
+          2
+        ],
+        "checkpoint_bytes": 66869,
+        "dead_atom_count": 0,
+        "dead_atom_fraction": 0.0,
+        "dead_atoms": [],
+        "evaluation_top_k": 4,
+        "mean_quality": 0.6620266761400893,
+        "persistent_adaptation_parameters": 13818,
+        "relative_storage_to_independent_rank4": 0.6347266881028939,
+        "reuse_fraction": 0.5833333333333334,
+        "reused_atom_count": 7,
+        "reused_atoms": [
+          0,
+          2,
+          3,
+          5,
+          9,
+          10,
+          11
+        ],
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\atom_count\\atoms_12\\seed_17",
+        "storage_below_independent_baseline": true,
+        "task_private_atom_count": 3,
+        "task_private_atoms": [
+          1,
+          4,
+          8
+        ],
+        "task_private_fraction": 0.25,
+        "task_scores": {
+          "mrpc": 0.7607843137254902,
+          "qnli": 0.636,
+          "qqp": 0.6253418467583497,
+          "rte": 0.5740072202166066,
+          "sst2": 0.714
+        },
+        "top_k_unused_atom_count": 2,
+        "variant_directory": "results\\followup_ablations\\atom_count\\atoms_12\\seed_17",
+        "worst_task_score": 0.5740072202166066
+      },
+      {
+        "active_adapter_operations_per_token": 4096,
+        "atom_count": 16,
+        "atom_utilization_count": [
+          0,
+          0,
+          1,
+          3,
+          3,
+          1,
+          0,
+          1,
+          1,
+          1,
+          3,
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        "checkpoint_bytes": 83765,
+        "dead_atom_count": 0,
+        "dead_atom_fraction": 0.0,
+        "dead_atoms": [],
+        "evaluation_top_k": 4,
+        "mean_quality": 0.6582680118488027,
+        "persistent_adaptation_parameters": 17994,
+        "relative_storage_to_independent_rank4": 0.826550298576022,
+        "reuse_fraction": 0.25,
+        "reused_atom_count": 4,
+        "reused_atoms": [
+          3,
+          4,
+          10,
+          11
+        ],
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\atom_count\\atoms_16\\seed_17",
+        "storage_below_independent_baseline": true,
+        "task_private_atom_count": 9,
+        "task_private_atoms": [
+          2,
+          5,
+          7,
+          8,
+          9,
+          12,
+          13,
+          14,
+          15
+        ],
+        "task_private_fraction": 0.5625,
+        "task_scores": {
+          "mrpc": 0.7553056727815577,
+          "qnli": 0.632,
+          "qqp": 0.6376372745490981,
+          "rte": 0.5703971119133574,
+          "sst2": 0.696
+        },
+        "top_k_unused_atom_count": 3,
+        "variant_directory": "results\\followup_ablations\\atom_count\\atoms_16\\seed_17",
+        "worst_task_score": 0.5703971119133574
+      }
+    ],
+    "values": [
+      2,
+      4,
+      6,
+      8,
+      12,
+      16
+    ],
+    "varied_field": "atom_count"
+  },
+  "core_sources": {
+    "independent_rank4": "results\\independent_lora\\seed_17",
+    "shared_atoms8": "results\\shared_atoms\\seed_17"
+  },
+  "experiment": "h1_followup_ablations",
+  "locked_budget": {
+    "active_atoms_during_training": 8,
+    "active_atoms_for_primary_evaluation": 4,
+    "adam_beta1": 0.9,
+    "adam_beta2": 0.999,
+    "adam_epsilon": 1e-08,
+    "atom_count": 8,
+    "atom_scaling": 1.0,
+    "base_model": "prajjwal1/bert-tiny",
+    "batch_size": 8,
+    "confirmatory_seeds": [
+      17,
+      29,
+      43
+    ],
+    "device": "cpu",
+    "epochs": 3,
+    "experiment_names": {
+      "independent_lora": "independent_lora",
+      "shared_atoms": "shared_atoms"
+    },
+    "learning_rate": 0.0003,
+    "learning_rate_schedule": "constant",
+    "lora_alpha": 4,
+    "lora_dropout": 0.0,
+    "lora_rank": 4,
+    "max_length": 128,
+    "seed": 17,
+    "sparsity_lambda": 1e-05,
+    "target_modules": [
+      "query",
+      "value"
+    ],
+    "tasks": [
+      "sst2",
+      "mrpc",
+      "rte",
+      "qnli",
+      "qqp"
+    ],
+    "train_examples_per_task": 2000,
+    "validation_examples_per_task": 500,
+    "weight_decay": 0.01
+  },
+  "lora_rank_ablation": {
+    "question_answers": {
+      "best_mean_quality": 0.6848486578777655,
+      "best_mean_quality_rank": 8,
+      "interpretation": "This is a single-seed sensitivity curve; the observed range is reported without imposing an unregistered robustness threshold.",
+      "mean_quality_range_across_ranks": 0.01062194190318344,
+      "rank4_gap_from_best": 0.001303012491402633
+    },
+    "rows": [
+      {
+        "active_adapter_operations_per_token": 1024,
+        "checkpoint_bytes": 56630,
+        "mean_quality": 0.6742267159745821,
+        "persistent_adaptation_parameters": 6410,
+        "rank": 1,
+        "relative_storage_to_core_shared_atoms": 0.6647998340593237,
+        "relative_storage_to_independent_rank4": 0.2944418925126321,
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\lora_rank\\rank_1\\seed_17",
+        "task_scores": {
+          "mrpc": 0.7599857450398557,
+          "qnli": 0.668,
+          "qqp": 0.6679203980099502,
+          "rte": 0.5812274368231047,
+          "sst2": 0.694
+        },
+        "variant_directory": "results\\followup_ablations\\lora_rank\\rank_1\\seed_17",
+        "worst_task_score": 0.5812274368231047
+      },
+      {
+        "active_adapter_operations_per_token": 2048,
+        "checkpoint_bytes": 77110,
+        "mean_quality": 0.6768310988830271,
+        "persistent_adaptation_parameters": 11530,
+        "rank": 2,
+        "relative_storage_to_core_shared_atoms": 1.1958099979257415,
+        "relative_storage_to_independent_rank4": 0.5296279283417548,
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\lora_rank\\rank_2\\seed_17",
+        "task_scores": {
+          "mrpc": 0.7625797306874558,
+          "qnli": 0.67,
+          "qqp": 0.6599584352078239,
+          "rte": 0.5776173285198556,
+          "sst2": 0.714
+        },
+        "variant_directory": "results\\followup_ablations\\lora_rank\\rank_2\\seed_17",
+        "worst_task_score": 0.5776173285198556
+      },
+      {
+        "active_adapter_operations_per_token": 4096,
+        "checkpoint_bytes": 118070,
+        "mean_quality": 0.6835456453863629,
+        "persistent_adaptation_parameters": 21770,
+        "rank": 4,
+        "relative_storage_to_core_shared_atoms": 2.257830325658577,
+        "relative_storage_to_independent_rank4": 1.0,
+        "reused_core_run": true,
+        "source_directory": "results\\independent_lora\\seed_17",
+        "task_scores": {
+          "mrpc": 0.7596304503536575,
+          "qnli": 0.674,
+          "qqp": 0.670429906542056,
+          "rte": 0.5956678700361011,
+          "sst2": 0.718
+        },
+        "variant_directory": "results\\followup_ablations\\lora_rank\\rank_4\\seed_17",
+        "worst_task_score": 0.5956678700361011
+      },
+      {
+        "active_adapter_operations_per_token": 8192,
+        "checkpoint_bytes": 199990,
+        "mean_quality": 0.6848486578777655,
+        "persistent_adaptation_parameters": 42250,
+        "rank": 8,
+        "relative_storage_to_core_shared_atoms": 4.381870981124248,
+        "relative_storage_to_independent_rank4": 1.9407441433164905,
+        "reused_core_run": false,
+        "source_directory": "results\\followup_ablations\\lora_rank\\rank_8\\seed_17",
+        "task_scores": {
+          "mrpc": 0.7547946597994036,
+          "qnli": 0.666,
+          "qqp": 0.6773403263403264,
+          "rte": 0.6101083032490975,
+          "sst2": 0.716
+        },
+        "variant_directory": "results\\followup_ablations\\lora_rank\\rank_8\\seed_17",
+        "worst_task_score": 0.6101083032490975
+      }
+    ],
+    "values": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "varied_field": "lora_rank"
+  },
+  "run_kind": "exploratory_single_seed_followup",
+  "schema_version": 1,
+  "seed": 17,
+  "tasks": [
+    "sst2",
+    "mrpc",
+    "rte",
+    "qnli",
+    "qqp"
+  ]
+}
