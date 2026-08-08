@@ -1,0 +1,8 @@
+# E1 runs on a CPU-only PyTorch build. Do not install a CUDA wheel: the harness
+# contains no CUDA code paths and a CUDA build would change nothing but download size.
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch==2.9.0
+numpy==2.2.4
+pandas==2.2.3
+matplotlib==3.10.1
+psutil==7.0.0

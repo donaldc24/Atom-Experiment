@@ -72,3 +72,8 @@ junit-*.xml
 
 # Optional: ignore generated distribution directories
 pip-wheel-metadata/
+
+# E1: checkpoints are large and regenerable from config + seed; every metric is
+# derivable from the artifacts, which ARE tracked. splits/ is frozen and tracked.
+runs/*/checkpoints/
+
