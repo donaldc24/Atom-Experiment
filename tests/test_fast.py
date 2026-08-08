@@ -140,7 +140,7 @@ def test_t8_memory_ceiling_on_a_short_run():
         cfg.examples_per_eval_task = 60
         cfg.n_probe_examples = 60
         cfg.epochs = 1
-        train(cfg, tmp)
+        train(cfg, tmp, allow_dirty=True)  # fixture, not a research run
         import json
         env = json.loads((tmp / "env.json").read_text())
         assert env["peak_rss_gb"] < cfg.rss_fail_gb, env["peak_rss_gb"]
@@ -241,6 +241,124 @@ def test_routing_modes_are_consistent():
     assert torch.allclose(hard["logits"], forced["logits"], atol=1e-5)
 
 
+# Post-review regression tests (DECISIONS.md D32). Each pins one of the three
+# defects found in external review so it cannot silently return.
+# --------------------------------------------------------------------------
+
+def test_b1_every_trainable_param_is_in_the_optimizer():
+    """B1: state_norm was omitted from the optimizer but included in grad clipping.
+
+    Its LayerNorm gains stayed frozen at init while its gradients inflated the
+    global norm, shrinking the clip coefficient and suppressing every other
+    parameter's update.
+    """
+    from e1.config import config_for_rung
+    from e1.train import build_optimizer
+
+    for rung, weight in [("R1", 0.0), ("R2", 10.0), ("R3", 0.0)]:
+        cfg = config_for_rung(rung, 0, weight)
+        model = AtomNet(cfg)
+        assert model.state_norm is not None, f"{rung} should have state_norm"
+        opt = build_optimizer(model, cfg, include_atoms=True)
+        in_opt = {id(p) for g in opt.param_groups for p in g["params"]}
+        trainable = {id(p) for p in model.parameters() if p.requires_grad}
+        missing = trainable - in_opt
+        assert not missing, (
+            f"{rung}: {len(missing)} trainable params absent from the optimizer "
+            "while still entering clip_grad_norm_")
+
+
+def test_b1_e1_arms_have_no_state_norm():
+    """The B1 bug path cannot have executed for any E1 arm."""
+    for arm in ("A0", "A1", "A2", "A3", "A3b", "A4"):
+        cfg = config_for_arm(arm, 0)
+        assert AtomNet(cfg).state_norm is None, f"{arm} unexpectedly has state_norm"
+
+
+def test_b2_e1b_runs_are_excluded_from_the_e1_table():
+    """B2: E1b cells keep arm="A1", so collect() must skip anything with a rung."""
+    import json
+    from e1.aggregate import collect
+
+    tmp = Path(tempfile.mkdtemp(prefix="e1_b2_"))
+    try:
+        for name, extra in [("A1_0_test", {}), ("e1b_R2_w10_0_test", {"rung": "R2"})]:
+            d = tmp / name / "artifacts"
+            d.mkdir(parents=True)
+            m = {"arm": "A1", "seed": 0,
+                 "params": {"composer": 1, "atoms_total": 1, "encoder": 1,
+                            "decoder": 1, "composer_over_atoms": 1.0}}
+            m.update(extra)
+            (tmp / name / "metrics.json").write_text(json.dumps(m))
+        df = collect(tmp)
+        ids = list(df["run_id"])
+        assert ids == ["A1_0_test"], f"E1b run leaked into the E1 table: {ids}"
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_b3_r3_evaluation_is_deterministic():
+    """B3: the R3 projection sampled Gumbel at eval, so every pass measured a
+    different model (82% token disagreement). Eval must be deterministic; training
+    must remain stochastic."""
+    from e1.config import config_for_rung
+
+    seed_everything(0)
+    cfg = config_for_rung("R3", 0, 0.0)
+    model = AtomNet(cfg)
+    x = torch.randint(0, cfg.vocab, (32, cfg.seq_len))
+    instr = torch.zeros(32, cfg.depth, dtype=torch.long)
+
+    model.eval()
+    with torch.no_grad():
+        a = model(x, instr, mode="hard")
+        b = model(x, instr, mode="hard")
+    assert torch.equal(a["states"], b["states"]), "R3 eval is not deterministic"
+    assert torch.equal(a["logits"], b["logits"])
+
+    model.train()
+    with torch.no_grad():
+        c = model(x, instr, mode="gumbel", tau=1.5)
+        d = model(x, instr, mode="gumbel", tau=1.5)
+    assert not torch.equal(c["states"], d["states"]), \
+        "training projection should still sample"
+
+
+def test_b3_non_bottleneck_rungs_were_never_affected():
+    from e1.config import config_for_rung
+    seed_everything(0)
+    cfg = config_for_rung("R2", 0, 10.0)
+    model = AtomNet(cfg)
+    model.eval()
+    x = torch.randint(0, cfg.vocab, (32, cfg.seq_len))
+    instr = torch.zeros(32, cfg.depth, dtype=torch.long)
+    with torch.no_grad():
+        a = model(x, instr, mode="hard")
+        b = model(x, instr, mode="hard")
+    assert torch.equal(a["logits"], b["logits"])
+
+
+def test_dirty_tree_guard_blocks_by_default():
+    """Provenance: a dirty tree must refuse to train unless explicitly allowed."""
+    from e1.utils import require_clean_tree
+    import e1.utils as U
+
+    real = U.git_info
+    try:
+        U.git_info = lambda: {"git_dirty": True, "git_sha": "x", "git_sha_short": "x"}
+        try:
+            require_clean_tree(False)
+        except SystemExit:
+            pass
+        else:
+            raise AssertionError("guard did not block on a dirty tree")
+        assert require_clean_tree(True), "--allow-dirty should return a diff hash"
+        U.git_info = lambda: {"git_dirty": False, "git_sha": "x", "git_sha_short": "x"}
+        assert require_clean_tree(False) is None
+    finally:
+        U.git_info = real
+
+
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
 
 if __name__ == "__main__":
@@ -254,3 +372,6 @@ if __name__ == "__main__":
             print(f"FAIL  {fn.__name__}: {type(exc).__name__}: {exc}")
     print(f"\n{len(TESTS) - failures}/{len(TESTS)} passed")
     sys.exit(1 if failures else 0)
+
+
+# --------------------------------------------------------------------------

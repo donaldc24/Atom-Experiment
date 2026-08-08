@@ -85,7 +85,7 @@ def t2_determinism(full: bool = False, arm: str = "A2", seed: int = 0) -> bool:
                 cfg.n_probe_examples = 80
                 cfg.epochs = 2
             out = tmp / rep
-            train(cfg, out)
+            train(cfg, out, allow_dirty=True)  # fixture, not a research run
             digests.append(sha256_file(out / "artifacts" / "predictions_unseen.jsonl"))
             print(f"T2 run {rep}: {digests[-1]}")
         ok = digests[0] == digests[1]
