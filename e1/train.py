@@ -88,7 +88,23 @@ def build_optimizer(model, cfg, include_atoms: bool):
     exactly zero, which would silently break A3's freezing guarantee. Applying
     wd=0 to atoms in *every* arm keeps the arms comparable. See DECISIONS.md D5.
     """
-    groups = [{"params": model.non_atom_parameters(), "weight_decay": cfg.weight_decay}]
+    scale = getattr(cfg, "codec_lr_scale", 1.0)
+    if scale == 1.0:
+        groups = [{"params": model.non_atom_parameters(),
+                   "weight_decay": cfg.weight_decay}]
+    else:
+        # R3-fixed: encoder/decoder/state_norm become a slow-moving substrate once
+        # phase 0 has trained them. Down-weighted rather than frozen -- a fully
+        # frozen codec may be unable to accommodate the atoms at all. See D35.
+        codec = list(model.encoder.parameters()) + list(model.decoder.parameters())
+        if model.state_norm is not None:
+            codec += list(model.state_norm.parameters())
+        codec_ids = {id(p) for p in codec}
+        rest = [p for p in model.non_atom_parameters() if id(p) not in codec_ids]
+        groups = [
+            {"params": rest, "weight_decay": cfg.weight_decay},
+            {"params": codec, "weight_decay": cfg.weight_decay, "lr": cfg.lr * scale},
+        ]
     if include_atoms:
         groups.append({"params": model.atom_parameters(), "weight_decay": 0.0})
     return torch.optim.AdamW(groups, lr=cfg.lr)
@@ -205,9 +221,17 @@ def run_phase(
                 # h_t must land on the encoder manifold at the partial composition.
                 # The target is detached: this shapes the atoms, not the encoder.
                 state_raw = []
-                for t in range(cfg.depth):
+                arb = getattr(cfg, "arbitrary_targets", False)
+                # S-arb pulls only h_1 (the intermediate), toward the frozen code of
+                # the step's FIRST primitive -- consistent per primitive, but
+                # semantically arbitrary. The final state keeps the task loss only.
+                steps = range(cfg.depth - 1) if arb else range(cfg.depth)
+                for t in steps:
                     with torch.no_grad():
-                        target_state = model.code(ysb[:, t])
+                        if arb:
+                            target_state = model.arbitrary_targets[ib[:, t]]
+                        else:
+                            target_state = model.code(ysb[:, t])
                     # Normalised so the term is *relative* squared error and does not
                     # depend on the scale the encoder happens to settle on.
                     denom = target_state.pow(2).mean().clamp_min(1e-6)
@@ -264,6 +288,49 @@ def run_phase(
             break
 
     state["global_step_in_phase"] = 0
+
+
+def run_codec_pretrain(model, cfg, arrays: TrainArrays, *, log, rss=None) -> None:
+    """R3-fixed phase 0: train encoder+decoder (+state_norm) on reconstruction only.
+
+    The R3 bottleneck routes every intermediate state through the decoder. With an
+    untrained codec the atoms learn to write through a transcriber that
+    mis-transcribes, and the two corrupt each other's signal -- the observed
+    pre-fix signature was a flat ~0.001 accuracy curve for 58 epochs. Phase 0 gives
+    the projection a working codec before any atom is asked to use it.
+
+    Atoms and composer are excluded from the optimizer here: this is tokens -> enc ->
+    [state_norm] -> dec -> tokens cross-entropy and nothing else. See D35.
+    """
+    x, _, _, _ = arrays.torch_view()
+    codec = list(model.encoder.parameters()) + list(model.decoder.parameters())
+    if model.state_norm is not None:
+        codec += list(model.state_norm.parameters())
+    optim = torch.optim.AdamW(codec, lr=cfg.lr, weight_decay=cfg.weight_decay)
+    steps_per_epoch = max(1, arrays.n // cfg.batch_size)
+    order_rng = np.random.default_rng(cfg.seed * 977 + 3)
+
+    model.train()
+    for epoch in range(cfg.codec_pretrain_epochs):
+        order = order_rng.permutation(arrays.n)
+        correct = total = 0
+        for b in range(steps_per_epoch):
+            idx = torch.from_numpy(order[b * cfg.batch_size:(b + 1) * cfg.batch_size])
+            xb = x[idx]
+            logits = model.decoder(model.code(xb))
+            loss = F.cross_entropy(logits.reshape(-1, cfg.vocab), xb.reshape(-1))
+            optim.zero_grad(set_to_none=True)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(codec, cfg.grad_clip)
+            optim.step()
+            correct += int((logits.argmax(-1) == xb).all(dim=-1).sum())
+            total += xb.shape[0]
+        acc = correct / max(1, total)
+        log({"event": "codec_pretrain_epoch", "phase": "codec_pretrain",
+             "epoch": epoch, "loss": float(loss.item()), "recon_acc": acc})
+        if rss is not None:
+            rss.sample()
+    log({"event": "codec_pretrain_done", "recon_acc": acc})
 
 
 def train(cfg: Config, run_dir: Path, allow_dirty: bool = False) -> AtomNet:
@@ -347,6 +414,11 @@ def train(cfg: Config, run_dir: Path, allow_dirty: bool = False) -> AtomNet:
         arrays = TrainArrays(bundle.train, cfg)
         if cfg.shuffle_labels:
             shuffle_targets(arrays, seed=cfg.seed * 7 + 13)
+        if getattr(cfg, "arbitrary_targets", False):
+            # Must be built from the INITIAL encoder and frozen thereafter (D36).
+            model.init_arbitrary_targets(cfg.split_seed)
+        if getattr(cfg, "codec_pretrain_epochs", 0) > 0:
+            run_codec_pretrain(model, cfg, arrays, log=log, rss=rss)
         run_phase(
             model, cfg, arrays, epochs=cfg.epochs, log=log, state=state,
             mode="forced" if cfg.forced_routing else "gumbel",

@@ -747,6 +747,100 @@ before R3 runs, not after.
 files. `backfill` regenerates them from `final.pt` without retraining, so the cell
 stays usable and comparable.)*
 
+### D33 — Provenance: harness committed, dirty-tree launch guard added
+
+The reviewer noted that the experiment source was untracked, every run reported
+`git_dirty=true` under one SHA, and the referenced spec was absent — so the recorded
+SHA did not identify the source that produced any number.
+
+Fixed: the harness, tests, split, specs and results are committed (tag
+`e1b-postfix`, SHA `c2b18e2`), and `train.py` / `train_e1b.py` now call
+`require_clean_tree()` at startup. Training **refuses to run from a dirty tree**
+unless `--allow-dirty` is passed, in which case the SHA256 of the full working-tree
+diff is written to `env.json` as `dirty_diff_sha256`. Test fixtures pass
+`allow_dirty=True` deliberately — the guard protects research runs, not tests.
+
+**Runs made before this entry keep `git_dirty=true` and cannot be retro-attributed.**
+The E1 battery's numeric artifacts remain complete and inspectable, but its
+provenance is weaker than every run made from here on.
+
+### D34 — R2 re-run: registered prediction **(recorded before launch)**
+
+Re-running R2 w=10 on post-fix code, seeds 0–2. Predicted:
+
+- collapse **reproduces** — `atom_residual_norms` ≲ 0.1, `M3_closed_map_coverage` = 1,
+  `acc_unseen` ≈ 0, `code_spread` ≲ 0.05.
+- Rationale: the collapse mechanism is **geometric** — the nearest valid code to `h0`
+  is `h0` itself, so shrinking the code satisfies the constraint — not an artifact of
+  the B1 clipping suppression, which cost only ~4% of update magnitude.
+
+**Stop rule:** if atoms come out **alive** (`atom_residual_norms` ≳ 0.3), halt the
+queue and report. The entire R2 verdict reopens and D29/D30 must be rewritten.
+
+R2 w=1 (seed 0 first) is the marginal case and the one result with real probability of
+flipping: at w=1 the task loss and the constraint were closely balanced, so a
+suppressed effective learning rate could plausibly have tipped it. If atoms come out
+alive there, seeds 1–2 run and the window question reopens before anything else
+proceeds.
+
+### D35 — R3-fixed: making the structural bottleneck trainable + kill rule
+
+The pre-fix R3 never learned (0.7% train accuracy at epoch 58, a flat ~0.001-per-4-epoch
+line). Three changes, all defaulting to off:
+
+| knob | value | why |
+|---|---|---|
+| `codec_pretrain_epochs` | 10 | The projection routes through the decoder. With an untrained codec, atoms learn to write through a transcriber that mis-transcribes and the two corrupt each other's signal. Phase 0 is encoder+decoder reconstruction **only** — atoms and composer excluded from the optimizer. Verified: reconstruction reaches **1.000 in 4 epochs**, so this is cheap. |
+| `codec_lr_scale` | 0.1 | After phase 0 the codec joins the main optimizer in its own group at 0.1× lr — a slow-moving substrate. Down-weighted rather than frozen, since a fully frozen codec may be unable to accommodate the atoms at all. |
+| `project_tau_floor` | 1.0 | The projection uses `max(tau, floor)` so the routing anneal (2.0 → 0.5) does not drag the projection's gradient channel toward zero. Routing keeps its own schedule. |
+
+`code_consistency_weight = 0` — bottleneck only. The penalty is what collapses atoms
+(D29), and R3 exists to test *structural* enforcement (D30).
+
+**Kill rule, registered now:** if at epoch 30 the `epoch_train_acc` curve is still
+linear at ~0.001 per 4 epochs with no acceleration — the pre-fix signature — stop the
+run and mark the R3 line **INCONCLUSIVE(optimization)** rather than riding it to 80.
+
+**Leading indicator:** `acc_singleton`. If the codec fix unblocked the bottleneck, the
+singleton anchoring channel should move **early**. Pair accuracy moving while
+singletons stay flat would be unexpected and is to be flagged, not explained away.
+
+### D36 — S-arb: consistency without correctness **(new rung, predictions registered)**
+
+A0 supplied three things at once: (a) states on-manifold, (b) a consistent target per
+primitive, (c) that target being *semantically correct*. E1b's R2 tested (a) alone and
+it failed. **S-arb tests (a)+(b) without (c).**
+
+Implementation: for each primitive `p`, one target state `T_p` is drawn by encoding a
+fixed random token sequence — seeded by `split_seed + p`, **not** the run seed — through
+the *initial* encoder, norm-matched to the encoder's typical output scale, and stored
+as a non-learnable buffer. `h_1` is pulled toward `T_{p_1}` by the same relative-MSE
+form as A0's state consistency at A0's authorised weight (40). Routing stays Gumbel;
+there is **no** intermediate decode supervision and **no** forced routing. Only the
+target changes.
+
+Three notes required by the design:
+
+1. **The targets are frozen deliberately.** A learnable target would drift toward the
+   true encoding of `p(x)` and quietly reintroduce semantic correctness — the exact
+   variable this rung removes.
+2. **`acc_singleton` is no longer a free anchor.** The decoder must learn an arbitrary
+   codebook, so singleton accuracy is part of what is being learned rather than
+   something the architecture supplies. It must not be read as a sanity check here.
+3. **Only `h_1` is constrained**, not the final state, which keeps the task loss the
+   sole authority on the output.
+
+**Registered predictions.** S-arb **works** — `acc_unseen` well above 0.5, plausibly
+approaching A0's 0.95 less a decoder tax — because the mechanism A0 needed was a
+*stable, predictable input distribution for atom j*, and consistency supplies that in
+full without correctness.
+
+The more interesting outcome is the other one: if S-arb **fails while the constraint
+is verifiably satisfied** (`loss_state_rel` low, i.e. `h_1` genuinely near `T_{p_1}`),
+then semantic correctness is itself load-bearing, and the decomposition — not merely a
+stable convention — must be supplied. That would be the stronger result and it points
+directly at prospectus §10.
+
 ### D32 — Three implementation defects found in external review — **E1b RESULTS RETRACTED**
 
 All three were verified empirically before acting, and all three are real.

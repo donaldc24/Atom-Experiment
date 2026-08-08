@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -155,6 +156,32 @@ class AtomNet(nn.Module):
         self.state_norm = (
             nn.LayerNorm(cfg.d_model) if getattr(cfg, "atom_layernorm", False) else None
         )
+
+    def init_arbitrary_targets(self, split_seed: int) -> None:
+        """S-arb: one FROZEN arbitrary target code per primitive (D36).
+
+        Each target is the initial encoder's encoding of a fixed random token
+        sequence, seeded by `split_seed + p` so the targets are identical across run
+        seeds, then norm-matched to the encoder's typical output scale and stored as
+        a non-learnable buffer.
+
+        Frozen deliberately: a learnable target would drift toward the true encoding
+        of p(x) and quietly reintroduce semantic correctness, which is exactly the
+        variable this rung removes.
+        """
+        with torch.no_grad():
+            toks = torch.stack([
+                torch.from_numpy(
+                    np.random.default_rng(split_seed + p)
+                    .integers(0, self.cfg.vocab, size=self.cfg.seq_len)
+                ).long()
+                for p in range(self.cfg.n_primitives)
+            ])
+            targets = self.code(toks)                       # [P, state_dim]
+            ref = self.code(torch.randint(0, self.cfg.vocab,
+                                          (256, self.cfg.seq_len))).norm(dim=1).mean()
+            targets = targets * (ref / targets.norm(dim=1, keepdim=True))
+        self.register_buffer("arbitrary_targets", targets, persistent=True)
 
     def _apply_state_norm(self, state: torch.Tensor) -> torch.Tensor:
         if self.state_norm is None:
@@ -313,8 +340,10 @@ class AtomNet(nn.Module):
                 # a deterministic argmax, or every pass realises a different
                 # intermediate and predictions/ablations/diagnostics are each measured
                 # on a different model. See D32.
+                proj_tau = max(tau, getattr(self.cfg, "project_tau_floor", 0.0))
                 state = self.code_project(
-                    state, tau=tau, stochastic=self.training, generator=generator)
+                    state, tau=proj_tau, stochastic=self.training,
+                    generator=generator)
 
             route_logits.append(masked_logits)
             hard_choices.append(masked_logits.argmax(dim=-1))

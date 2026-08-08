@@ -69,10 +69,21 @@ class Config:
     shuffle_labels: bool = False        # A4
 
     # --- E1b manifold ladder (all default off, so E1 behaviour is unchanged) ---
-    rung: str = ""                          # "R0".."R3"; empty means an E1 arm
+    rung: str = ""                          # "R0".."R3", "Sarb"; empty = an E1 arm
     atom_layernorm: bool = False            # R1+
     code_consistency_weight: float = 0.0    # R2+
     code_bottleneck: bool = False           # R3
+
+    # --- R3-fixed: make the structural bottleneck trainable (D35) -------------
+    # The projection routes through the decoder, so an untrained codec means atoms
+    # learn to write through a transcriber that mis-transcribes and the two corrupt
+    # each other's signal. Phase 0 trains the codec alone first.
+    codec_pretrain_epochs: int = 0          # phase 0: enc+dec reconstruction only
+    codec_lr_scale: float = 1.0             # enc/dec/state_norm lr multiplier after phase 0
+    project_tau_floor: float = 0.0          # projection uses max(tau, floor)
+
+    # --- S-arb: consistency without correctness (D36) -------------------------
+    arbitrary_targets: bool = False         # pull h_1 to a frozen per-primitive code
 
     # --- execution ------------------------------------------------------
     num_threads: int = 4
@@ -111,6 +122,7 @@ def config_for_arm(arm: str, seed: int) -> Config:
     cfg.state_consistency = False
     cfg.early_stop = True
     cfg.sequential_forced_assignment = False
+    cfg.arbitrary_targets = False
 
     if arm == "A0":
         # Oracle: routing forced to the ground-truth primitive at every step, AND
@@ -153,7 +165,7 @@ def config_for_arm(arm: str, seed: int) -> Config:
     return cfg
 
 
-RUNGS = ("R0", "R1", "R2", "R3")
+RUNGS = ("R0", "R1", "R2", "R3", "Sarb")
 R2_WEIGHTS = (1.0, 10.0, 40.0)
 
 
@@ -184,6 +196,18 @@ def config_for_rung(rung: str, seed: int, weight: float = 0.0) -> Config:
         cfg.atom_layernorm = True
         cfg.code_consistency_weight = weight   # ladder passes 0.0; see run_e1b.LADDER
         cfg.code_bottleneck = True
+    elif rung == "Sarb":
+        # Consistency WITHOUT correctness (D36). A0 supplied three things at once:
+        # (a) on-manifold, (b) consistent-per-primitive, (c) semantically correct.
+        # E1b's R2 tested (a) alone and it failed. S-arb tests (a)+(b) without (c):
+        # h_1 is pulled toward a FROZEN arbitrary code for the step's first
+        # primitive. Routing stays gumbel, there is no intermediate decode
+        # supervision and no forced routing -- only the target changes.
+        cfg.atom_layernorm = True           # parity with the ladder
+        cfg.arbitrary_targets = True
+        cfg.state_consistency = True        # reuses the same relative-MSE form
+        cfg.state_consistency_weight = 40.0  # A0's authorised value (D18)
+        cfg.early_stop = False              # target-fitting is not tracked by task acc
     else:
         raise ValueError(f"unknown rung {rung!r}")
     return cfg
