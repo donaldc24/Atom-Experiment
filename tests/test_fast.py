@@ -359,6 +359,299 @@ def test_dirty_tree_guard_blocks_by_default():
         U.git_info = real
 
 
+# --------------------------------------------------------------------------
+# D35/D36 regression -- the newest code carried no coverage at all
+# --------------------------------------------------------------------------
+
+def test_d35_r3_carries_the_fix_knobs():
+    """R3 must run the FIXED configuration, not the pre-fix one.
+
+    The three knobs default to off in Config so no other rung is disturbed. That
+    left `config_for_rung("R3")` silently producing the pre-fix setup -- the one
+    whose flat 0.7%-at-epoch-58 curve D35 exists to remove -- so an R3 run would
+    have hit the D35 kill rule without ever testing the fix.
+    """
+    from e1.config import config_for_rung
+    cfg = config_for_rung("R3", 0, 0.0)
+    assert cfg.code_bottleneck is True
+    assert cfg.codec_pretrain_epochs == 10, cfg.codec_pretrain_epochs
+    assert cfg.codec_lr_scale == 0.1, cfg.codec_lr_scale
+    assert cfg.project_tau_floor == 1.0, cfg.project_tau_floor
+    # And the knobs must stay off everywhere else.
+    for rung, w in (("R0", 0.0), ("R1", 0.0), ("R2", 10.0)):
+        other = config_for_rung(rung, 0, w)
+        assert other.codec_pretrain_epochs == 0, rung
+        assert other.codec_lr_scale == 1.0, rung
+        assert other.project_tau_floor == 0.0, rung
+
+
+def test_d37_sarb_is_blocked():
+    """S-arb must not run until its target design is replaced. See D37."""
+    from e1.config import config_for_rung
+    try:
+        config_for_rung("Sarb", 0, 0.0)
+    except NotImplementedError as exc:
+        assert "D37" in str(exc)
+    else:
+        raise AssertionError("Sarb built a config; the D36 target is ill-posed")
+
+
+def test_d37_arbitrary_targets_are_input_independent():
+    """Pin the defect itself, so a future redesign cannot reintroduce it quietly.
+
+    The D36 target is one constant vector per primitive. With depth=2, h_1 is the
+    only path from input to output, so pulling h_1 onto a constant demands it carry
+    zero information about x -- guaranteeing acc ~ 0 for a reason that has nothing
+    to do with semantic correctness. Any replacement MUST make this test fail.
+    """
+    from e1.config import Config
+    from e1.model import AtomNet
+    seed_everything(0)
+    cfg = Config(arm="A1", seed=0, atom_layernorm=True, arbitrary_targets=True)
+    model = AtomNet(cfg)
+    model.init_arbitrary_targets(cfg.split_seed)
+    targets = model.arbitrary_targets
+    assert targets.shape == (cfg.n_primitives, cfg.state_dim)
+    same_primitive = targets[torch.full((6,), 3)]
+    spread = float((same_primitive - same_primitive[0]).abs().max())
+    assert spread == 0.0, (
+        "targets now vary with the input -- if this is the intended redesign, "
+        "supersede D37 and re-register a prediction before running the rung"
+    )
+
+
+def test_d37_unschedulable_rung_is_not_a_silent_no_op():
+    """`--rungs X` filters LADDER, so an off-ladder name planned zero runs and
+
+    exited 0 -- success and "did nothing" were indistinguishable.
+    """
+    import subprocess
+    root = Path(__file__).resolve().parents[1]
+    proc = subprocess.run(
+        [sys.executable, "-m", "e1.run_e1b", "--rungs", "Sarb", "--plan"],
+        cwd=str(root), capture_output=True, text=True,
+    )
+    assert proc.returncode != 0, "off-ladder rung exited 0 instead of failing"
+    assert "no ladder cell" in (proc.stderr + proc.stdout)
+
+
+# --------------------------------------------------------------------------
+# D40 -- generations: v1 immutable, v2 sound, the two never mixed
+# --------------------------------------------------------------------------
+
+V1_SPLIT_SHA = "a7b1ca7cca42e242a604c0c8541c3b248119665d4afd662948675a4afae0eabb"
+
+
+def test_d40_v1_primitive_set_is_frozen():
+    """v1's primitive table is load-bearing for 30 committed runs.
+
+    Every v1 artifact, and the sha256 in every v1 split_ref.json, is a fact about
+    exactly this table in exactly this order. Ids are positional, so reordering it
+    would silently relabel every task in the E1 report.
+    """
+    from e1.primitives import PRIMITIVE_SETS, primitive_names
+    assert primitive_names("v1") == (
+        "identity", "reverse", "increment", "sort_asc",
+        "rotate_left", "swap_halves", "double", "reflect",
+    )
+    # The default must stay v1: every un-parameterised call site resolves through it.
+    from e1.primitives import DEFAULT_SET, PRIMITIVES
+    assert DEFAULT_SET == "v1"
+    assert PRIMITIVES is PRIMITIVE_SETS["v1"]
+
+
+def test_d40_v1_split_hash_is_unchanged():
+    """The frozen split must survive every refactor byte-for-byte."""
+    from e1.data import split_hash, split_path_for
+    assert split_hash(split_path_for("v1", 1234)) == V1_SPLIT_SHA
+
+
+def test_d40_v2_differs_from_v1_in_exactly_one_slot():
+    from e1.primitives import primitive_names
+    v1, v2 = primitive_names("v1"), primitive_names("v2")
+    differing = [i for i, (a, b) in enumerate(zip(v1, v2)) if a != b]
+    assert differing == [3], differing
+    assert v2[3] == "index_shift"
+    assert v1[0] == v2[0] == "identity", "the identity slot must be shared"
+
+
+def test_d40_v2_primitives_pass_t4_and_raise_resolution():
+    """The reason for the swap: sort_asc is idempotent and order-destroying (D10)."""
+    from e1.primitives import (
+        apply_primitive, check_primitive_independence, distinct_pair_functions,
+        random_inputs,
+    )
+    violations, _ = check_primitive_independence(2000, seed=0, pset="v2")
+    assert violations == [], violations
+    n_v1 = len(distinct_pair_functions(2000, pset="v1"))
+    n_v2 = len(distinct_pair_functions(2000, pset="v2"))
+    assert n_v1 == 39 and n_v2 == 42, (n_v1, n_v2)
+    x = random_inputs(np.random.default_rng(0), 500)
+    once = apply_primitive(3, x, "v2")
+    assert not np.array_equal(apply_primitive(3, once, "v2"), once), \
+        "index_shift must be non-idempotent"
+
+
+def test_d40_v2_splits_exist_and_are_distinct():
+    from e1.config import GENERATIONS
+    from e1.data import load_split, split_path_for, verify_split
+    heldouts = []
+    for ss in GENERATIONS["v2"]["split_seeds"]:
+        path = split_path_for("v2", ss)
+        assert path.exists(), f"{path} missing -- run `make_split --generation v2`"
+        split = load_split(path)
+        assert verify_split(split, "v2") == []
+        assert split["primitive_set"] == "v2"
+        heldouts.append({tuple(p) for p in split["heldout_pairs"]})
+    # Three splits that mostly agree would not be three independent samples of the
+    # task space, which is the whole reason for having more than one (E1_REPORT 6b).
+    for i in range(len(heldouts)):
+        for j in range(i + 1, len(heldouts)):
+            shared = len(heldouts[i] & heldouts[j])
+            assert shared < 20, f"splits {i},{j} share {shared}/24 held-out pairs"
+
+
+def test_d40_split_and_primitive_set_cannot_be_mismatched():
+    """A v1 split used with v2 functions would generate targets from the wrong maps."""
+    from e1.config import Config
+    from e1.data import build_bundle, load_split, split_path_for, verify_split
+    v1_split = load_split(split_path_for("v1", 1234))
+    assert verify_split(v1_split, "v2"), "mismatch was not reported"
+    assert verify_split(v1_split, "v1") == []
+    cfg = Config(arm="A1", seed=0, generation="v2", primitive_set="v2",
+                 examples_per_train_task=2, examples_per_eval_task=2,
+                 n_probe_examples=2)
+    try:
+        build_bundle(cfg, v1_split)
+    except ValueError as exc:
+        assert "primitive set" in str(exc)
+    else:
+        raise AssertionError("build_bundle accepted a mismatched split")
+
+
+def test_d40_generation_config_rejects_unfrozen_split_seed():
+    from e1.config import config_for_generation
+    cfg = config_for_generation("v2", "A1", 0, 5678)
+    assert cfg.primitive_set == "v2" and cfg.split_seed == 5678
+    for bad in (("v3", "A1", 0, None), ("v2", "A1", 0, 4321)):
+        try:
+            config_for_generation(*bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"accepted {bad}")
+
+
+def test_d40_run_dirs_separate_generations_and_split_seeds():
+    from e1.config import config_for_generation
+    from e1.train import run_dir_for
+    v1 = run_dir_for(config_for_generation("v1", "A1", 0))
+    a = run_dir_for(config_for_generation("v2", "A1", 0, 1234))
+    b = run_dir_for(config_for_generation("v2", "A1", 0, 5678))
+    assert v1.parent.name == "v1" and a.parent.name == "v2"
+    # Same arm and seed on two splits must not collide -- otherwise the second run
+    # silently overwrites the first.
+    assert a != b, (a, b)
+    assert "s1234" in a.name and "s5678" in b.name
+    # v1 has one split, so its ids keep their historical shape.
+    assert "_s" not in v1.name
+
+
+def test_d40_aggregate_never_mixes_generations():
+    """v1 and v2 measure different task families; a pooled mean describes neither."""
+    import json
+    from e1.aggregate import collect
+    tmp = Path(tempfile.mkdtemp())
+    try:
+        for gen, acc in (("v1", 0.10), ("v2", 0.90)):
+            d = tmp / gen / f"A1_0_{gen}"
+            d.mkdir(parents=True)
+            (d / "config.json").write_text(json.dumps({"generation": gen}))
+            (d / "metrics.json").write_text(json.dumps({
+                "arm": "A1", "seed": 0, "M1_acc_unseen": acc,
+                "params": {"composer": 1, "atoms_total": 1, "encoder": 1,
+                           "decoder": 1, "composer_over_atoms": 1.0},
+            }))
+        for gen, acc in (("v1", 0.10), ("v2", 0.90)):
+            df = collect(tmp, generation=gen)
+            assert len(df) == 1, df
+            assert float(df["M1_acc_unseen"].iloc[0]) == acc
+            assert set(df["generation"]) == {gen}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_d40_make_split_refuses_to_regenerate_v1():
+    """v1's split hash is pinned by 30 committed runs; --force must not touch it."""
+    from e1.data import split_hash, split_path_for
+    from e1.make_split import main as make_split_main
+    before = split_hash(split_path_for("v1", 1234))
+    assert make_split_main(["--generation", "v1", "--force"]) == 0
+    assert split_hash(split_path_for("v1", 1234)) == before == V1_SPLIT_SHA
+
+
+# --------------------------------------------------------------------------
+# D41 -- archived batteries are frozen and never pooled
+# --------------------------------------------------------------------------
+
+def _fake_run(d: Path, *, generation="v1", host="Perro", acc=0.5):
+    import json
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "config.json").write_text(json.dumps({"generation": generation}))
+    (d / "env.json").write_text(json.dumps({"hostname": host}))
+    (d / "metrics.json").write_text(json.dumps({
+        "arm": "A1", "seed": 0, "M1_acc_unseen": acc,
+        "params": {"composer": 1, "atoms_total": 1, "encoder": 1,
+                   "decoder": 1, "composer_over_atoms": 1.0},
+    }))
+
+
+def test_d41_archived_runs_are_skipped_by_default():
+    from e1.aggregate import collect
+    tmp = Path(tempfile.mkdtemp())
+    try:
+        _fake_run(tmp / "archive_perro_v1" / "A1_0_old", host="Perro", acc=0.11)
+        _fake_run(tmp / "v1" / "A1_0_new", host="Perrito", acc=0.99)
+        df = collect(tmp, generation="v1")
+        assert len(df) == 1 and float(df["M1_acc_unseen"].iloc[0]) == 0.99, df
+        # ...but pointing --runs AT the archive reads it: opting in is explicit.
+        arch = collect(tmp / "archive_perro_v1", generation="v1")
+        assert len(arch) == 1 and float(arch["M1_acc_unseen"].iloc[0]) == 0.11
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_d39_aggregation_refuses_to_span_two_hosts():
+    """Determinism is a within-platform guarantee; mixing hosts is not a comparison."""
+    from e1.aggregate import collect
+    tmp = Path(tempfile.mkdtemp())
+    try:
+        _fake_run(tmp / "v1" / "A1_0_a", host="Perro")
+        _fake_run(tmp / "v1" / "A1_1_b", host="Perrito")
+        try:
+            collect(tmp, generation="v1")
+        except SystemExit as exc:
+            assert "D39" in str(exc) and "Perro" in str(exc)
+        else:
+            raise AssertionError("aggregated across two hosts")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_d41_archive_layout_is_intact():
+    """The committed v1 record must stay where the report says it is."""
+    root = Path(__file__).resolve().parents[1]
+    runs = root / "runs" / "archive_perro_v1"
+    res = root / "results" / "archive_perro_v1"
+    assert runs.is_dir() and res.is_dir()
+    assert len([d for d in runs.iterdir() if (d / "metrics.json").exists()]) == 36
+    assert (res / "E1_REPORT.md").exists()
+    assert (res / "summary.csv").exists()
+    # Checkpoints must stay ignored at the deeper path, or a batch commits 90 of them.
+    ignore = (root / ".gitignore").read_text()
+    assert "runs/**/checkpoints/" in ignore, "checkpoint ignore is not recursive"
+
+
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
 
 if __name__ == "__main__":

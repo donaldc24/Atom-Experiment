@@ -14,6 +14,14 @@ class Config:
     # --- identity -------------------------------------------------------
     arm: str = "A1"
     seed: int = 0
+    # Generation: which *design* of the experiment this run belongs to. Both
+    # generations live in one working tree and run from one checkout -- switching
+    # generations must never require switching commits, or old results stop being
+    # reproducible the moment the code moves on. See D40.
+    #   v1  the committed E1 battery: sort_asc in slot 3, one split (seed 1234)
+    #   v2  index_shift in slot 3 (39 -> 42 distinct pair functions), 3 split seeds
+    generation: str = "v1"
+    primitive_set: str = "v1"
 
     # --- data -----------------------------------------------------------
     seq_len: int = 8
@@ -165,6 +173,56 @@ def config_for_arm(arm: str, seed: int) -> Config:
     return cfg
 
 
+# --- generations ----------------------------------------------------------
+# A generation fixes the task family and the split policy. Everything else -- arms,
+# architecture, optimiser, thresholds -- is shared, which is what keeps v1 and v2
+# comparable and keeps a single `analyze.py` scoring both.
+GENERATIONS = {
+    "v1": {
+        "primitive_set": "v1",
+        "split_seeds": (1234,),
+        "note": "committed E1 battery; sort_asc in slot 3; ONE split, inspected "
+                "during development (E1_REPORT 6b) -- development evidence",
+    },
+    "v2": {
+        "primitive_set": "v2",
+        "split_seeds": (1234, 5678, 9012),
+        "note": "index_shift replaces sort_asc (39 -> 42 distinct pair functions, "
+                "0 T4 violations); three independent splits so the reported spread "
+                "covers split variance, not just optimisation variance",
+    },
+}
+
+
+def config_for_generation(generation: str, arm: str, seed: int,
+                          split_seed: int | None = None) -> Config:
+    """An arm config bound to a generation's task family and one of its splits.
+
+    `split_seed` must be one the generation actually froze: a run pointing at an
+    ungenerated split would otherwise fail deep inside data loading, or worse, load a
+    neighbouring generation's file.
+    """
+    try:
+        spec = GENERATIONS[generation]
+    except KeyError:
+        raise ValueError(
+            f"unknown generation {generation!r}; known: {sorted(GENERATIONS)}"
+        ) from None
+    seeds = spec["split_seeds"]
+    if split_seed is None:
+        split_seed = seeds[0]
+    if split_seed not in seeds:
+        raise ValueError(
+            f"generation {generation!r} froze split seeds {list(seeds)}, "
+            f"not {split_seed}"
+        )
+    cfg = config_for_arm(arm, seed)
+    cfg.generation = generation
+    cfg.primitive_set = spec["primitive_set"]
+    cfg.split_seed = split_seed
+    return cfg
+
+
 RUNGS = ("R0", "R1", "R2", "R3", "Sarb")
 R2_WEIGHTS = (1.0, 10.0, 40.0)
 
@@ -196,18 +254,32 @@ def config_for_rung(rung: str, seed: int, weight: float = 0.0) -> Config:
         cfg.atom_layernorm = True
         cfg.code_consistency_weight = weight   # ladder passes 0.0; see run_e1b.LADDER
         cfg.code_bottleneck = True
+        # D35's three knobs. They default to off in Config so no other rung is
+        # touched, which meant R3 was still running the PRE-FIX configuration --
+        # the one that produced the flat 0.7%-at-epoch-58 curve the fix exists to
+        # remove. Wiring them here is what makes "R3-fixed" actually fixed.
+        cfg.codec_pretrain_epochs = 10   # phase 0: encoder+decoder reconstruction only
+        cfg.codec_lr_scale = 0.1         # codec becomes a slow-moving substrate after
+        cfg.project_tau_floor = 1.0      # routing anneal must not close the proj channel
     elif rung == "Sarb":
-        # Consistency WITHOUT correctness (D36). A0 supplied three things at once:
-        # (a) on-manifold, (b) consistent-per-primitive, (c) semantically correct.
-        # E1b's R2 tested (a) alone and it failed. S-arb tests (a)+(b) without (c):
-        # h_1 is pulled toward a FROZEN arbitrary code for the step's first
-        # primitive. Routing stays gumbel, there is no intermediate decode
-        # supervision and no forced routing -- only the target changes.
-        cfg.atom_layernorm = True           # parity with the ladder
-        cfg.arbitrary_targets = True
-        cfg.state_consistency = True        # reuses the same relative-MSE form
-        cfg.state_consistency_weight = 40.0  # A0's authorised value (D18)
-        cfg.early_stop = False              # target-fitting is not tracked by task acc
+        # BLOCKED -- the D36 design is ill-posed and would return a confident wrong
+        # answer. See D37. `arbitrary_targets` is one CONSTANT vector per primitive
+        # (verified: shape [8, 512], byte-identical across inputs), so the constraint
+        # "h_1 == T[p_1] for all x" demands h_1 carry zero information about x. With
+        # depth=2, h_1 is the only path from input to output, so at weight 40 the run
+        # is guaranteed to land at acc_unseen ~ 0 with loss_state_rel low -- which is
+        # exactly D36's registered signature for "semantic correctness is
+        # load-bearing", and would have redirected the program to prospectus 10 on
+        # the strength of an information-destroying target. Same family as D29.
+        #
+        # The replacement is not a patch: D37 shows any admissible target must be
+        # input-dependent AND determine p_1(x), which forces correctness up to
+        # isomorphism. Do not re-enable without a superseding decision entry and a
+        # freshly registered prediction.
+        raise NotImplementedError(
+            "rung 'Sarb' is blocked: the D36 target is input-independent and "
+            "guarantees an uninterpretable failure. See DECISIONS.md D37."
+        )
     else:
         raise ValueError(f"unknown rung {rung!r}")
     return cfg

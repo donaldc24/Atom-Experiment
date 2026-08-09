@@ -23,26 +23,81 @@ tests/test_fast.py  T4, T5, T7, T8 + architecture invariants  (CI, ~1 min)
 tests/test_gates.py T1, T2, T3, T6                             (need training runs)
 ```
 
+## Generations (D40)
+
+Both designs live in this one working tree. **Switching generations never requires
+switching commits** — that is the point, because old results stop being reproducible
+the moment the code moves on.
+
+| | v1 | v2 |
+|---|---|---|
+| slot-3 primitive | `sort_asc` | `index_shift`, `x_i → (x_i + i) mod 10` |
+| distinct pair functions | 39 / 64 | **42 / 64** |
+| split seeds | 1234 | 1234, 5678, 9012 |
+| runs land in | `runs/v1/` | `runs/v2/` |
+| results land in | `results/` | `results/v2/` |
+
+**v1 is immutable.** Its split sha256 is pinned by a test and recorded in 30 committed
+runs; `make_split --generation v1 --force` refuses. Generations are never pooled —
+they measure different task families, so a combined mean describes neither.
+
+Use v2 for new work. v1 exists to be re-run and reproduced, not extended.
+
+### The archive (D41)
+
+The battery as run on `Perro` (Intel) lives in `runs/archive_perro_v1/` and
+`results/archive_perro_v1/`. `aggregate`, `backfill` and `status` **skip `archive*`
+subtrees by default**, so a frozen battery is never pooled with new runs and
+`backfill --reanalyze` cannot rewrite it. Read it by pointing at it:
+
+```bash
+python -m e1.aggregate --generation v1 --runs runs/archive_perro_v1
+```
+
+Aggregation also **refuses to span two hostnames** (D39) — determinism is a
+within-platform guarantee, so a table mixing machines is not a comparison.
+
+## Environment
+
+CPU-only, and the pins matter — `numpy==2.2.4` has no cp314 wheels, so Python must be
+≤ 3.13 (3.11 in use, see D39).
+
+```bash
+py -3.11 -m venv .venv
+.venv/Scripts/python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.9.0
+.venv/Scripts/python -m pip install numpy==2.2.4 pandas==2.2.3 matplotlib==3.10.1 psutil==7.0.0
+```
+
 ## Running
 
 ```bash
-python -m e1.make_split          # already frozen and committed; --force to regenerate
 python tests/test_fast.py        # must be green before anything else
 
+python -m e1.make_split --generation v2   # frozen and committed; --force to regenerate
+
 # Run in THIS order. A3 is the informative arm and D12 predicts A1 fails, so getting
-# A3 after ~3.5 h beats waiting ~10 h for a single 25-run block.
-python -m e1.run_all --arms A0            # T1 gate: oracle must clear 99% on `unseen`
-python -m e1.run_all --arms A3            # the informative arm
-python -m e1.run_all --arms A1 A2 A4      # comparison arms, overnight
-python -m e1.aggregate                    # results/summary.md + plots + verdict
+# A3 early beats waiting for a single full block.
+python -m e1.run_all --generation v2 --arms A0        # T1 gate: oracle must clear the bar
+python -m e1.run_all --generation v2 --arms A3        # the informative arm
+python -m e1.run_all --generation v2 --arms A1 A2 A4  # comparison arms, overnight
+python -m e1.aggregate --generation v2                # results/v2/summary.md + verdict
+
+# Reproduce the committed v1 battery instead:
+python -m e1.run_all --generation v1
+python -m e1.aggregate --generation v1                # -> results/
 
 python tests/test_gates.py --t1 --t3
 python tests/test_gates.py --t2                        # determinism, reduced scale
-python tests/test_gates.py --t6 runs/A0_0_<sha>
+python tests/test_gates.py --t6 runs/v2/A0_0_s1234_<sha>
 ```
 
-`run_all` stops the batch if A0 misses the T1 gate — no other arm's failure would be
-interpretable.
+`run_all` sweeps every split seed the generation froze (v2: 3), with split seed as the
+**outer** loop — a batch that dies partway still leaves complete arm × seed blocks for
+the splits it finished, rather than a ragged fragment of every split. It stops the
+batch if A0 misses the T1 gate; no other arm's failure would be interpretable.
+
+Runs are discovered **recursively**, so `aggregate`, `backfill` and `status` see both
+the nested layout and the flat pre-D40 runs.
 
 ## Arms
 
@@ -72,6 +127,14 @@ every run directory carries `config.json`, `env.json`, `split_ref.json`,
 
 CPU only: no CUDA paths, 4 pinned threads, `torch.use_deterministic_algorithms(True)`,
 `final.pt` only. Peak RSS is asserted below 4 GB and recorded in `env.json`.
+
+**Thread count is a determinism parameter, not a performance knob** — it changes
+reduction order. Measured on the Ryzen 9 6900HX: 4 threads 17.8 s/epoch, 8 threads
+17.0, 16 threads 21.9. 8 buys 5% and 16 is worse, so it stays at **4**. Sweep once
+with `--threads`, freeze one value, never vary it inside a batch.
+
+**Determinism is a within-platform guarantee.** The E1 battery ran on Intel; work
+continues on AMD. No comparison may span the two — see D39.
 
 Per H5, composer and library parameter counts are always reported as separate line
 items — a composer quietly absorbing the atoms' work is invisible under a combined

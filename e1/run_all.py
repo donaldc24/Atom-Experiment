@@ -17,8 +17,8 @@ import time
 from pathlib import Path
 
 from .analyze import analyze
-from .config import ARMS, SEEDS
-from .train import RUNS_DIR, run_id_for
+from .config import ARMS, GENERATIONS, SEEDS, config_for_generation
+from .train import RUNS_DIR, run_dir_for
 from .utils import read_json, write_json
 
 
@@ -28,28 +28,49 @@ def already_done(run_dir: Path) -> bool:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--generation", default="v1",
+                    help="which experiment generation to run (D40)")
     ap.add_argument("--arms", nargs="*", default=list(ARMS))
     ap.add_argument("--seeds", nargs="*", type=int, default=list(SEEDS))
+    ap.add_argument("--split-seeds", nargs="*", type=int, default=None,
+                    help="default: every split seed the generation froze")
     ap.add_argument("--epochs", type=int, default=None)
+    ap.add_argument("--threads", type=int, default=None)
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--stop-on-oracle-failure", action="store_true", default=True)
     args = ap.parse_args()
 
-    plan = [(a, s) for a in args.arms for s in args.seeds]
-    print(f"planned runs: {len(plan)}")
+    if args.generation not in GENERATIONS:
+        print(f"error: unknown generation {args.generation!r}; "
+              f"known: {sorted(GENERATIONS)}", file=sys.stderr)
+        return 2
+    split_seeds = args.split_seeds or list(GENERATIONS[args.generation]["split_seeds"])
+
+    # Split seed is the OUTER loop: a batch that dies partway then still holds a
+    # complete arm x seed block for the splits it finished, rather than a ragged
+    # fragment of every split.
+    plan = [(ss, a, s) for ss in split_seeds for a in args.arms for s in args.seeds]
+    print(f"generation {args.generation}: {len(plan)} runs "
+          f"({len(args.arms)} arms x {len(args.seeds)} seeds x "
+          f"{len(split_seeds)} splits)")
     t_batch = time.time()
 
-    for idx, (arm, seed) in enumerate(plan, start=1):
-        run_dir = RUNS_DIR / run_id_for(arm, seed)
+    for idx, (split_seed, arm, seed) in enumerate(plan, start=1):
+        cfg = config_for_generation(args.generation, arm, seed, split_seed)
+        run_dir = run_dir_for(cfg)
         if already_done(run_dir) and not args.force:
             print(f"[{idx}/{len(plan)}] skip {run_dir.name} (already complete)")
             continue
 
-        cmd = [sys.executable, "-m", "e1.train", "--arm", arm, "--seed", str(seed)]
+        cmd = [sys.executable, "-m", "e1.train", "--arm", arm, "--seed", str(seed),
+               "--generation", args.generation, "--split-seed", str(split_seed)]
         if args.epochs is not None:
             cmd += ["--epochs", str(args.epochs)]
+        if args.threads is not None:
+            cmd += ["--threads", str(args.threads)]
         t0 = time.time()
-        print(f"[{idx}/{len(plan)}] {arm} seed {seed} ...", flush=True)
+        print(f"[{idx}/{len(plan)}] {arm} seed {seed} split {split_seed} ...",
+              flush=True)
         # A separate process per run keeps thread pinning and RNG state clean.
         proc = subprocess.run(cmd, cwd=str(RUNS_DIR.parent))
         if proc.returncode != 0:

@@ -168,6 +168,11 @@ class AtomNet(nn.Module):
         Frozen deliberately: a learnable target would drift toward the true encoding
         of p(x) and quietly reintroduce semantic correctness, which is exactly the
         variable this rung removes.
+
+        SUPERSEDED -- unreachable via `config_for_rung`, which now blocks the rung.
+        The target this builds is one CONSTANT vector per primitive, with no
+        dependence on the input, so pulling h_1 onto it destroys the information the
+        task needs. Retained only so D37's analysis is auditable against real code.
         """
         with torch.no_grad():
             toks = torch.stack([
@@ -178,8 +183,13 @@ class AtomNet(nn.Module):
                 for p in range(self.cfg.n_primitives)
             ])
             targets = self.code(toks)                       # [P, state_dim]
-            ref = self.code(torch.randint(0, self.cfg.vocab,
-                                          (256, self.cfg.seq_len))).norm(dim=1).mean()
+            # Explicit generator: bare torch.randint would advance the GLOBAL RNG
+            # stream, so this rung's later sampling would diverge from every other
+            # rung's for a reason unrelated to the rung. Determinism is load-bearing.
+            gen = torch.Generator().manual_seed(split_seed * 7919 + 13)
+            ref_toks = torch.randint(0, self.cfg.vocab, (256, self.cfg.seq_len),
+                                     generator=gen)
+            ref = self.code(ref_toks).norm(dim=1).mean()
             targets = targets * (ref / targets.norm(dim=1, keepdim=True))
         self.register_buffer("arbitrary_targets", targets, persistent=True)
 

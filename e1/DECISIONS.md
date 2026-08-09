@@ -841,6 +841,233 @@ then semantic correctness is itself load-bearing, and the decomposition — not 
 stable convention — must be supplied. That would be the stronger result and it points
 directly at prospectus §10.
 
+### D37 — S-arb is **BLOCKED**: the D36 target is ill-posed — **SUPERSEDES D36**
+
+Found in a pre-launch audit, before any S-arb run. No result is affected; the rung
+had never been executed.
+
+**The defect.** `init_arbitrary_targets` builds **one constant vector per
+primitive** — verified empirically, shape `[8, 512]`, byte-identical for every
+input sharing a first primitive (max abs deviation across six different inputs:
+**0.0**). `train.py` then indexes it by primitive id, so the constraint reads
+
+> `h_1 == T[p_1]` for **all** `x`
+
+Depth is 2, so `h_1` is the only path from input to output. The constraint therefore
+demands that `h_1` carry **zero information about `x`**, while the task loss demands
+it carry all of it. At the authorised weight of 40 the state term wins.
+
+**Why this would have been worse than a null result.** The predicted signature is
+`acc_unseen ≈ 0` with `loss_state_rel` low — which is *exactly* D36's registered
+reading for:
+
+> if S-arb **fails while the constraint is verifiably satisfied**, then semantic
+> correctness is itself load-bearing, and the decomposition must be supplied. That
+> would be the stronger result and it points directly at prospectus §10.
+
+The program would have been redirected to "atoms taught rather than discovered" — a
+branch the prospectus itself flags as making H1 close to tautological — on the
+strength of an information-destroying target. This is the same failure family as
+D29's code collapse: a degenerate solution satisfying the letter of a constraint by
+annihilating the thing constrained. D29 was caught by the coverage floor. **Nothing
+in the pre-registered E1b gate would have caught this one**, because S-arb's verdict
+keys on the conjunction of low `loss_state_rel` and low `acc_unseen`, which the
+degenerate solution satisfies honestly.
+
+**It is not a patch, and this is the substantive part.** Make the target
+input-dependent and the design still does not close:
+
+- `atom_j` must be **history-independent** — the same map wherever it appears — and
+  must yield `p_2(p_1(x))` from `h_1` for **every** partner `p_2`. Therefore `h_1`
+  must **determine** `p_1(x)`.
+- So an admissible target has the form `σ(enc(p_1(x)))` for a fixed injective `σ`.
+  Constrain only `h_1` (as D36 specifies) and `σ ≠ id` splits `atom_p` into two
+  different demands at step 1 and step 2 — it is no longer one map.
+- Constrain both steps and the demands agree again, but `σ` is then a global change
+  of basis that the encoder/decoder absorb: the rung becomes **isomorphic to A0** and
+  tests nothing.
+
+**Conclusion: "consistency without correctness" is not an available experiment in
+this architecture.** Any target convention that supports history-independent atoms
+is correctness up to isomorphism. D36's premise — that (b) and (c) are separable —
+is false here, and that is a finding about the architecture rather than a bug.
+
+**Decision.** `config_for_rung("Sarb", ...)` raises. `init_arbitrary_targets` is
+retained, documented as superseded, and pinned by
+`test_d37_arbitrary_targets_are_input_independent` so a redesign cannot quietly
+reintroduce the constant target. Re-enabling requires a superseding entry and a
+**freshly registered prediction** — D36's prediction is void, and re-registering it
+after learning the rung was unrunnable would not be a prediction.
+
+**What this does to the §10 question.** It does not settle it. It removes the cheap
+route to it: E1b cannot separate "a stable convention suffices" from "the
+decomposition must be supplied", because in this architecture they are the same
+claim. Deciding §10 now needs a design where the intermediate is *not* forced to be a
+lossless code for the partial composition — i.e. depth > 2, or atoms that are not
+required to be closed maps on a single shared code.
+
+### D38 — D35's fix was never wired up; R3 would have re-run the pre-fix arm
+
+Same audit. `codec_pretrain_epochs`, `codec_lr_scale` and `project_tau_floor` default
+to off in `Config` so that no other rung is disturbed — but `config_for_rung("R3")`
+never set them, and `train_e1b.py` exposed no flags for them. The machinery
+(`run_codec_pretrain`, the codec optimiser group, the `max(tau, floor)` call at
+`model.py`) was all present and all unreachable.
+
+Consequence had it run: R3 reproduces the pre-fix signature (0.7% train accuracy at
+epoch 58, flat ~0.001-per-4-epoch), trips D35's kill rule, and is recorded
+**INCONCLUSIVE(optimization)** — having never once tested the fix that the entry was
+written to test.
+
+Fixed in `config_for_rung`, with `test_d35_r3_carries_the_fix_knobs` asserting both
+that R3 carries all three values and that R0/R1/R2 carry none of them.
+
+Related: `--rungs Sarb` used to filter a ladder that contained no such cell, planning
+zero runs and exiting **0** — success and "did nothing" were indistinguishable.
+`run_e1b` now fails loudly on an off-ladder rung.
+
+### D39 — Platform migration: Intel → AMD, and the batch is re-baselined
+
+The E1 battery ran on `Perro` — `Intel64 Family 6 Model 189`, 8 logical CPUs, Python
+3.13.1. Work continues on `Perrito` — `AMD64 Family 25 Model 68` (Ryzen 9 6900HX),
+16 logical CPUs.
+
+This crosses a **vendor** boundary, not merely a machine one: different oneDNN/MKL
+kernel dispatch and different SIMD paths. Bit-identical reproduction across it is
+unlikely rather than marginal, and the harness's determinism guarantees
+(`use_deterministic_algorithms(True)`, fixed thread count, byte-identical T2) are
+guarantees *within* a platform, not across platforms.
+
+**Rule adopted:** no comparison may span the two machines. Every arm a result is
+judged against runs on the same host as the arms it is compared to.
+
+Environment on `Perrito`: Python **3.11.5** (3.13 unavailable; `numpy==2.2.4` has no
+cp314 wheels, so the pins forbid 3.14), with `requirements-e1.txt` otherwise
+honoured exactly — torch 2.9.0+cpu, numpy 2.2.4, pandas 2.2.3, matplotlib 3.10.1,
+psutil 7.0.0. `tests/test_fast.py` is green (25/25) on this platform.
+
+Thread count is a determinism parameter, not a performance knob: it changes reduction
+order. One value is chosen for the whole batch and frozen in `Config` before any
+research run.
+
+### D41 — The Perro battery is archived, and archives are frozen by construction
+
+The v1 battery and its generated results moved to `runs/archive_perro_v1/` (36 runs)
+and `results/archive_perro_v1/` (report, tables, figures, plots). Nothing was
+regenerated or rewritten; the move is a rename.
+
+**Why an archive rather than deletion or in-place retention.** The battery is a
+complete, citable record of an experiment on a machine that will not be used again
+(D39). Leaving it in `runs/` risked exactly one thing, and it is the thing D39 exists
+to prevent: a later `aggregate` sweeping Perro and Perrito runs into one table.
+
+**Enforced, not documented.**
+
+- `aggregate`, `backfill` and `status` skip any `archive*` subtree by default.
+  Pointing `--runs` **at** an archive still reads it — the relative path then contains
+  no archive component, so opting in is explicit rather than accidental.
+- `backfill --reanalyze` **rewrites** `metrics.json` and `SHA256SUMS`. Skipping
+  archives is what makes "frozen record" true rather than aspirational.
+- `collect()` now **refuses to aggregate runs from more than one hostname**, naming
+  the hosts and the run counts. D39 was a policy; this makes it a mechanism.
+- `status` excludes archives, or a finished battery would report the current one as
+  permanently complete.
+
+**A latent defect fixed in passing.** `.gitignore` carried `runs/*/checkpoints/` — a
+**single-level** pattern. Runs sit one level deeper from D40 on
+(`runs/<generation>/<run_id>/checkpoints`) and archived runs deeper still, so the
+pattern had already stopped matching. The next commit would have added a checkpoint
+per run — 90 of them for a full v2 battery — to a repository whose stated policy is
+that checkpoints are regenerable and untracked. Now `runs/**/checkpoints/`, asserted
+by a test.
+
+**Verified.** `aggregate --generation v1 --runs runs/archive_perro_v1` reproduces the
+archived `summary.csv` byte-identically after the move.
+
+The archived `E1_REPORT.md` carries a header stating what it is, and its one
+repo-relative link was repointed.
+
+### D40 — Generations: v1 and v2 coexist in one working tree
+
+**Requirement.** Any experiment must be re-runnable **without checking out an old
+commit**. Copying `e1/` into `e1_v1/`, `e1_v2/` would satisfy that and then rot:
+bug fixes land in one copy, and `analyze.py` stops being able to re-score old runs —
+which is the property that let every metric added mid-experiment be applied
+retroactively without retraining anything (D21, D24, D28).
+
+**Mechanism.** One code base, parameterised by `generation`. A generation fixes the
+task family and split policy; arms, architecture, optimiser and thresholds are
+shared, so a single `analyze.py` scores both and the two stay comparable.
+
+| | v1 | v2 |
+|---|---|---|
+| slot-3 primitive | `sort_asc` | `index_shift` (`x_i -> (x_i + i) mod 10`) |
+| distinct ordered-pair functions | 39 / 64 | **42 / 64** |
+| distinct functions among held-out | 17 | 18 / 17 / 17 |
+| split seeds | 1234 | 1234, 5678, 9012 |
+| T4 violations | 0 | **0** |
+| run directory | `runs/<run_id>` (pre-D40) · `runs/v1/<run_id>` | `runs/v2/<run_id>` |
+
+**Why `index_shift`.** D10 flagged `sort_asc` as idempotent and order-destroying and
+named the replacement; D15 measured it and deferred it only to avoid invalidating the
+A0 work. A from-scratch re-baseline is exactly when that objection lapses. Re-measured
+here on 10,000 inputs rather than trusted from D15: 39 → 42 distinct pair functions,
+zero T4 violations, non-idempotent.
+
+**Why three splits.** `E1_REPORT` §6b's sharpest self-criticism is that all 30 E1 runs
+share one split that was *inspected during development*, so the reported ± is
+optimisation variance and nothing else. Three frozen splits make the spread cover
+split variance too. They are genuinely different: pairwise held-out overlap is
+11–15 of 24.
+
+**v1 is immutable, and this is enforced rather than asked for.**
+
+- `make_split --generation v1 --force` **refuses**; v1's sha256
+  `a7b1ca7c…` is pinned by a test and recorded in 30 runs' `split_ref.json`.
+- The v1 primitive table is pinned by name and order — ids are positional, so
+  reordering would silently relabel every task in the committed report.
+- Every un-parameterised call site still resolves to v1 (`DEFAULT_SET = "v1"`), which
+  is what makes the refactor invisible to v1.
+
+**Verified, not assumed.** A 2-epoch `A1 seed 0` run under this code was compared
+against the same run built from `HEAD` in a separate git worktree:
+
+- **44 / 44 tensors bit-identical**; 30 of 31 artifacts byte-identical.
+- The one difference is `checkpoints/final.pt`, which embeds `cfg.to_dict()`: two keys
+  added (`generation`, `primitive_set`), **no value changed**.
+- `aggregate --generation v1` reproduces the committed `results/summary.csv`
+  **byte-identically**.
+
+**Guards added.** Splits are self-describing (`primitive_set` in the file) and
+`build_bundle` refuses a split whose set differs from the run's — otherwise a v1
+split under v2 functions generates targets from the wrong maps and every number is
+quietly wrong. `collect()` filters by generation and never pools: v1 and v2 measure
+different task families, so a pooled mean describes neither. Run ids carry the split
+seed whenever a generation has more than one, or the same arm on two splits collides
+on one directory and the second run overwrites the first.
+
+**Depth stays 2 — a correction.** Raising depth was proposed on the reasoning that it
+would give intermediate states somewhere to be that is not fully determined. **That
+reasoning is wrong**, and D37's argument is why: at any depth, `h_t` must determine
+the partial composition, because some continuations are bijections and the final
+answer recovers it. Depth 3 buys measurable H5-depth and error-accumulation data —
+both real, neither addressing the D37 blocker — at 8× the task space and roughly 10×
+the compute, and the split machinery is written over ordered *pairs* throughout, so it
+is a redesign rather than a knob. It belongs to a later generation, decided on its own
+merits.
+
+**What v2 does and does not claim.** v2 is a better-resolved instrument for the same
+question, not a new hypothesis. It does not address D37; no arm in it can build closed
+maps without ground truth by any mechanism E1b has left. Its purpose is to re-establish
+the E1 result on this platform (D39), across three splits, with the extensional
+collapse reduced — i.e. to convert §6b's development evidence into something confirmed.
+
+**Also fixed here.** `aggregate.program_verdict` still emitted "the architecture and
+the optimizer are both adequate", the exact sentence `E1_REPORT` §6b retracts as
+overstating the evidence. The generated `summary.md` therefore contradicted the report
+on every run. Reworded to match §6b: A0 establishes feasibility under privileged
+supervision, not adequacy for discovery.
+
 ### D32 — Three implementation defects found in external review — **E1b RESULTS RETRACTED**
 
 All three were verified empirically before acting, and all three are real.

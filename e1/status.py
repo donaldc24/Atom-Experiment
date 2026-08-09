@@ -55,7 +55,12 @@ def live_processes():
 
 
 def snapshot(runs_dir: Path = RUNS_DIR) -> None:
-    done = sorted(runs_dir.glob("*/metrics.json"))
+    # Recursive: runs/<generation>/<run_id> from D40 on, flat before it. Archived
+    # batteries are excluded -- progress means progress on the CURRENT batch, and a
+    # finished archive would otherwise report it as permanently complete (D41).
+    from .aggregate import is_archived
+    done = sorted(m for m in runs_dir.rglob("metrics.json")
+                  if not is_archived(m.parent, runs_dir))
     total_planned = len(ARMS) * len(SEEDS)
     print(f"=== E1 battery: {len(done)}/{total_planned} runs complete ===\n")
 
@@ -73,7 +78,7 @@ def snapshot(runs_dir: Path = RUNS_DIR) -> None:
     for arm, seed, mins in running:
         print(f"  {arm} seed {seed}   elapsed {mins:.1f} min")
         # Find its run dir: has a train log but no metrics yet.
-        for d in sorted(runs_dir.glob(f"{arm}_{seed}_*")):
+        for d in sorted(runs_dir.rglob(f"{arm}_{seed}_*")):
             if (d / "metrics.json").exists():
                 continue
             rows = _read_log(d / "train_log.jsonl")

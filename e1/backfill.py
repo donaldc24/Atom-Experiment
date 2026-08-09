@@ -17,6 +17,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from .aggregate import is_archived
 from .analyze import analyze
 from .config import Config
 from .data import build_bundle, load_split
@@ -79,6 +80,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", default=str(RUNS_DIR))
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--include-archived", action="store_true",
+                    help="also rewrite runs under archive* subtrees (D41)")
     ap.add_argument("--reanalyze", action="store_true",
                     help="re-run analyze.py on every complete run without recomputing "
                          "artifacts; needed when a long-lived run_all process held a "
@@ -86,8 +89,18 @@ def main() -> int:
     args = ap.parse_args()
 
     n = 0
-    for run_dir in sorted(Path(args.runs).glob("*")):
-        if not (run_dir / "metrics.json").exists():
+    # Recursive: runs live at runs/<generation>/<run_id> from D40 on, and flat at
+    # runs/<run_id> before it. Re-scoring must reach every run of every generation --
+    # that is the property that lets a metric added mid-experiment be applied
+    # retroactively without retraining anything.
+    #
+    # Archives are skipped: --reanalyze REWRITES metrics.json and SHA256SUMS, and an
+    # archived battery is a frozen record of what a finished experiment reported. Pass
+    # --runs runs/<archive dir> to re-score one deliberately. See D41.
+    runs_root = Path(args.runs)
+    for mpath in sorted(runs_root.rglob("metrics.json")):
+        run_dir = mpath.parent
+        if is_archived(run_dir, runs_root) and not args.include_archived:
             continue
         n += int(backfill_run(run_dir, args.force))
         if args.reanalyze:

@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 
 from .primitives import (
+    DEFAULT_SET,
     IDENTITY_ID,
     K,
     L,
@@ -30,10 +31,26 @@ from .primitives import (
 from .utils import read_json, sha256_bytes, write_json
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SPLIT_PATH = REPO_ROOT / "splits" / "pairs_split.json"
+SPLITS_DIR = REPO_ROOT / "splits"
+# v1's split keeps its original filename and contents: its sha256 is recorded in
+# every committed run's split_ref.json, so renaming it would orphan 30 runs.
+SPLIT_PATH = SPLITS_DIR / "pairs_split.json"
 
 SIGNATURE_SAMPLES = 20_000
 SIGNATURE_SEED = 987
+
+
+def split_path_for(generation: str = "v1", split_seed: int = 1234) -> Path:
+    """Where a generation's frozen split lives.
+
+    v1 is a single split at the historical path (D40 keeps it byte-identical).
+    Later generations are one file per split seed, because a single split that was
+    inspected during development is development evidence, not held-out evidence --
+    the limitation E1_REPORT 6b flags as bounding every E1 claim.
+    """
+    if generation == "v1":
+        return SPLIT_PATH
+    return SPLITS_DIR / f"{generation}_seed{split_seed}.json"
 
 
 @dataclass(frozen=True)
@@ -71,22 +88,22 @@ def make_task(primitives) -> Task:
 # Extensional equivalence classes
 # --------------------------------------------------------------------------
 
-def _signatures():
+def _signatures(pset: str = DEFAULT_SET):
     rng = np.random.default_rng(SIGNATURE_SEED)
     probe = random_inputs(rng, SIGNATURE_SAMPLES)
-    singleton_sig = {p: apply_primitive(p, probe).tobytes() for p in range(K)}
-    pair_sig = {(a, b): apply_composition((a, b), probe).tobytes()
+    singleton_sig = {p: apply_primitive(p, probe, pset).tobytes() for p in range(K)}
+    pair_sig = {(a, b): apply_composition((a, b), probe, pset).tobytes()
                 for a in range(K) for b in range(K)}
     return singleton_sig, pair_sig
 
 
-def equivalence_classes():
+def equivalence_classes(pset: str = DEFAULT_SET):
     """Return (classes, forced_train_ids, sig_of_class).
 
     classes: list of lists of (a, b) pairs sharing one extension.
     forced_train_ids: indices of classes extensionally equal to some length-1 task.
     """
-    singleton_sig, pair_sig = _signatures()
+    singleton_sig, pair_sig = _signatures(pset)
     by_sig: dict[bytes, list] = {}
     for pair, sig in pair_sig.items():
         by_sig.setdefault(sig, []).append(pair)
@@ -124,9 +141,10 @@ def informative_pairs(pairs, classes, forced):
     return [tuple(p) for p in pairs if tuple(p) not in forced_pairs]
 
 
-def build_split(n_heldout: int = 24, seed: int = 1234, max_tries: int = 200_000) -> dict:
+def build_split(n_heldout: int = 24, seed: int = 1234, max_tries: int = 200_000,
+                pset: str = DEFAULT_SET) -> dict:
     """Rejection-sample a class-level split satisfying every constraint."""
-    classes, forced, sigs = equivalence_classes()
+    classes, forced, sigs = equivalence_classes(pset)
     free_ids = [i for i in range(len(classes)) if i not in forced]
     rng = np.random.default_rng(seed)
 
@@ -167,6 +185,11 @@ def build_split(n_heldout: int = 24, seed: int = 1234, max_tries: int = 200_000)
 
         heldout_info = informative_pairs(heldout_pairs, classes, forced)
         return {
+            # Self-describing: a split carries the primitive set it was built over, so
+            # loading it against a different set is caught rather than silently
+            # producing targets from the wrong functions. v1's committed file predates
+            # this key and defaults to "v1" on read.
+            "primitive_set": pset,
             "n_primitives": K,
             "seq_len": L,
             "vocab": V,
@@ -200,9 +223,22 @@ def build_split(n_heldout: int = 24, seed: int = 1234, max_tries: int = 200_000)
     raise RuntimeError("could not satisfy split constraints; loosen n_heldout or seed")
 
 
-def verify_split(split: dict) -> list[str]:
-    """T3 (static half) + T5. Returns a list of violation strings; empty means pass."""
+def verify_split(split: dict, pset: str | None = None) -> list[str]:
+    """T3 (static half) + T5. Returns a list of violation strings; empty means pass.
+
+    `pset` is the set the CALLER intends to train with. It is checked against the one
+    the split was built over, because every extensional guarantee here -- no held-out
+    pair equal to a training task, informative-coverage counts -- is a fact about a
+    specific primitive set and silently voids under another.
+    """
     problems = []
+    declared = split.get("primitive_set", "v1")
+    if pset is not None and pset != declared:
+        problems.append(
+            f"split was built over primitive set {declared!r} but the run requests "
+            f"{pset!r}; every extensional guarantee in this split is void"
+        )
+    pset = declared
     train = {tuple(p) for p in split["train_pairs"]}
     heldout = {tuple(p) for p in split["heldout_pairs"]}
 
@@ -211,7 +247,7 @@ def verify_split(split: dict) -> list[str]:
     if len(train) + len(heldout) != K * K:
         problems.append(f"pairs do not partition K^2: {len(train)}+{len(heldout)}")
 
-    singleton_sig, pair_sig = _signatures()
+    singleton_sig, pair_sig = _signatures(pset)
     train_sigs = {pair_sig[p] for p in train} | set(singleton_sig.values())
     for p in sorted(heldout):
         if pair_sig[p] in train_sigs:
@@ -224,7 +260,7 @@ def verify_split(split: dict) -> list[str]:
         if pos2[p] < 2:
             problems.append(f"primitive {p} appears {pos2[p]}x in position 2 of train (<2)")
 
-    classes, forced, _ = equivalence_classes()
+    classes, forced, _ = equivalence_classes(pset)
     ipos1, ipos2 = _position_counts(informative_pairs(sorted(train), classes, forced))
     for p in range(K):
         if p == IDENTITY_ID:
@@ -291,7 +327,16 @@ class Bundle:
 
 
 def build_bundle(cfg, split: dict | None = None) -> Bundle:
-    split = split or load_split()
+    pset = getattr(cfg, "primitive_set", DEFAULT_SET)
+    split = split or load_split(
+        split_path_for(getattr(cfg, "generation", "v1"), cfg.split_seed)
+    )
+    declared = split.get("primitive_set", "v1")
+    if declared != pset:
+        raise ValueError(
+            f"split declares primitive set {declared!r} but cfg.primitive_set is "
+            f"{pset!r} -- targets would be generated from the wrong functions"
+        )
     rng = np.random.default_rng(cfg.data_seed)
 
     n_tr = cfg.examples_per_train_task
@@ -304,21 +349,21 @@ def build_bundle(cfg, split: dict | None = None) -> Bundle:
     for p in range(K):
         task = make_task((p,))
         xs = _unique_inputs(rng, n_tr + n_ev)
-        ys = apply_composition(task.primitives, xs)
+        ys = apply_composition(task.primitives, xs, pset)
         train.append(TaskData(task, xs[:n_tr], ys[:n_tr]))
         singleton.append(TaskData(task, xs[n_tr:], ys[n_tr:]))
 
     for pair in split["train_pairs"]:
         task = make_task(pair)
         xs = _unique_inputs(rng, n_tr + n_ev)
-        ys = apply_composition(task.primitives, xs)
+        ys = apply_composition(task.primitives, xs, pset)
         train.append(TaskData(task, xs[:n_tr], ys[:n_tr]))
         seen_heldout.append(TaskData(task, xs[n_tr:], ys[n_tr:]))
 
     for pair in split["heldout_pairs"]:
         task = make_task(pair)
         xs = _unique_inputs(rng, n_ev)
-        ys = apply_composition(task.primitives, xs)
+        ys = apply_composition(task.primitives, xs, pset)
         unseen.append(TaskData(task, xs, ys))
 
     probe_rng = np.random.default_rng(cfg.data_seed + 7919)

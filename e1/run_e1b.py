@@ -62,7 +62,19 @@ def main() -> int:
 
     ladder = [c for c in LADDER if not (args.skip_r3 and c[0] == "R3")]
     if args.rungs:
+        # --rungs FILTERS the ladder, so a name that is valid in config.RUNGS but
+        # absent from LADDER used to yield an empty plan and exit 0 -- a silent
+        # no-op indistinguishable from success. Fail loudly instead.
+        unschedulable = sorted(set(args.rungs) - {c[0] for c in ladder})
+        if unschedulable:
+            print(f"error: no ladder cell for rung(s) {unschedulable}; "
+                  f"schedulable rungs are {sorted({c[0] for c in ladder})}",
+                  file=sys.stderr)
+            return 2
         ladder = [c for c in ladder if c[0] in args.rungs]
+    if not ladder:
+        print("error: empty plan -- nothing to run", file=sys.stderr)
+        return 2
     # Per-cell seed lists; --seeds overrides them uniformly when given explicitly.
     plan = [(r, w, sd) for r, w, seeds in ladder
             for sd in (args.seeds if args.seeds_override else seeds)]

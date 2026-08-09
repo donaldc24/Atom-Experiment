@@ -50,11 +50,43 @@ ARM_LABELS = {
 }
 
 
-def collect(runs_dir: Path = RUNS_DIR) -> pd.DataFrame:
+ARCHIVE_PREFIX = "archive"
+
+
+def is_archived(run_dir: Path, runs_dir: Path) -> bool:
+    """True when `run_dir` sits under an `archive*` subtree of `runs_dir`.
+
+    Archived runs are a frozen record of a finished battery on a specific machine.
+    They are skipped by default so they cannot be silently pooled with new runs --
+    D39 forbids a comparison spanning two hosts, and archives are the most likely way
+    that would happen by accident. Pointing `--runs` AT an archive still reads it,
+    because then the relative path contains no archive component: opting in is
+    explicit.
+    """
+    try:
+        parts = run_dir.relative_to(runs_dir).parts
+    except ValueError:
+        return False
+    return any(p.startswith(ARCHIVE_PREFIX) for p in parts)
+
+
+def collect(runs_dir: Path = RUNS_DIR, generation: str = "v1",
+            include_archived: bool = False) -> pd.DataFrame:
+    """Every run of ONE generation, found at any depth under `runs_dir`.
+
+    Discovery is recursive because runs are laid out `runs/<generation>/<run_id>/`
+    from D40 onward, while the runs made before it sit flat at `runs/<run_id>/`.
+
+    Generations are never mixed. v1 and v2 have different primitive sets, so their
+    accuracies are not measurements of the same task family -- averaging them would
+    produce a number that describes no experiment. A run whose config predates the
+    generation field is v1 by definition, since v1 is what existed then.
+    """
     rows = []
-    for run_dir in sorted(runs_dir.glob("*")):
-        mpath = run_dir / "metrics.json"
-        if not mpath.exists():
+    hosts: dict[str, str] = {}
+    for mpath in sorted(runs_dir.rglob("metrics.json")):
+        run_dir = mpath.parent
+        if is_archived(run_dir, runs_dir) and not include_archived:
             continue
         m = read_json(mpath)
         # E1b cells are built from config_for_arm("A1", ...) and keep arm="A1", so
@@ -62,7 +94,12 @@ def collect(runs_dir: Path = RUNS_DIR) -> pd.DataFrame:
         # E1 battery table. E1b is aggregated separately. See D32.
         if m.get("rung"):
             continue
-        row = {"run_id": run_dir.name, "arm": m["arm"], "seed": m["seed"]}
+        cfg_path = run_dir / "config.json"
+        run_gen = read_json(cfg_path).get("generation", "v1") if cfg_path.exists() else "v1"
+        if run_gen != generation:
+            continue
+        row = {"run_id": run_dir.name, "generation": run_gen,
+               "arm": m["arm"], "seed": m["seed"]}
         for k in HEADLINE:
             row[k] = m.get(k, np.nan)
         row["params_composer"] = m["params"]["composer"]
@@ -70,9 +107,25 @@ def collect(runs_dir: Path = RUNS_DIR) -> pd.DataFrame:
         row["params_encoder"] = m["params"]["encoder"]
         row["params_decoder"] = m["params"]["decoder"]
         row["composer_over_atoms"] = m["params"]["composer_over_atoms"]
+        env_path = run_dir / "env.json"
+        if env_path.exists():
+            hosts[run_dir.name] = read_json(env_path).get("hostname", "?")
         rows.append(row)
     if not rows:
-        raise SystemExit(f"no metrics.json found under {runs_dir}")
+        raise SystemExit(
+            f"no generation-{generation} metrics.json found under {runs_dir}"
+        )
+    # D39: determinism is a within-platform guarantee. Two hosts in one table is a
+    # comparison spanning machines, which no arm-vs-arm claim may rest on.
+    distinct = sorted(set(hosts.values()))
+    if len(distinct) > 1:
+        byhost = {h: sorted(r for r, v in hosts.items() if v == h) for h in distinct}
+        raise SystemExit(
+            f"refusing to aggregate runs from {len(distinct)} hosts {distinct}: "
+            f"determinism is a within-platform guarantee and D39 forbids a "
+            f"comparison spanning machines. Runs per host: "
+            + "; ".join(f"{h}={len(v)}" for h, v in byhost.items())
+        )
     return pd.DataFrame(rows).sort_values(["arm", "seed"]).reset_index(drop=True)
 
 
@@ -177,18 +230,20 @@ def program_verdict(arm_verdicts: dict, oracle_ok: bool, arm_means: dict) -> str
 
     if training_signal_failure(arm_means, failing):
         return (
-            "FAIL(training-signal) -- the architecture and the optimizer are both "
-            "adequate: the oracle reaches a genuinely factorized, composing solution "
-            "over the SAME architecture and optimizer (teacher-forced "
-            f">={SIGNAL_ORACLE_TEACHER_MIN:.2f}, closed-map error "
+            "FAIL(training-signal) -- a factorized, composing solution is REACHABLE "
+            "here: the oracle reaches one over the SAME architecture and optimizer "
+            f"(teacher-forced >={SIGNAL_ORACLE_TEACHER_MIN:.2f}, closed-map error "
             f"<={SIGNAL_ORACLE_CLOSED_MAX:.2f}). Every unsupervised arm fails by never "
             f"making its atoms closed maps (closed-map error >={SIGNAL_ARM_CLOSED_MIN:.2f}). "
-            "What is missing is a training SIGNAL -- nothing in the task loss requires "
-            "intermediate states to stay on the encoder manifold. This is NOT "
-            "FAIL(representational): H6 cannot be refuted by arms that fail while an "
-            "oracle over the same architecture succeeds. Next step is to add the missing "
-            "signal (intermediate-state supervision, a cycle/reconstruction term, or an "
-            "architectural constraint that keeps the state on-manifold), then re-run.")
+            "The best-supported reading is that a training SIGNAL is missing -- nothing "
+            "in the task loss requires intermediate states to stay on the encoder "
+            "manifold. This is NOT FAIL(representational): H6 cannot be refuted by arms "
+            "that fail while an oracle over the same architecture succeeds. NOTE: the "
+            "oracle varies routing supervision, intermediate targets, state consistency, "
+            "objective AND effective budget at once, so it establishes feasibility under "
+            "privileged supervision, NOT that the optimizer and learned-routing "
+            "architecture are adequate for DISCOVERY (E1_REPORT 6b). Next step is to "
+            "supply the missing signal, then re-run.")
 
     if all(v == "FAIL" for a, v in arm_verdicts.items()
            if v is not None and a not in ("A4", "A3b")):
@@ -354,14 +409,26 @@ def write_markdown(df, summary, arm_verdicts, per_metric, overall, path: Path) -
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", default=str(RUNS_DIR))
-    ap.add_argument("--out", default=str(RESULTS_DIR))
+    ap.add_argument("--out", default=None,
+                    help="default: results/ for v1, results/<generation>/ otherwise")
+    ap.add_argument("--generation", default="v1",
+                    help="which generation to aggregate; never mixed (D40)")
+    ap.add_argument("--include-archived", action="store_true",
+                    help="also read runs under archive* subtrees (D41); off by "
+                         "default so a frozen battery is never pooled with new runs")
     ap.add_argument("--no-plots", action="store_true")
     args = ap.parse_args()
 
-    runs_dir, out_dir = Path(args.runs), Path(args.out)
+    runs_dir = Path(args.runs)
+    if args.out is not None:
+        out_dir = Path(args.out)
+    else:
+        # v1 keeps writing to results/ so the committed report's paths stay valid.
+        out_dir = RESULTS_DIR if args.generation == "v1" else RESULTS_DIR / args.generation
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    df = collect(runs_dir)
+    df = collect(runs_dir, generation=args.generation,
+                 include_archived=args.include_archived)
     summary = summarise(df)
 
     arm_verdicts, per_metric, arm_means = {}, {}, {}

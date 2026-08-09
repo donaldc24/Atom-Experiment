@@ -15,8 +15,15 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from .config import Config, config_for_arm
-from .data import SPLIT_PATH, Bundle, build_bundle, load_split, split_hash, verify_split
+from .config import GENERATIONS, Config, config_for_arm, config_for_generation
+from .data import (
+    Bundle,
+    build_bundle,
+    load_split,
+    split_hash,
+    split_path_for,
+    verify_split,
+)
 from .evaluate import emit_artifacts
 from .model import AtomNet
 from .primitives import K
@@ -42,7 +49,8 @@ RUNS_DIR = REPO_ROOT / "runs"
 
 class TrainArrays:
     def __init__(self, task_data_list, cfg):
-        from .primitives import apply_composition
+        from .primitives import DEFAULT_SET, apply_composition
+        pset = getattr(cfg, "primitive_set", DEFAULT_SET)
 
         self.x = np.concatenate([td.inputs for td in task_data_list])
         self.y = np.concatenate([td.targets for td in task_data_list])
@@ -55,7 +63,7 @@ class TrainArrays:
         # step 1's target, so this is uniform across task kinds.
         self.y_step = np.stack([
             np.concatenate([
-                apply_composition(td.task.instruction[:t + 1], td.inputs)
+                apply_composition(td.task.instruction[:t + 1], td.inputs, pset)
                 for td in task_data_list
             ])
             for t in range(cfg.depth)
@@ -338,8 +346,9 @@ def train(cfg: Config, run_dir: Path, allow_dirty: bool = False) -> AtomNet:
     set_threads(cfg.num_threads, cfg.num_interop_threads)
     seed_everything(cfg.seed)
 
-    split = load_split()
-    problems = verify_split(split)
+    split_path = split_path_for(cfg.generation, cfg.split_seed)
+    split = load_split(split_path)
+    problems = verify_split(split, cfg.primitive_set)
     if problems:
         raise RuntimeError(f"split verification failed: {problems}")
 
@@ -441,8 +450,11 @@ def train(cfg: Config, run_dir: Path, allow_dirty: bool = False) -> AtomNet:
     env["peak_rss_gb"] = rss.peak_gb
     write_json(run_dir / "env.json", env)
     write_json(run_dir / "split_ref.json", {
-        "path": str(SPLIT_PATH.relative_to(REPO_ROOT).as_posix()),
-        "sha256": split_hash(),
+        "path": str(split_path.relative_to(REPO_ROOT).as_posix()),
+        "sha256": split_hash(split_path),
+        "generation": cfg.generation,
+        "primitive_set": cfg.primitive_set,
+        "split_seed": cfg.split_seed,
         "n_train_pairs": split["n_train_pairs"],
         "n_heldout_pairs": split["n_heldout_pairs"],
     })
@@ -453,25 +465,56 @@ def train(cfg: Config, run_dir: Path, allow_dirty: bool = False) -> AtomNet:
     return model
 
 
-def run_id_for(arm: str, seed: int) -> str:
-    return f"{arm}_{seed}_{git_info()['git_sha_short']}"
+def run_id_for(arm: str, seed: int, split_seed: int | None = None) -> str:
+    """v1 keeps its historical single-split id so existing run names still resolve.
+
+    Generations with more than one split carry the split seed in the id -- otherwise
+    the same arm on two different splits collides on one directory and the second run
+    silently overwrites the first.
+    """
+    base = f"{arm}_{seed}" if split_seed is None else f"{arm}_{seed}_s{split_seed}"
+    return f"{base}_{git_info()['git_sha_short']}"
+
+
+def run_dir_for(cfg: Config) -> Path:
+    """runs/<generation>/<run_id>. See D40.
+
+    Runs made before D40 sit flat at runs/<run_id> and are left there: they carry the
+    Perro provenance (D39) and moving them would detach them from the report that
+    cites them. Discovery is recursive, so both layouts aggregate together.
+    """
+    multi = len(GENERATIONS[cfg.generation]["split_seeds"]) > 1
+    rid = run_id_for(cfg.arm, cfg.seed, cfg.split_seed if multi else None)
+    return RUNS_DIR / cfg.generation / rid
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--arm", required=True)
     ap.add_argument("--seed", type=int, required=True)
+    ap.add_argument("--generation", default="v1",
+                    help="which experiment generation to run (D40)")
+    ap.add_argument("--split-seed", type=int, default=None,
+                    help="which of the generation's frozen splits to use")
     ap.add_argument("--epochs", type=int, default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--allow-dirty", action="store_true",
                     help="run from a dirty tree, recording the diff hash in env.json")
+    ap.add_argument("--threads", type=int, default=None,
+                    help="override num_threads. This is a DETERMINISM parameter, not "
+                         "a performance knob -- thread count changes reduction order. "
+                         "Sweep it once, freeze one value in Config, and do not vary "
+                         "it within a batch. See DECISIONS.md D39.")
     args = ap.parse_args()
 
-    cfg = config_for_arm(args.arm, args.seed)
+    cfg = config_for_generation(args.generation, args.arm, args.seed, args.split_seed)
     if args.epochs is not None:
         cfg.epochs = args.epochs
-    run_dir = Path(args.out) if args.out else RUNS_DIR / run_id_for(args.arm, args.seed)
-    print(f"[{args.arm} seed={args.seed}] -> {run_dir}")
+    if args.threads is not None:
+        cfg.num_threads = args.threads
+    run_dir = Path(args.out) if args.out else run_dir_for(cfg)
+    print(f"[{args.generation}/{args.arm} seed={args.seed} "
+          f"split={cfg.split_seed}] -> {run_dir}")
     train(cfg, run_dir, allow_dirty=args.allow_dirty)
     print(f"done in {json.load(open(run_dir / 'env.json'))['train_seconds']:.1f}s")
 
