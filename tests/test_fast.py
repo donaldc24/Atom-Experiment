@@ -338,23 +338,52 @@ def test_b3_non_bottleneck_rungs_were_never_affected():
     assert torch.equal(a["logits"], b["logits"])
 
 
+def test_d43_batch_output_does_not_dirty_the_tree():
+    """A batch's own artifacts must not stop the next run in that batch.
+
+    `git status --porcelain` lists untracked run output, so the original guard made
+    run #2 of ANY batch refuse to start. It was never caught because D33's guard
+    postdates the only multi-run battery ever executed.
+    """
+    from e1.utils import source_dirt
+    batch_output = "?? runs/v2/\n?? results/v2/summary.csv\n"
+    assert source_dirt(batch_output) == [], source_dirt(batch_output)
+    # ...but real source changes still count, including inside output dirs when the
+    # file is TRACKED (a rewritten committed artifact must stop a run).
+    for line in (" M e1/train.py", "?? e1/new_module.py", " M runs/v1/A0_0/metrics.json",
+                 " M splits/pairs_split.json", "?? scratch.py"):
+        assert source_dirt(line + "\n") == [line], line
+    # Renames are parsed on the destination path.
+    assert source_dirt("R  runs/old -> runs/new\n") == ["R  runs/old -> runs/new"]
+
+
 def test_dirty_tree_guard_blocks_by_default():
     """Provenance: a dirty tree must refuse to train unless explicitly allowed."""
     from e1.utils import require_clean_tree
     import e1.utils as U
 
+    def info(source_dirty, dirty=True):
+        # The guard keys on git_source_dirty, not the raw git_dirty (D43): mid-batch
+        # the raw flag is True purely because earlier runs wrote their artifacts.
+        return lambda: {"git_dirty": dirty, "git_source_dirty": source_dirty,
+                        "git_sha": "x", "git_sha_short": "x"}
+
     real = U.git_info
     try:
-        U.git_info = lambda: {"git_dirty": True, "git_sha": "x", "git_sha_short": "x"}
+        U.git_info = info(source_dirty=True)
         try:
             require_clean_tree(False)
         except SystemExit:
             pass
         else:
-            raise AssertionError("guard did not block on a dirty tree")
+            raise AssertionError("guard did not block on uncommitted source")
         assert require_clean_tree(True), "--allow-dirty should return a diff hash"
-        U.git_info = lambda: {"git_dirty": False, "git_sha": "x", "git_sha_short": "x"}
+        U.git_info = info(source_dirty=False, dirty=False)
         assert require_clean_tree(False) is None
+        # Mid-batch: raw tree dirty from output, source clean -> must still run.
+        U.git_info = info(source_dirty=False, dirty=True)
+        assert require_clean_tree(False) is None, \
+            "a batch's own output must not block the next run"
     finally:
         U.git_info = real
 

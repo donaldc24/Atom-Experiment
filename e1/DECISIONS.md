@@ -950,6 +950,41 @@ Thread count is a determinism parameter, not a performance knob: it changes redu
 order. One value is chosen for the whole batch and frozen in `Config` before any
 research run.
 
+### D43 — D33's clean-tree guard would have killed every batch after run 1
+
+Found while launching the v2 battery, before any run started.
+
+`git status --porcelain` lists **untracked** files, and `runs/` content is tracked by
+policy (artifacts are the provenance record; only checkpoints are ignored). So the
+first completed run leaves `?? runs/v2/` behind, `git_dirty` flips to true, and run 2
+hits `require_clean_tree` and exits. Verified directly: after a single simulated run
+output, `git_dirty = True`.
+
+**Why it was never caught.** The guard was added in D33, *after* the only multi-run
+battery this project has executed. The single run made since (`e1b_R2_w10_0_4af4e48`)
+could not expose it. Test coverage existed and passed — it monkeypatched `git_info`
+and so never touched the real porcelain semantics. A guard that has only ever been
+exercised on run 1 of 1 is untested for the thing it does on run 2 of 54.
+
+**Fix.** The guard now keys on **source** dirt. Untracked entries under `runs/` and
+`results/` are the batch's own output and do not change what produced the numbers,
+which is the only question D33 asks. Everything else counts, including:
+
+- modifications to **tracked** files anywhere — a rewritten committed artifact under
+  `runs/` must still stop a run;
+- any untracked file outside the output directories, e.g. a stray `scratch.py`;
+- renames, parsed on the destination path.
+
+`git_info` now reports both `git_dirty` (raw working-tree state, recorded as-is so
+`env.json` never overstates cleanliness) and `git_source_dirty` (the
+provenance-relevant one). The refusal message lists the offending paths, so "commit
+your changes" names *which*.
+
+**Operational consequence.** A batch must not be interrupted by editing source. Any
+uncommitted change to `e1/`, `tests/` or `splits/` mid-batch causes every subsequent
+run to refuse — correctly, but the batch stops. `run_all` skips completed runs, so the
+recovery is to commit or stash and re-invoke the same command.
+
 ### D42 — v2 runs 3 seeds × 3 splits — **registered before the first v2 run**
 
 **The design.** 3 optimisation seeds on each of 3 frozen splits: **9 runs per arm**,

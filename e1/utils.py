@@ -52,16 +52,55 @@ def require_clean_tree(allow_dirty: bool) -> str | None:
     when the tree is clean. See D33.
     """
     info = git_info()
-    if not info.get("git_dirty"):
+    if not info.get("git_source_dirty"):
         return None
     if not allow_dirty:
         raise SystemExit(
-            "REFUSING TO RUN: the working tree is dirty, so this run's git SHA would "
-            "not identify the source that produced it. "
-            "Commit your changes, or pass --allow-dirty to record a diff hash in "
-            "env.json instead."
+            "REFUSING TO RUN: the working tree has uncommitted SOURCE changes, so "
+            "this run's git SHA would not identify the source that produced it.\n  "
+            + "\n  ".join(source_dirt(
+                subprocess.run(["git", "status", "--porcelain"],
+                               capture_output=True, text=True).stdout)[:10])
+            + "\nCommit your changes, or pass --allow-dirty to record a diff hash in "
+            "env.json instead. (Untracked files under runs/ and results/ are the "
+            "batch's own output and are NOT counted -- see D43.)"
         )
     return git_diff_sha256()
+
+
+# Paths that hold EXPERIMENT OUTPUT rather than source. A batch writes into these
+# as it goes, so untracked files appearing here do not change what produced the
+# numbers. Everything else is source. See D43.
+OUTPUT_PREFIXES = ("runs/", "results/")
+
+
+def _porcelain_paths(line: str) -> str:
+    """Path from one `git status --porcelain` line, handling renames and quoting."""
+    path = line[3:] if len(line) > 3 else ""
+    if " -> " in path:                      # "R  old -> new"
+        path = path.split(" -> ")[-1]
+    return path.strip().strip('"')
+
+
+def source_dirt(porcelain: str) -> list[str]:
+    """Porcelain lines that represent a change to SOURCE.
+
+    Untracked entries under `runs/` and `results/` are excluded: during a batch every
+    completed run leaves its own artifacts untracked, and treating those as dirt
+    means the second run of any batch refuses to start. Modifications to *tracked*
+    files are never excluded, anywhere -- a rewritten committed artifact is exactly
+    the kind of thing that should stop a run.
+    """
+    out = []
+    for line in porcelain.splitlines():
+        if not line.strip():
+            continue
+        untracked = line.startswith("??")
+        path = _porcelain_paths(line)
+        if untracked and path.startswith(OUTPUT_PREFIXES):
+            continue
+        out.append(line)
+    return out
 
 
 def git_info() -> dict:
@@ -75,10 +114,16 @@ def git_info() -> dict:
 
     sha = _run(["git", "rev-parse", "HEAD"])
     dirty = _run(["git", "status", "--porcelain"])
+    unknown = dirty == "unknown"
     return {
         "git_sha": sha,
         "git_sha_short": sha[:7] if sha != "unknown" else "unknown",
-        "git_dirty": bool(dirty) if dirty != "unknown" else None,
+        # Raw working-tree state, recorded as-is so env.json never overstates
+        # cleanliness. True mid-batch simply because earlier runs wrote output.
+        "git_dirty": bool(dirty) if not unknown else None,
+        # The provenance-relevant one: does the recorded SHA identify the SOURCE that
+        # produced this run? This is what D33's guard actually cares about.
+        "git_source_dirty": bool(source_dirt(dirty)) if not unknown else None,
     }
 
 
