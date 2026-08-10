@@ -720,6 +720,81 @@ def test_d42_run_all_plans_the_registered_batch():
     assert "generation v1: 30 runs" in v1.stdout, v1.stdout[:400]
 
 
+# --------------------------------------------------------------------------
+# D44 -- every ground-truth computation must honour cfg.primitive_set
+# --------------------------------------------------------------------------
+
+def test_d44_no_bare_primitive_calls_in_the_package():
+    """Static guard: `apply_primitive`/`apply_composition` must be passed a pset.
+
+    evaluate.py called them with two arguments, so every diagnostic silently scored
+    v2 runs against v1 functions. Only slot 3 differs, so the corruption was confined
+    to one primitive -- which is exactly why it produced clean-looking k/8 fractions
+    rather than obvious garbage. A behavioural test catches today's call sites; this
+    catches the ones added tomorrow.
+    """
+    import ast
+    pkg = Path(__file__).resolve().parents[1] / "e1"
+    offenders = []
+    for path in sorted(pkg.glob("*.py")):
+        if path.name == "primitives.py":       # where they are defined
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            fn = node.func
+            name = fn.id if isinstance(fn, ast.Name) else getattr(fn, "attr", None)
+            if name in ("apply_primitive", "apply_composition"):
+                if len(node.args) < 3:
+                    offenders.append(f"{path.name}:{node.lineno} {name} "
+                                     f"({len(node.args)} args, needs pset)")
+    assert not offenders, "ground truth computed from the default primitive set:\n" \
+        + "\n".join(offenders)
+
+
+def test_d44_diagnostics_actually_depend_on_the_primitive_set():
+    """Behavioural: identical weights must score differently under v1 vs v2.
+
+    The two sets differ only in slot 3, so a diagnostic that ignores `primitive_set`
+    returns byte-identical output for both -- which is the signature this asserts
+    against. Complements the static check: this one fails if a call site threads the
+    argument but the value never reaches the ground truth.
+    """
+    import dataclasses
+    from e1.config import Config
+    from e1.evaluate import compute_state_alignment
+    from e1.model import AtomNet
+    from e1.primitives import apply_primitive, random_inputs
+
+    seed_everything(0)
+    cfg1 = Config(arm="A1", seed=0, generation="v1", primitive_set="v1",
+                  n_probe_examples=64)
+    cfg2 = dataclasses.replace(cfg1, generation="v2", primitive_set="v2")
+    model = AtomNet(cfg1)          # ONE model; only the scoring set changes
+    model.eval()
+    probe = random_inputs(np.random.default_rng(0), 64)
+
+    # The two sets must actually differ on slot 3, or the test proves nothing.
+    assert not np.array_equal(apply_primitive(3, probe, "v1"),
+                              apply_primitive(3, probe, "v2"))
+
+    # Closed-map error is a CONTINUOUS distance to enc(p(x)), so it responds to the
+    # target changing even on an untrained model. Exact-match alignment does not:
+    # atoms initialise near zero, so h0+atom(h0) ~ h0 and every atom reads as
+    # identity whatever the targets are (D24) -- a degenerate probe, not a signal.
+    err1, _ = compute_state_alignment(model, probe, cfg1)
+    err2, _ = compute_state_alignment(model, probe, cfg2)
+    assert not np.array_equal(err1, err2), \
+        "compute_state_alignment ignores primitive_set"
+    # Only slot 3's column may move; if others do, the generations differ by more
+    # than one primitive and are not comparable at all.
+    shared = [p for p in range(cfg1.n_primitives) if p != 3]
+    assert np.array_equal(err1[:, shared], err2[:, shared]), \
+        "v1 and v2 disagree outside slot 3"
+    assert not np.array_equal(err1[:, 3], err2[:, 3]), "slot 3 column did not move"
+
+
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
 
 if __name__ == "__main__":

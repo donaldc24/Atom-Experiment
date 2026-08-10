@@ -103,10 +103,11 @@ def compute_alignment(model, probe_inputs: np.ndarray, cfg):
     spec 5 and is retained as a diagnostic; it is off-distribution because T is always
     2 and the decoder never sees a state with a single residual add. See DECISIONS.md D11.
     """
-    from .primitives import apply_primitive
+    from .primitives import DEFAULT_SET, apply_primitive
 
+    pset = getattr(cfg, "primitive_set", DEFAULT_SET)
     xs = _to_tensor(probe_inputs)
-    targets = {p: _to_tensor(apply_primitive(p, probe_inputs)) for p in range(K)}
+    targets = {p: _to_tensor(apply_primitive(p, probe_inputs, pset)) for p in range(K)}
     id_atom = model.identity_atom(xs)
 
     A = np.zeros((cfg.n_atoms, K), dtype=np.float64)
@@ -193,11 +194,12 @@ def compute_alignment_tensor(model, probe_inputs: np.ndarray, cfg) -> np.ndarray
     Recording the full tensor lets every variant be derived after the fact, and lets
     a human audit which trailing atom carried a given reading. See DECISIONS.md D21.
     """
-    from .primitives import apply_primitive
+    from .primitives import DEFAULT_SET, apply_primitive
 
+    pset = getattr(cfg, "primitive_set", DEFAULT_SET)
     xs = _to_tensor(probe_inputs)
     n = xs.shape[0]
-    targets = {p: _to_tensor(apply_primitive(p, probe_inputs)) for p in range(K)}
+    targets = {p: _to_tensor(apply_primitive(p, probe_inputs, pset)) for p in range(K)}
     T = np.zeros((cfg.n_atoms, cfg.n_atoms, K), dtype=np.float64)
 
     instr = torch.zeros(n, cfg.depth, dtype=torch.long)
@@ -236,8 +238,9 @@ def compute_state_alignment(model, probe_inputs: np.ndarray, cfg):
     err ~ 0 for the matched primitive means atom i is a genuine closed map on the
     encoder manifold -- the property A0 established is achievable. See D21.
     """
-    from .primitives import apply_primitive
+    from .primitives import DEFAULT_SET, apply_primitive
 
+    pset = getattr(cfg, "primitive_set", DEFAULT_SET)
     xs = _to_tensor(probe_inputs)
     h0 = model.code(xs)
     # Canonical targets, and the model's own transition -- never a hand-built
@@ -245,7 +248,7 @@ def compute_state_alignment(model, probe_inputs: np.ndarray, cfg):
     # bottleneck is in it (D26). `project=False`: the closed-map question is whether
     # the ATOM maps code to code, and R3's projection would snap any output onto a
     # valid code and hide exactly what is being measured.
-    encs = torch.stack([model.code(_to_tensor(apply_primitive(p, probe_inputs)))
+    encs = torch.stack([model.code(_to_tensor(apply_primitive(p, probe_inputs, pset)))
                         for p in range(K)], dim=1)          # [B, K, S]
 
     err = np.zeros((cfg.n_atoms, K))
@@ -380,8 +383,9 @@ def compute_manifold_diagnostic(model, unseen_tasks, cfg):
     correct closed map on the encoder manifold and only the composition operator is
     at fault. That is an architectural finding, not a refutation of H6.
     """
-    from .primitives import apply_composition
+    from .primitives import DEFAULT_SET, apply_composition
 
+    pset = getattr(cfg, "primitive_set", DEFAULT_SET)
     n = len(unseen_tasks)
     drift = np.zeros((n, cfg.depth))
     acc_teacher = np.zeros(n)
@@ -400,14 +404,15 @@ def compute_manifold_diagnostic(model, unseen_tasks, cfg):
 
             for t in range(cfg.depth):
                 y_t = apply_composition(td.task.instruction[:t + 1],
-                                        td.inputs[s:s + EVAL_BATCH])
+                                        td.inputs[s:s + EVAL_BATCH], pset)
                 enc_t = model.code(_to_tensor(y_t))
                 h_t = out["states"][:, t]
                 rel = (h_t - enc_t).norm(dim=1) / enc_t.norm(dim=1).clamp_min(1e-6)
                 d_acc[t] += float(rel.sum())
 
             # Teacher-forced: start step 2 from the true encoding of the intermediate.
-            y1 = apply_composition(td.task.instruction[:1], td.inputs[s:s + EVAL_BATCH])
+            y1 = apply_composition(td.task.instruction[:1],
+                                   td.inputs[s:s + EVAL_BATCH], pset)
             enc1 = model.code(_to_tensor(y1))
             # Reproduce the model's own final step. forward() does not project after
             # the last step, so project=False here mirrors it exactly (D26).

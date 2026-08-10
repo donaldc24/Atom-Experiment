@@ -950,6 +950,60 @@ Thread count is a determinism parameter, not a performance knob: it changes redu
 order. One value is chosen for the whole batch and frozen in `Config` before any
 research run.
 
+### D44 — v2 diagnostics scored against v1 functions; the T1 gate caught it at run 1
+
+**The defect.** `evaluate.py` called `apply_primitive` / `apply_composition` with two
+arguments at **six** call sites, so every ground truth it computed came from the
+**default (v1)** primitive set. `data.py` and `train.py` were threaded correctly, so
+targets — and therefore `acc_seen`, `acc_unseen`, `acc_singleton` — were right. Only
+the *diagnostics* were wrong, and only for the one slot where the sets differ.
+
+**What that looked like.** The first v2 A0 run reported:
+
+| metric | value | |
+|---|---|---|
+| `M1_acc_seen` / `M1_acc_unseen` | **1.0000 / 1.0000** | a perfect oracle |
+| `acc_singleton` | 1.0000 | |
+| `M7_acc_teacher_forced` | **0.8333** | = 20/24 |
+| `M3_align`, closed-map coverage | 0.875, **7/8** | |
+
+`manifold_acc_teacher` is binary per task and was exactly **0.0** on held-out tasks
+5–8 — precisely the four whose **first** primitive is `index_shift`, slot 3 — while
+`manifold_acc_actual` was 1.0 on all 24. Every corrupted quantity is a clean `k/8` or
+`k/24` fraction, because exactly one primitive in eight was being scored against the
+wrong function. It reads like a finding, not like garbage.
+
+**The gate did its job, and the D18 substitution is what made it work.** T1's
+*original* form — A0 reaching ≥ 0.99 end-to-end on `unseen` — would have **passed at
+1.0000**, and the battery would have spent ~20 h producing 54 runs whose every
+diagnostic was wrong. D18 replaced it with `M7_acc_teacher_forced ≥ 0.99` on the
+argument that teacher-forced composition measures reachability directly. That
+substituted form failed at run 1 of 54 and stopped the batch.
+
+This is the §4 diagnostic-failure result running in the other direction: there,
+conventional metrics read clean on a system composing at chance; here, a gate metric
+read broken on a system composing perfectly. Both cases have the same moral — **the
+end-to-end number and the internal number answer different questions, and a design
+that reports only one of them cannot tell these situations apart.**
+
+**Guards added.** A static AST check asserting no `apply_primitive` /
+`apply_composition` call anywhere in `e1/` is made without an explicit primitive set —
+it catches call sites added later, which a behavioural test cannot. Plus a behavioural
+check that identical weights score differently under v1 and v2, and that **only slot
+3's column moves** (if others move, the generations differ by more than one primitive
+and are not comparable at all).
+
+The behavioural check has to key on the **continuous** closed-map error, not on
+exact-match alignment: with an untrained model, atoms initialise near zero, so
+`h0 + atom(h0) ≈ h0` and every atom reads as identity whatever the targets are (D24).
+The first version of this test asserted on alignment and failed against *correct*
+code, for that reason.
+
+**Disposition.** `runs/v2/A0_0_s1234_68fd353` is deleted rather than re-scored:
+`analyze.py` derives metrics from artifacts, and here the **artifacts themselves**
+were produced against the wrong targets, so re-analysis cannot repair it. No v2
+number from before this entry is usable.
+
 ### D43 — D33's clean-tree guard would have killed every batch after run 1
 
 Found while launching the v2 battery, before any run started.
