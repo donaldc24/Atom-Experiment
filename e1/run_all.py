@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 
 from .analyze import analyze
-from .config import ARMS, GENERATIONS, SEEDS, config_for_generation
+from .config import ARMS, GENERATIONS, config_for_generation, seeds_for
 from .train import RUNS_DIR, run_dir_for
 from .utils import read_json, write_json
 
@@ -31,11 +31,14 @@ def main() -> int:
     ap.add_argument("--generation", default="v1",
                     help="which experiment generation to run (D40)")
     ap.add_argument("--arms", nargs="*", default=list(ARMS))
-    ap.add_argument("--seeds", nargs="*", type=int, default=list(SEEDS))
+    ap.add_argument("--seeds", nargs="*", type=int, default=None,
+                    help="default: the generation's registered seed list")
     ap.add_argument("--split-seeds", nargs="*", type=int, default=None,
                     help="default: every split seed the generation froze")
     ap.add_argument("--epochs", type=int, default=None)
     ap.add_argument("--threads", type=int, default=None)
+    ap.add_argument("--plan", action="store_true",
+                    help="print the batch and exit without training")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--stop-on-oracle-failure", action="store_true", default=True)
     args = ap.parse_args()
@@ -45,14 +48,19 @@ def main() -> int:
               f"known: {sorted(GENERATIONS)}", file=sys.stderr)
         return 2
     split_seeds = args.split_seeds or list(GENERATIONS[args.generation]["split_seeds"])
+    seeds = args.seeds if args.seeds is not None else list(seeds_for(args.generation))
 
     # Split seed is the OUTER loop: a batch that dies partway then still holds a
     # complete arm x seed block for the splits it finished, rather than a ragged
     # fragment of every split.
-    plan = [(ss, a, s) for ss in split_seeds for a in args.arms for s in args.seeds]
+    plan = [(ss, a, s) for ss in split_seeds for a in args.arms for s in seeds]
     print(f"generation {args.generation}: {len(plan)} runs "
-          f"({len(args.arms)} arms x {len(args.seeds)} seeds x "
-          f"{len(split_seeds)} splits)")
+          f"({len(args.arms)} arms x {len(seeds)} seeds x "
+          f"{len(split_seeds)} splits = {len(seeds) * len(split_seeds)} per arm)")
+    if args.plan:
+        for split_seed, arm, seed in plan:
+            print(f"  {arm:4s} seed {seed}  split {split_seed}")
+        return 0
     t_batch = time.time()
 
     for idx, (split_seed, arm, seed) in enumerate(plan, start=1):

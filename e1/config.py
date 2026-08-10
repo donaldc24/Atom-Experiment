@@ -6,6 +6,8 @@ import dataclasses
 from dataclasses import dataclass, field
 
 ARMS = ("A0", "A1", "A2", "A3", "A3b", "A4")
+# v1's seed list, kept as the module default so existing call sites are unchanged.
+# Seed count is a per-generation property -- use `seeds_for(generation)`.
 SEEDS = (0, 1, 2, 3, 4)
 
 
@@ -181,17 +183,28 @@ GENERATIONS = {
     "v1": {
         "primitive_set": "v1",
         "split_seeds": (1234,),
+        "seeds": (0, 1, 2, 3, 4),
         "note": "committed E1 battery; sort_asc in slot 3; ONE split, inspected "
                 "during development (E1_REPORT 6b) -- development evidence",
     },
     "v2": {
         "primitive_set": "v2",
         "split_seeds": (1234, 5678, 9012),
+        # 3 seeds x 3 splits = 9 runs per arm, against v1's 5 x 1 = 5. MORE runs per
+        # arm, and the spread covers split variance as well as optimisation variance.
+        # Registered before the first v2 run -- this is a design choice, not D31's
+        # post-hoc reduction. See D42.
+        "seeds": (0, 1, 2),
         "note": "index_shift replaces sort_asc (39 -> 42 distinct pair functions, "
-                "0 T4 violations); three independent splits so the reported spread "
-                "covers split variance, not just optimisation variance",
+                "0 T4 violations); three independent splits x three seeds so the "
+                "reported spread covers split variance, not just optimisation "
+                "variance",
     },
 }
+
+
+def seeds_for(generation: str) -> tuple:
+    return tuple(GENERATIONS[generation]["seeds"])
 
 
 def config_for_generation(generation: str, arm: str, seed: int,

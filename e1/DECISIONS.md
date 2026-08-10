@@ -950,6 +950,54 @@ Thread count is a determinism parameter, not a performance knob: it changes redu
 order. One value is chosen for the whole batch and frozen in `Config` before any
 research run.
 
+### D42 — v2 runs 3 seeds × 3 splits — **registered before the first v2 run**
+
+**The design.** 3 optimisation seeds on each of 3 frozen splits: **9 runs per arm**,
+54 in the battery. v1 was 5 seeds on 1 split — **5 runs per arm**.
+
+**This is not D31.** D31 cut seed counts *after* a result was established and the
+affected cells are labelled `[REDUCED-n]` wherever they appear, because a reduction
+made once the answer is known is a different act from a design fixed in advance. This
+entry is written before any v2 run exists, and no v2 number has been seen by anyone.
+
+**Why it is an increase in evidence, not a cut.** More runs per arm (9 vs 5), and the
+spread now covers the variance component v1 could not see at all. `E1_REPORT` §6b:
+
+> The seeds vary optimisation only — they are **not** independent task or split
+> replications, and the reported ± is optimisation variance, not sampling variance
+> over task families.
+
+With one split, seeds 4 and 5 add precision to an estimate of *the wrong quantity* —
+they tighten the error bar on "this split" while saying nothing about whether the
+result is a property of that split. Reallocating them across two further splits buys
+the missing component directly. Given a fixed budget, splits dominate seeds here,
+because v1 already measured optimisation variance as small (A0 `acc_unseen`
+0.951 ± 0.017) while split variance is entirely unmeasured.
+
+**What this costs, stated plainly.**
+
+- **Per-split subgroup claims rest on n = 3** and must be labelled as such. The
+  headline is the pooled n = 9; any sentence of the form "on split 5678 the arms
+  did X" is a reduced-n observation, not a result.
+- **3 seeds cannot support a distributional claim about seeds.** Nothing in v2 may
+  assert bimodality or seed-dependent behaviour of the kind §2.6 found in v1, where
+  `M3_align` read above threshold on 2 of 5 seeds. If a v2 arm shows seed spread
+  that looks structured, that is a trigger to run more seeds on that arm, not
+  something to interpret at n = 3.
+- **The A0 T1 gate rests on 3 runs per split.** Acceptable: it is a ceiling check
+  against a very wide gap (0.951 vs ~0.000), and v1 measured its seed std at 0.017.
+
+**Escalation rule, fixed now.** If any arm's pooled `M1_acc_unseen` std across the 9
+runs exceeds **0.10**, that arm goes to 5 seeds on all three splits before its number
+is reported. This is registered so that adding seeds later is a pre-committed response
+to dispersion rather than a reaction to an inconvenient mean.
+
+**Cost.** ~16 h of training against ~27 h at 5 × 3, before thermal throttling.
+
+Implemented as a per-generation `seeds` list rather than a global, so v1's five seeds
+stay pinned and `status` counts progress against the right denominator — a fixed
+`len(SEEDS)` would have reported a complete v2 battery as 300% done.
+
 ### D41 — The Perro battery is archived, and archives are frozen by construction
 
 The v1 battery and its generated results moved to `runs/archive_perro_v1/` (36 runs)

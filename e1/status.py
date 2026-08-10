@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 try:
-    from .config import ARMS, SEEDS
+    from .config import ARMS, GENERATIONS, seeds_for
     from .train import RUNS_DIR
 except ImportError:
     # Allows `python status.py` from inside e1/, or `python e1/status.py` from the
@@ -20,7 +20,7 @@ except ImportError:
     # reach for casually, so it should not care where it is invoked from.
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from e1.config import ARMS, SEEDS
+    from e1.config import ARMS, GENERATIONS, seeds_for
     from e1.train import RUNS_DIR
 
 
@@ -54,15 +54,20 @@ def live_processes():
     return out
 
 
-def snapshot(runs_dir: Path = RUNS_DIR) -> None:
+def snapshot(runs_dir: Path = RUNS_DIR, generation: str = "v2") -> None:
     # Recursive: runs/<generation>/<run_id> from D40 on, flat before it. Archived
     # batteries are excluded -- progress means progress on the CURRENT batch, and a
     # finished archive would otherwise report it as permanently complete (D41).
     from .aggregate import is_archived
     done = sorted(m for m in runs_dir.rglob("metrics.json")
                   if not is_archived(m.parent, runs_dir))
-    total_planned = len(ARMS) * len(SEEDS)
-    print(f"=== E1 battery: {len(done)}/{total_planned} runs complete ===\n")
+    # Per-arm denominator is seeds x splits, which differs by generation (D42): v1 is
+    # 5 x 1, v2 is 3 x 3. A fixed len(SEEDS) would have reported v2 as 300% complete.
+    spec = GENERATIONS[generation]
+    per_arm = len(spec["seeds"]) * len(spec["split_seeds"])
+    total_planned = len(ARMS) * per_arm
+    print(f"=== E1 battery [{generation}]: {len(done)}/{total_planned} "
+          f"runs complete ===\n")
 
     by_arm = {a: 0 for a in ARMS}
     for m in done:
@@ -70,7 +75,7 @@ def snapshot(runs_dir: Path = RUNS_DIR) -> None:
             by_arm[json.loads(m.read_text())["arm"]] += 1
         except Exception:
             pass
-    print("  " + "   ".join(f"{a}:{n}/{len(SEEDS)}" for a, n in by_arm.items()))
+    print("  " + "   ".join(f"{a}:{n}/{per_arm}" for a, n in by_arm.items()))
 
     running = live_processes()
     if running:
@@ -118,9 +123,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--watch", action="store_true")
     ap.add_argument("--interval", type=int, default=30)
+    ap.add_argument("--generation", default="v2",
+                    help="which generation's plan to count progress against")
     args = ap.parse_args()
     while True:
-        snapshot()
+        snapshot(generation=args.generation)
         if not args.watch:
             return 0
         print(f"\n(refreshing every {args.interval}s -- Ctrl-C to stop)\n")

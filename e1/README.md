@@ -34,8 +34,16 @@ the moment the code moves on.
 | slot-3 primitive | `sort_asc` | `index_shift`, `x_i → (x_i + i) mod 10` |
 | distinct pair functions | 39 / 64 | **42 / 64** |
 | split seeds | 1234 | 1234, 5678, 9012 |
+| optimisation seeds | 0–4 | 0–2 |
+| **runs per arm** | 5 (5 × 1) | **9 (3 × 3)** |
 | runs land in | `runs/v1/` | `runs/v2/` |
 | results land in | `results/` | `results/v2/` |
+
+v2 trades seeds for splits (D42): *more* runs per arm than v1, and the spread covers
+split variance, which v1's five-seeds-one-split design could not see at all. The cost
+is that per-split subgroup claims rest on n = 3 and must be labelled — the headline is
+the pooled n = 9. If any arm's pooled `acc_unseen` std exceeds 0.10 it goes to 5 seeds
+before being reported; that escalation is pre-registered, not discretionary.
 
 **v1 is immutable.** Its split sha256 is pinned by a test and recorded in 30 committed
 runs; `make_split --generation v1 --force` refuses. Generations are never pooled —
@@ -129,9 +137,20 @@ CPU only: no CUDA paths, 4 pinned threads, `torch.use_deterministic_algorithms(T
 `final.pt` only. Peak RSS is asserted below 4 GB and recorded in `env.json`.
 
 **Thread count is a determinism parameter, not a performance knob** — it changes
-reduction order. Measured on the Ryzen 9 6900HX: 4 threads 17.8 s/epoch, 8 threads
-17.0, 16 threads 21.9. 8 buys 5% and 16 is worse, so it stays at **4**. Sweep once
-with `--threads`, freeze one value, never vary it inside a batch.
+reduction order. On the Ryzen 9 6900HX at 4 threads, steady-state cost is
+**14.5 s/epoch**, measured as the marginal difference between an 8-epoch and a
+2-epoch run (118.1 s vs 31.1 s) so that ~2 s of startup is excluded. Comparing thread
+counts on 2-epoch runs: 8 threads buys ~5%, 16 is ~23% *worse* (SMT contention). It
+stays at **4**. Sweep once with `--threads`, freeze one value, never vary it inside a
+batch.
+
+Each run also carries **~20 s** of non-training wall clock — process start, data
+generation, `emit_artifacts`, checksums — which `train_seconds` excludes.
+
+**This machine is at parity with Perro, not faster.** Perro's archived A1 runs
+averaged 14.69 s/epoch against Perrito's 14.5. Budget accordingly; note that
+`DECISIONS.md` D9's "38.9 s/epoch" does not match the runs that were actually made
+(A0's 80 epochs would then be 52 min, and it took 23).
 
 **Determinism is a within-platform guarantee.** The E1 battery ran on Intel; work
 continues on AMD. No comparison may span the two — see D39.

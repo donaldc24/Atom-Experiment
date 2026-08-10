@@ -652,6 +652,45 @@ def test_d41_archive_layout_is_intact():
     assert "runs/**/checkpoints/" in ignore, "checkpoint ignore is not recursive"
 
 
+def test_d42_seed_counts_are_per_generation():
+    """v1's five seeds stay pinned; v2 is 3 seeds x 3 splits = 9 runs per arm."""
+    from e1.config import GENERATIONS, seeds_for
+    assert seeds_for("v1") == (0, 1, 2, 3, 4)
+    assert seeds_for("v2") == (0, 1, 2)
+    per_arm = {g: len(s["seeds"]) * len(s["split_seeds"])
+               for g, s in GENERATIONS.items()}
+    assert per_arm["v1"] == 5
+    assert per_arm["v2"] == 9, per_arm
+    # The whole justification for the trade is that v2 has MORE runs per arm.
+    assert per_arm["v2"] > per_arm["v1"]
+
+
+def test_d42_run_all_plans_the_registered_batch():
+    """A stale global seed list would silently plan the wrong batch size.
+
+    Uses --plan, which must print the batch and exit WITHOUT training -- a test that
+    shells out to run_all without it would launch the real 54-run battery.
+    """
+    import subprocess
+    root = Path(__file__).resolve().parents[1]
+    proc = subprocess.run(
+        [sys.executable, "-m", "e1.run_all", "--generation", "v2", "--plan"],
+        cwd=str(root), capture_output=True, text=True, timeout=120,
+    )
+    assert proc.returncode == 0, proc.stderr[:400]
+    assert "generation v2: 54 runs" in proc.stdout, proc.stdout[:400]
+    assert "9 per arm" in proc.stdout, proc.stdout[:400]
+    # One indented line per planned run (the header also says "splits", so match on
+    # the indent rather than the word), and no run may be started by --plan.
+    planned = [l for l in proc.stdout.splitlines() if l.startswith("  ") and "seed" in l]
+    assert len(planned) == 54, len(planned)
+    v1 = subprocess.run(
+        [sys.executable, "-m", "e1.run_all", "--generation", "v1", "--plan"],
+        cwd=str(root), capture_output=True, text=True, timeout=120,
+    )
+    assert "generation v1: 30 runs" in v1.stdout, v1.stdout[:400]
+
+
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
 
 if __name__ == "__main__":
