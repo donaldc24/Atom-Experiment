@@ -950,6 +950,80 @@ Thread count is a determinism parameter, not a performance knob: it changes redu
 order. One value is chosen for the whole batch and frozen in `Config` before any
 research run.
 
+### D45 — v2 battery complete: FAIL(training-signal), and the predictions scored
+
+54 runs, 6 arms × 3 seeds × 3 splits, 17.1 h on `Perrito`. Every run made from a clean
+tree under one SHA (`b017073`) — the first battery in this project with provenance
+that identifies its own source (D33/D43).
+
+**Verdict: FAIL(training-signal)**, the same category as v1, now on a sharper task
+family, three independent splits and different hardware. A0 reaches **1.0000** on
+`acc_seen`, `acc_unseen`, `align` and teacher-forced on **all nine** runs, with
+closed-map coverage 8/8. **All 45 non-oracle runs sit at coverage 1/8.**
+
+**Registered predictions** were written to
+[`results/v2/PREDICTIONS_registered.md`](../results/v2/PREDICTIONS_registered.md)
+while the battery ran and before any v2 metric was read. Scored as recorded, hits and
+misses together:
+
+| high-confidence claim | outcome |
+|---|---|
+| T1 passes, A0 teacher-forced ≥ 0.99 on all 9 | **hit** (1.0000) |
+| no unsupervised arm composes, `acc_unseen` < 0.05 | **hit** (max 0.0067) |
+| coverage 1/8 for every failing arm, every split | **hit** (45/45) |
+| A4 exactly 0.0000, per-token ~0.10, `M5_dead` = 8 | **hit** |
+| verdict FAIL(training-signal) | **hit** |
+| `acc_seen`(A2) below A1 by ≥ 0.10 | **MISS** — 0.488 vs 0.504, a 0.016 gap |
+
+5 of 6. The miss matters: v1's finding that cheap countermeasures cost ~19 points of
+capacity **does not reproduce**, because A1 itself degraded to A2's level (0.504
+against v1's 0.743). Cross-generation `acc_seen` comparisons therefore read
+optimisation difficulty as much as task difficulty and must not be quoted as
+like-for-like.
+
+Interval misses: A0 `acc_unseen` predicted 0.93–0.98, actual **1.0000**; A0 closed-map
+predicted 0.02–0.05, actual **0.0036**; A1 `acc_seen` predicted 0.72–0.88, actual
+**0.504**; A3 teacher-forced predicted < 0.05, actual **0.145**; `acc_singleton` ≥ 0.88
+predicted for A1, actual **0.702**. The A0 misses are all in the same direction —
+`index_shift` is easier to represent than `sort_asc` by more than argued.
+
+**The split-variance prediction was backwards, and that is a result.** I predicted
+split spread would exceed seed spread on `acc_seen`. Measured, it is roughly **7×
+smaller**: A1 across splits 0.517 / 0.520 / 0.475, against a within-split seed range of
+0.339. Which pairs are held out barely matters; which optimisation trajectory the run
+lands in matters enormously. This argues D42's 3 seeds × 3 splits bought **less** than
+5 seeds × 1 split would have, and a future generation should weight seeds over splits.
+
+**No tripwire fired.** No unsupervised arm reached coverage ≥ 4/8; A0 never fell below
+0.99 teacher-forced; A4 never exceeded 0.02; and D42's escalation rule (pooled
+`acc_unseen` std > 0.10) did not trigger for any arm — the largest is A3b at 0.0118.
+
+**The §4 diagnostic-failure result is now systematic rather than anecdotal.** A3b's
+pre-registered `M3_align` averages **0.906 over 9 runs — above its 0.85 PASS
+threshold** — on models with `acc_unseen` 0.0067, teacher-forced **0.0013** and
+coverage **1/8**. Its phase-1 library reads `M3_align` **0.9997 at 8/8 primitives
+covered** and is still not a closed-map library. v1 saw this on 2 of 5 seeds and
+called it a caution about metric reliability; v2 reproduces it across three splits in
+a whole arm. Meanwhile A1's `M3_align` fell to 0.382 (v1: 0.598) with a std of 0.194
+across runs, against coverage's std of 0.000. **Three independent failure modes of the
+same pre-registered probe — seed-noisy (§2.6), clean-on-dead (§4), split-noisy (here)
+— while the decoder-free coverage stayed at 1/8 in all 45 runs.**
+
+A3 reproduces §2.7 unchanged: `library_decay` negative on **8 of 9** runs
+(mean −0.387), phase-1 alignment 0.354 at 5.33/8 covered. Free routing still never
+builds a library.
+
+**H6 remains untested**, now after 84 runs across two generations. Every failing arm
+fails upstream of H6's question: coverage 1/8 means the atoms are not primitives, so
+"do they co-adapt?" presupposes a structure that does not exist. E2 stays gated, and
+D37 closed the cheapest remaining route to opening it.
+
+**One bug, found at aggregation.** `make_plots` rebuilt artifact paths as
+`runs_dir / run_id`, which D40's nesting invalidated — the same flat-path assumption
+that broke `test_gates` (D41). It surfaced only *after* 17 h of compute, because no
+test covers plotting. `collect()` now carries `run_path` per run. The run artifacts
+were never at risk; only the figures failed to render.
+
 ### D44 — v2 diagnostics scored against v1 functions; the T1 gate caught it at run 1
 
 **The defect.** `evaluate.py` called `apply_primitive` / `apply_composition` with two

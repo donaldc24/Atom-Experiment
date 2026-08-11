@@ -1,0 +1,74 @@
+{
+  "a0_acc_unseen_mean": 0.999988425925926,
+  "a0_teacher_forced_mean": 0.999988425925926,
+  "architectural_signature": {
+    "A0": false,
+    "A1": false,
+    "A2": false,
+    "A3": false,
+    "A3b": false,
+    "A4": false
+  },
+  "arm_verdicts": {
+    "A0": "PASS",
+    "A1": "FAIL",
+    "A2": "FAIL",
+    "A3": "FAIL",
+    "A3b": "FAIL",
+    "A4": "FAIL"
+  },
+  "oracle_t1_passed": true,
+  "per_metric": {
+    "A0": {
+      "M1_acc_unseen": "PASS",
+      "M1_gap": "PASS",
+      "M2_cv": "PASS",
+      "M3_align": "PASS",
+      "M3_purity": "PASS",
+      "M5_dead": "PASS"
+    },
+    "A1": {
+      "M1_acc_unseen": "FAIL",
+      "M1_gap": "FAIL",
+      "M2_cv": "FAIL",
+      "M3_align": "FAIL",
+      "M3_purity": "AMBIGUOUS",
+      "M5_dead": "AMBIGUOUS"
+    },
+    "A2": {
+      "M1_acc_unseen": "FAIL",
+      "M1_gap": "FAIL",
+      "M2_cv": "FAIL",
+      "M3_align": "AMBIGUOUS",
+      "M3_purity": "PASS",
+      "M5_dead": "PASS"
+    },
+    "A3": {
+      "M1_acc_unseen": "FAIL",
+      "M1_gap": "FAIL",
+      "M2_cv": "FAIL",
+      "M3_align": "AMBIGUOUS",
+      "M3_purity": "PASS",
+      "M5_dead": "PASS"
+    },
+    "A3b": {
+      "M1_acc_unseen": "FAIL",
+      "M1_gap": "FAIL",
+      "M2_cv": "FAIL",
+      "M3_align": "PASS",
+      "M3_purity": "PASS",
+      "M5_dead": "PASS"
+    },
+    "A4": {
+      "M1_acc_unseen": "FAIL",
+      "M1_gap": "PASS",
+      "M2_cv": "AMBIGUOUS",
+      "M3_align": "FAIL",
+      "M3_purity": "FAIL",
+      "M5_dead": "FAIL"
+    }
+  },
+  "program_verdict": "FAIL(training-signal) -- a factorized, composing solution is REACHABLE here: the oracle reaches one over the SAME architecture and optimizer (teacher-forced >=0.99, closed-map error <=0.10). Every unsupervised arm fails by never making its atoms closed maps (closed-map error >=0.30). The best-supported reading is that a training SIGNAL is missing -- nothing in the task loss requires intermediate states to stay on the encoder manifold. This is NOT FAIL(representational): H6 cannot be refuted by arms that fail while an oracle over the same architecture succeeds. NOTE: the oracle varies routing supervision, intermediate targets, state consistency, objective AND effective budget at once, so it establishes feasibility under privileged supervision, NOT that the optimizer and learned-routing architecture are adequate for DISCOVERY (E1_REPORT 6b). Next step is to supply the missing signal, then re-run.",
+  "t1_form": "substituted: A0 M7_acc_teacher_forced >= 0.99 (DECISIONS.md D18)",
+  "training_signal_signature": true
+}

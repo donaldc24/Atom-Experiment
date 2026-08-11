@@ -98,8 +98,12 @@ def collect(runs_dir: Path = RUNS_DIR, generation: str = "v1",
         run_gen = read_json(cfg_path).get("generation", "v1") if cfg_path.exists() else "v1"
         if run_gen != generation:
             continue
-        row = {"run_id": run_dir.name, "generation": run_gen,
-               "arm": m["arm"], "seed": m["seed"]}
+        # `run_path` is carried alongside `run_id` because a run's artifacts can no
+        # longer be located by joining runs_dir with its name: runs sit at
+        # runs/<generation>/<run_id> from D40 on. Reassembling the path flatly is the
+        # same defect that broke test_gates' discovery -- see D45.
+        row = {"run_id": run_dir.name, "run_path": str(run_dir),
+               "generation": run_gen, "arm": m["arm"], "seed": m["seed"]}
         for k in HEADLINE:
             row[k] = m.get(k, np.nan)
         row["params_composer"] = m["params"]["composer"]
@@ -274,8 +278,7 @@ def make_plots(df: pd.DataFrame, runs_dir: Path, out_dir: Path) -> None:
                              squeeze=False, constrained_layout=True)
     for col, (ax, arm) in enumerate(zip(axes[0], arms)):
         sub = df[df["arm"] == arm].sort_values("seed")
-        run_id = sub.iloc[0]["run_id"]
-        A = np.load(runs_dir / run_id / "artifacts" / "alignment_matrix.npy")
+        A = np.load(Path(sub.iloc[0]["run_path"]) / "artifacts" / "alignment_matrix.npy")
         im = ax.imshow(A, vmin=0, vmax=1, cmap="magma", aspect="auto")
         ax.set_title(f"{ARM_LABELS[arm]}\nseed {int(sub.iloc[0]['seed'])}", fontsize=9)
         ax.set_xticks(range(len(PRIMITIVE_NAMES)))
@@ -298,8 +301,8 @@ def make_plots(df: pd.DataFrame, runs_dir: Path, out_dir: Path) -> None:
     data, labels = [], []
     for arm in arms:
         vals = []
-        for run_id in df[df["arm"] == arm]["run_id"]:
-            d = np.load(runs_dir / run_id / "artifacts" / "ablation_matrix.npy")
+        for run_path in df[df["arm"] == arm]["run_path"]:
+            d = np.load(Path(run_path) / "artifacts" / "ablation_matrix.npy")
             for i in range(d.shape[0]):
                 row = d[i][~np.isnan(d[i])]
                 if row.size and row.mean() > 0.05:
