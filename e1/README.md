@@ -4,8 +4,29 @@ Tests **H6** of the Atoms preregistration: are atoms independently meaningful
 primitives, or co-adapted fragments? This is a hard gate — if atoms do not
 factorize, H1's marginal-cost curve and H3's geometry are both uninterpretable.
 
-Read [DECISIONS.md](DECISIONS.md) before interpreting any number. It records the
-frozen thresholds and every deviation from the spec, with reasons.
+**[`../GATES.md`](../GATES.md) is the experimental contract** — gates T1–T8, the frozen
+§8 thresholds, the verdict rules, and every amendment that has ever occurred, in one
+place. Read it before interpreting any number.
+
+[DECISIONS.md](DECISIONS.md) is the long form: every deviation D1–D45 with its reason
+and its effect on interpretation.
+
+### Gates at a glance
+
+| | asserts | kind | status |
+|---|---|---|---|
+| **T1** | oracle ceiling — a composing solution is reachable (**amended**, D18) | battery | pass |
+| **T2** | determinism — two identical runs, byte-identical predictions | battery | pass |
+| **T3** | no leakage — A4 stays at chance (≤ 0.02) | both | pass |
+| **T4** | primitive independence — no primitive is a composition of ≤ 2 others | fast | pass |
+| **T5** | split validity — sizes, equivalence classes, coverage | fast | pass |
+| **T6** | metric reproducibility — `analyze` twice, identical output | battery | pass |
+| **T7** | ablation sanity — all-ablated → chance, none-ablated → logged accuracy | fast | pass |
+| **T8** | memory ceiling — peak RSS < 4 GB | fast | pass |
+
+T1 is a hard stop: `run_all` aborts the batch if A0 misses it, because no other arm's
+failure is interpretable without a demonstrated ceiling. It has fired once for real,
+catching D44 at run 1 of 54.
 
 ## Layout
 
