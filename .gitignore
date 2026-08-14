@@ -1,42 +1,15 @@
+# Repo-level, machine-specific ignores. Project-specific rules live in each
+# project's own .gitignore (e.g. AtomV1/.gitignore).
+
 # Python bytecode
 __pycache__/
 *.py[cod]
-*$py.class
 
 # Virtual environments
 .venv/
 env/
 venv/
 ENV/
-
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-*.egg
-*.whl
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-.pytest_cache/
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Jupyter Notebook
-.ipynb_checkpoints/
 
 # IDE/editor files
 .vscode/
@@ -48,38 +21,6 @@ dmypy.json
 Thumbs.db
 desktop.ini
 .DS_Store
-
-# Local environment and secrets
-.env
-.env.*
-
-# Build artifacts
-*.log
-*.tmp
-*.bak
-
-# Python packaging metadata
-pip-wheel-metadata/
-
-# C extensions
-*.so
-*.dylib
-*.dll
-
-# Local test artifacts
-coverage.xml
-junit-*.xml
-
-# Optional: ignore generated distribution directories
-pip-wheel-metadata/
-
-# E1: checkpoints are large and regenerable from config + seed; every metric is
-# derivable from the artifacts, which ARE tracked. splits/ is frozen and tracked.
-# Must be `**`, not `*`: runs are nested one level deeper from D40 on
-# (runs/<generation>/<run_id>/checkpoints) and archived runs deeper still, so a
-# single-level pattern would silently start committing every checkpoint.
-runs/**/checkpoints/
-
 
 # Local tooling indexes (generated, machine-specific)
 .vexp/

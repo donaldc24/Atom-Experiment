@@ -89,15 +89,20 @@ within-platform guarantee, so a table mixing machines is not a comparison.
 ## Environment
 
 CPU-only, and the pins matter — `numpy==2.2.4` has no cp314 wheels, so Python must be
-≤ 3.13 (3.11 in use, see D39).
+≤ 3.13 (3.11 in use, see D39). The venv lives at the REPO root (one level above this
+project folder):
 
 ```bash
-py -3.11 -m venv .venv
+py -3.11 -m venv .venv                    # from the repo root
 .venv/Scripts/python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.9.0
 .venv/Scripts/python -m pip install numpy==2.2.4 pandas==2.2.3 matplotlib==3.10.1 psutil==7.0.0
 ```
 
 ## Running
+
+Every command below runs from `AtomV1/` (this project's root, where `e1/`, `runs/`
+and `splits/` live), with the repo-root venv on PATH or invoked as
+`../.venv/Scripts/python`.
 
 ```bash
 python tests/test_fast.py        # must be green before anything else

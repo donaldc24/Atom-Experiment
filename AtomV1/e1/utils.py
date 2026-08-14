@@ -68,10 +68,31 @@ def require_clean_tree(allow_dirty: bool) -> str | None:
     return git_diff_sha256()
 
 
+def _git_prefix() -> str:
+    """This project's root relative to the git toplevel, as a porcelain prefix.
+
+    `git status --porcelain` paths are relative to the git TOPLEVEL, not to this
+    project. Since the project moved into a subfolder of the repo (AtomV1/), the
+    output filter below must carry that prefix or it matches nothing and D43's
+    guard kills every batch after the first run again.
+    """
+    try:
+        top = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        rel = Path(__file__).resolve().parents[1].relative_to(Path(top).resolve())
+        return "" if str(rel) == "." else rel.as_posix() + "/"
+    except Exception:
+        return ""
+
+
+GIT_PREFIX = _git_prefix()
+
 # Paths that hold EXPERIMENT OUTPUT rather than source. A batch writes into these
 # as it goes, so untracked files appearing here do not change what produced the
 # numbers. Everything else is source. See D43.
-OUTPUT_PREFIXES = ("runs/", "results/")
+OUTPUT_PREFIXES = (GIT_PREFIX + "runs/", GIT_PREFIX + "results/")
 
 
 def _porcelain_paths(line: str) -> str:

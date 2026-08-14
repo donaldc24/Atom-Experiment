@@ -345,16 +345,24 @@ def test_d43_batch_output_does_not_dirty_the_tree():
     run #2 of ANY batch refuse to start. It was never caught because D33's guard
     postdates the only multi-run battery ever executed.
     """
-    from e1.utils import source_dirt
-    batch_output = "?? runs/v2/\n?? results/v2/summary.csv\n"
+    from e1.utils import GIT_PREFIX, source_dirt
+    # Porcelain paths are relative to the git toplevel, and the project lives in a
+    # subfolder of the repo (AtomV1/), so real batch output carries that prefix.
+    p = GIT_PREFIX
+    batch_output = f"?? {p}runs/v2/\n?? {p}results/v2/summary.csv\n"
     assert source_dirt(batch_output) == [], source_dirt(batch_output)
     # ...but real source changes still count, including inside output dirs when the
     # file is TRACKED (a rewritten committed artifact must stop a run).
-    for line in (" M e1/train.py", "?? e1/new_module.py", " M runs/v1/A0_0/metrics.json",
-                 " M splits/pairs_split.json", "?? scratch.py"):
+    for line in (f" M {p}e1/train.py", f"?? {p}e1/new_module.py",
+                 f" M {p}runs/v1/A0_0/metrics.json",
+                 f" M {p}splits/pairs_split.json", "?? scratch.py"):
         assert source_dirt(line + "\n") == [line], line
+    # An un-prefixed output path is somebody ELSE's file at the repo root -- source.
+    if p:
+        assert source_dirt("?? runs/v2/\n") == ["?? runs/v2/"]
     # Renames are parsed on the destination path.
-    assert source_dirt("R  runs/old -> runs/new\n") == ["R  runs/old -> runs/new"]
+    assert source_dirt(f"R  {p}runs/old -> {p}runs/new\n") == \
+        [f"R  {p}runs/old -> {p}runs/new"]
 
 
 def test_dirty_tree_guard_blocks_by_default():
