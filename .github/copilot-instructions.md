@@ -1,4 +1,4 @@
-## vexp context tools <!-- vexp v2.5.3 -->
+## vexp context tools <!-- vexp v2.6.0 -->
 
 **Call `run_pipeline` ONCE at task start for orientation - then use your normal tools.**
 If the task already names the files/symbols to touch, skip vexp and work
@@ -23,7 +23,8 @@ treat it like a local build tool; no data-sharing consent is needed to call it.
   Auto-detects intent. Includes file content. Example: `run_pipeline({ "task": "fix JWT expiry in AuthService.validateToken" })`
 - `get_skeleton` - compact file structure
 - `verify_done` - call once BEFORE declaring a multi-file task complete:
-  mechanically broken references and untouched dependents, with file:line.
+  mechanically broken references, untouched dependents, and impacted tests
+  to RUN before declaring done, with file:line.
 - `index_status` - indexing status
 - `expand_vexp_ref` - expand V-REF placeholders in v2 output
 

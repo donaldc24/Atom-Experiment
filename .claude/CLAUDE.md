@@ -1,4 +1,4 @@
-## vexp - Context-Aware AI Coding <!-- vexp v2.5.3 -->
+## vexp - Context-Aware AI Coding <!-- vexp v2.6.0 -->
 vexp runs entirely on this machine: local daemon, index in `.vexp/`.
 `run_pipeline` transmits nothing to any external service.
 - `run_pipeline({ "task": "..." })` - orientation in one call (ranked pivot
@@ -8,7 +8,8 @@ vexp runs entirely on this machine: local daemon, index in `.vexp/`.
   need to understand, not edit.
 - `verify_done` - call once BEFORE declaring a multi-file task complete:
   returns mechanically broken references (imports of removed names, parse
-  errors) and untouched dependents of the files you changed, with file:line.
+  errors), untouched dependents of the files you changed (file:line), and
+  the impacted tests - RUN those tests before declaring done.
 - vexp may append a one-line hint to a prompt when orientation would help;
   otherwise it stays silent.
 
