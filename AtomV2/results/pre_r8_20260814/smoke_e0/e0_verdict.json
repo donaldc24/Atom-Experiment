@@ -1,0 +1,48 @@
+{
+  "checks": {
+    "closed_map_direction": {
+      "free": 0.5819199976940004,
+      "note": "direction only: oracle closed-map < free closed-map",
+      "ok": true,
+      "oracle": 0.10325593091104002
+    },
+    "free_L1_floor": {
+      "max": 0.05,
+      "ok": true,
+      "value": 0.0
+    },
+    "gap_unmistakable": {
+      "gap": 0.0,
+      "min": 0.5,
+      "ok": false
+    },
+    "oracle_L1_high": {
+      "min": 0.7,
+      "ok": false,
+      "value": 0.0
+    }
+  },
+  "instrument_audit": {
+    "A0-oracle_seed0": {
+      "census_reads_8": false,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": -8.42614977317636,
+      "usage_matches_ground_truth": 0.7077464788732394
+    },
+    "A0-oracle_seed1": {
+      "census_reads_8": false,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": -8.426149773176359,
+      "usage_matches_ground_truth": 0.7077464788732394
+    },
+    "A0-oracle_seed2": {
+      "census_reads_8": false,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": null,
+      "usage_matches_ground_truth": 0.7605633802816901
+    }
+  },
+  "n_runs": 6,
+  "note": "qualitative pattern match, NOT number match - the world changed (length 6 not 8, 16 slots not 8, micro-steps added)",
+  "passed": false
+}

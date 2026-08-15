@@ -1,0 +1,3043 @@
+{
+  "audit": {
+    "adjacency_overlaps": {
+      "first": {
+        "T": [
+          "P2",
+          "P8"
+        ]
+      },
+      "last": {
+        "A": [
+          "P2",
+          "P7"
+        ]
+      }
+    },
+    "counts": {
+      "L1": 8,
+      "L2": 6,
+      "L3": 15,
+      "excluded": 1,
+      "train": 34
+    },
+    "coverage_train_pairs": {
+      "P1": [
+        5,
+        5
+      ],
+      "P2": [
+        5,
+        4
+      ],
+      "P3": [
+        0,
+        0
+      ],
+      "P4": [
+        5,
+        5
+      ],
+      "P5": [
+        4,
+        3
+      ],
+      "P6": [
+        4,
+        4
+      ],
+      "P7": [
+        5,
+        7
+      ],
+      "P8": [
+        6,
+        6
+      ]
+    },
+    "dax": "P3",
+    "excluded_cells": [
+      "P5_P5"
+    ],
+    "l1_siblings": {
+      "P1_P2": {
+        "adjacency": [
+          "I",
+          "T"
+        ],
+        "trained_siblings": [
+          "P1_P8"
+        ]
+      },
+      "P2_P1": {
+        "adjacency": [
+          "A",
+          "R"
+        ],
+        "trained_siblings": [
+          "P7_P1"
+        ]
+      },
+      "P2_P5": {
+        "adjacency": [
+          "A",
+          "N"
+        ],
+        "trained_siblings": [
+          "P7_P5"
+        ]
+      },
+      "P4_P2": {
+        "adjacency": [
+          "T",
+          "T"
+        ],
+        "trained_siblings": [
+          "P4_P8"
+        ]
+      },
+      "P5_P2": {
+        "adjacency": [
+          "W",
+          "T"
+        ],
+        "trained_siblings": [
+          "P5_P8"
+        ]
+      },
+      "P6_P8": {
+        "adjacency": [
+          "M",
+          "T"
+        ],
+        "trained_siblings": [
+          "P6_P2"
+        ]
+      },
+      "P7_P4": {
+        "adjacency": [
+          "A",
+          "M"
+        ],
+        "trained_siblings": [
+          "P2_P4"
+        ]
+      },
+      "P7_P6": {
+        "adjacency": [
+          "A",
+          "I"
+        ],
+        "trained_siblings": [
+          "P2_P6"
+        ]
+      }
+    },
+    "l2_adjacencies": {
+      "P1_P4": [
+        "I",
+        "M"
+      ],
+      "P4_P6": [
+        "T",
+        "I"
+      ],
+      "P5_P6": [
+        "W",
+        "I"
+      ],
+      "P6_P1": [
+        "M",
+        "R"
+      ],
+      "P6_P5": [
+        "M",
+        "N"
+      ],
+      "P8_P5": [
+        "N",
+        "N"
+      ]
+    },
+    "merged_classes": [
+      [
+        "P4_P8",
+        "P8_P4"
+      ]
+    ],
+    "n_distinct_pair_functions": 63,
+    "p2_disqualified_as_dax_verified": true
+  },
+  "cells": {
+    "P1_P1": {
+      "adjacency": [
+        "I",
+        "R"
+      ],
+      "class_members": [
+        "P1_P1"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "R",
+        "I",
+        "R",
+        "I"
+      ],
+      "task": "P1_P1",
+      "triple": {
+        "a": 1,
+        "b": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|1|222222"
+    },
+    "P1_P2": {
+      "adjacency": [
+        "I",
+        "T"
+      ],
+      "class_members": [
+        "P1_P2"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "R",
+        "I",
+        "T",
+        "A"
+      ],
+      "task": "P1_P2",
+      "triple": {
+        "a": 1,
+        "b": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "pi": [
+          4,
+          3,
+          2,
+          1,
+          0,
+          5
+        ]
+      },
+      "triple_key": "432105|1|123456"
+    },
+    "P1_P3": {
+      "adjacency": [
+        "I",
+        "A"
+      ],
+      "class_members": [
+        "P1_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "R",
+        "I",
+        "A",
+        "R"
+      ],
+      "task": "P1_P3",
+      "triple": {
+        "a": 1,
+        "b": [
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|1|654321"
+    },
+    "P1_P4": {
+      "adjacency": [
+        "I",
+        "M"
+      ],
+      "class_members": [
+        "P1_P4"
+      ],
+      "reason": "registered choice: adjacency unique to this cell, untrained",
+      "split": "L2",
+      "subop_chain": [
+        "R",
+        "I",
+        "M",
+        "T"
+      ],
+      "task": "P1_P4",
+      "triple": {
+        "a": 3,
+        "b": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "pi": [
+          4,
+          3,
+          2,
+          1,
+          0,
+          5
+        ]
+      },
+      "triple_key": "432105|3|333333"
+    },
+    "P1_P5": {
+      "adjacency": [
+        "I",
+        "N"
+      ],
+      "class_members": [
+        "P1_P5"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "R",
+        "I",
+        "N",
+        "W"
+      ],
+      "task": "P1_P5",
+      "triple": {
+        "a": 9,
+        "b": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|9|999999"
+    },
+    "P1_P6": {
+      "adjacency": [
+        "I",
+        "I"
+      ],
+      "class_members": [
+        "P1_P6"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "R",
+        "I",
+        "I",
+        "M"
+      ],
+      "task": "P1_P6",
+      "triple": {
+        "a": 3,
+        "b": [
+          6,
+          6,
+          6,
+          6,
+          6,
+          6
+        ],
+        "pi": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      "triple_key": "543210|3|666666"
+    },
+    "P1_P7": {
+      "adjacency": [
+        "I",
+        "W"
+      ],
+      "class_members": [
+        "P1_P7"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "R",
+        "I",
+        "W",
+        "A"
+      ],
+      "task": "P1_P7",
+      "triple": {
+        "a": 1,
+        "b": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|1|123456"
+    },
+    "P1_P8": {
+      "adjacency": [
+        "I",
+        "T"
+      ],
+      "class_members": [
+        "P1_P8"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "R",
+        "I",
+        "T",
+        "N"
+      ],
+      "task": "P1_P8",
+      "triple": {
+        "a": 9,
+        "b": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "pi": [
+          4,
+          3,
+          2,
+          1,
+          0,
+          5
+        ]
+      },
+      "triple_key": "432105|9|999999"
+    },
+    "P2_P1": {
+      "adjacency": [
+        "A",
+        "R"
+      ],
+      "class_members": [
+        "P2_P1"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "T",
+        "A",
+        "R",
+        "I"
+      ],
+      "task": "P2_P1",
+      "triple": {
+        "a": 1,
+        "b": [
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "pi": [
+          0,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      },
+      "triple_key": "054321|1|654321"
+    },
+    "P2_P2": {
+      "adjacency": [
+        "A",
+        "T"
+      ],
+      "class_members": [
+        "P2_P2"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "A",
+        "T",
+        "A"
+      ],
+      "task": "P2_P2",
+      "triple": {
+        "a": 1,
+        "b": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          5
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|1|135795"
+    },
+    "P2_P3": {
+      "adjacency": [
+        "A",
+        "A"
+      ],
+      "class_members": [
+        "P2_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "T",
+        "A",
+        "A",
+        "R"
+      ],
+      "task": "P2_P3",
+      "triple": {
+        "a": 1,
+        "b": [
+          0,
+          8,
+          6,
+          4,
+          2,
+          0
+        ],
+        "pi": [
+          0,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      },
+      "triple_key": "054321|1|086420"
+    },
+    "P2_P4": {
+      "adjacency": [
+        "A",
+        "M"
+      ],
+      "class_members": [
+        "P2_P4"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "A",
+        "M",
+        "T"
+      ],
+      "task": "P2_P4",
+      "triple": {
+        "a": 3,
+        "b": [
+          3,
+          6,
+          9,
+          2,
+          5,
+          0
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|3|369250"
+    },
+    "P2_P5": {
+      "adjacency": [
+        "A",
+        "N"
+      ],
+      "class_members": [
+        "P2_P5"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "T",
+        "A",
+        "N",
+        "W"
+      ],
+      "task": "P2_P5",
+      "triple": {
+        "a": 9,
+        "b": [
+          9,
+          0,
+          7,
+          8,
+          5,
+          6
+        ],
+        "pi": [
+          2,
+          1,
+          4,
+          3,
+          0,
+          5
+        ]
+      },
+      "triple_key": "214305|9|907856"
+    },
+    "P2_P6": {
+      "adjacency": [
+        "A",
+        "I"
+      ],
+      "class_members": [
+        "P2_P6"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "A",
+        "I",
+        "M"
+      ],
+      "task": "P2_P6",
+      "triple": {
+        "a": 3,
+        "b": [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "triple_key": "123450|3|369258"
+    },
+    "P2_P7": {
+      "adjacency": [
+        "A",
+        "W"
+      ],
+      "class_members": [
+        "P2_P7"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "A",
+        "W",
+        "A"
+      ],
+      "task": "P2_P7",
+      "triple": {
+        "a": 1,
+        "b": [
+          1,
+          1,
+          5,
+          5,
+          9,
+          9
+        ],
+        "pi": [
+          2,
+          1,
+          4,
+          3,
+          0,
+          5
+        ]
+      },
+      "triple_key": "214305|1|115599"
+    },
+    "P2_P8": {
+      "adjacency": [
+        "A",
+        "T"
+      ],
+      "class_members": [
+        "P2_P8"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "A",
+        "T",
+        "N"
+      ],
+      "task": "P2_P8",
+      "triple": {
+        "a": 9,
+        "b": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          0
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|9|987650"
+    },
+    "P3_P1": {
+      "adjacency": [
+        "R",
+        "R"
+      ],
+      "class_members": [
+        "P3_P1"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "R",
+        "I"
+      ],
+      "task": "P3_P1",
+      "triple": {
+        "a": 1,
+        "b": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|1|123456"
+    },
+    "P3_P2": {
+      "adjacency": [
+        "R",
+        "T"
+      ],
+      "class_members": [
+        "P3_P2"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "T",
+        "A"
+      ],
+      "task": "P3_P2",
+      "triple": {
+        "a": 1,
+        "b": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          0
+        ],
+        "pi": [
+          4,
+          3,
+          2,
+          1,
+          0,
+          5
+        ]
+      },
+      "triple_key": "432105|1|444440"
+    },
+    "P3_P3": {
+      "adjacency": [
+        "R",
+        "A"
+      ],
+      "class_members": [
+        "P3_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "A",
+        "R"
+      ],
+      "task": "P3_P3",
+      "triple": {
+        "a": 1,
+        "b": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|1|555555"
+    },
+    "P3_P4": {
+      "adjacency": [
+        "R",
+        "M"
+      ],
+      "class_members": [
+        "P3_P4"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "M",
+        "T"
+      ],
+      "task": "P3_P4",
+      "triple": {
+        "a": 3,
+        "b": [
+          2,
+          9,
+          6,
+          3,
+          0,
+          5
+        ],
+        "pi": [
+          4,
+          3,
+          2,
+          1,
+          0,
+          5
+        ]
+      },
+      "triple_key": "432105|3|296305"
+    },
+    "P3_P5": {
+      "adjacency": [
+        "R",
+        "N"
+      ],
+      "class_members": [
+        "P3_P5"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "N",
+        "W"
+      ],
+      "task": "P3_P5",
+      "triple": {
+        "a": 9,
+        "b": [
+          6,
+          5,
+          8,
+          7,
+          0,
+          9
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|9|658709"
+    },
+    "P3_P6": {
+      "adjacency": [
+        "R",
+        "I"
+      ],
+      "class_members": [
+        "P3_P6"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "I",
+        "M"
+      ],
+      "task": "P3_P6",
+      "triple": {
+        "a": 3,
+        "b": [
+          8,
+          5,
+          2,
+          9,
+          6,
+          3
+        ],
+        "pi": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      "triple_key": "543210|3|852963"
+    },
+    "P3_P7": {
+      "adjacency": [
+        "R",
+        "W"
+      ],
+      "class_members": [
+        "P3_P7"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "W",
+        "A"
+      ],
+      "task": "P3_P7",
+      "triple": {
+        "a": 1,
+        "b": [
+          4,
+          6,
+          4,
+          6,
+          4,
+          6
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|1|464646"
+    },
+    "P3_P8": {
+      "adjacency": [
+        "R",
+        "T"
+      ],
+      "class_members": [
+        "P3_P8"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "A",
+        "R",
+        "T",
+        "N"
+      ],
+      "task": "P3_P8",
+      "triple": {
+        "a": 9,
+        "b": [
+          6,
+          7,
+          8,
+          9,
+          0,
+          5
+        ],
+        "pi": [
+          4,
+          3,
+          2,
+          1,
+          0,
+          5
+        ]
+      },
+      "triple_key": "432105|9|678905"
+    },
+    "P4_P1": {
+      "adjacency": [
+        "T",
+        "R"
+      ],
+      "class_members": [
+        "P4_P1"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "M",
+        "T",
+        "R",
+        "I"
+      ],
+      "task": "P4_P1",
+      "triple": {
+        "a": 3,
+        "b": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "pi": [
+          0,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      },
+      "triple_key": "054321|3|111111"
+    },
+    "P4_P2": {
+      "adjacency": [
+        "T",
+        "T"
+      ],
+      "class_members": [
+        "P4_P2"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "M",
+        "T",
+        "T",
+        "A"
+      ],
+      "task": "P4_P2",
+      "triple": {
+        "a": 3,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|3|012345"
+    },
+    "P4_P3": {
+      "adjacency": [
+        "T",
+        "A"
+      ],
+      "class_members": [
+        "P4_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "M",
+        "T",
+        "A",
+        "R"
+      ],
+      "task": "P4_P3",
+      "triple": {
+        "a": 3,
+        "b": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "pi": [
+          0,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      },
+      "triple_key": "054321|3|543210"
+    },
+    "P4_P4": {
+      "adjacency": [
+        "T",
+        "M"
+      ],
+      "class_members": [
+        "P4_P4"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "M",
+        "T",
+        "M",
+        "T"
+      ],
+      "task": "P4_P4",
+      "triple": {
+        "a": 9,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|9|000000"
+    },
+    "P4_P5": {
+      "adjacency": [
+        "T",
+        "N"
+      ],
+      "class_members": [
+        "P4_P5"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "M",
+        "T",
+        "N",
+        "W"
+      ],
+      "task": "P4_P5",
+      "triple": {
+        "a": 7,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          2,
+          1,
+          4,
+          3,
+          0,
+          5
+        ]
+      },
+      "triple_key": "214305|7|000000"
+    },
+    "P4_P6": {
+      "adjacency": [
+        "T",
+        "I"
+      ],
+      "class_members": [
+        "P4_P6"
+      ],
+      "reason": "registered choice: adjacency unique to this cell, untrained",
+      "split": "L2",
+      "subop_chain": [
+        "M",
+        "T",
+        "I",
+        "M"
+      ],
+      "task": "P4_P6",
+      "triple": {
+        "a": 9,
+        "b": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "triple_key": "123450|9|333333"
+    },
+    "P4_P7": {
+      "adjacency": [
+        "T",
+        "W"
+      ],
+      "class_members": [
+        "P4_P7"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "M",
+        "T",
+        "W",
+        "A"
+      ],
+      "task": "P4_P7",
+      "triple": {
+        "a": 3,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          2,
+          1,
+          4,
+          3,
+          0,
+          5
+        ]
+      },
+      "triple_key": "214305|3|012345"
+    },
+    "P4_P8": {
+      "adjacency": [
+        "T",
+        "T"
+      ],
+      "class_members": [
+        "P4_P8",
+        "P8_P4"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "M",
+        "T",
+        "T",
+        "N"
+      ],
+      "task": "P4_P8",
+      "triple": {
+        "a": 7,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|7|000000"
+    },
+    "P5_P1": {
+      "adjacency": [
+        "W",
+        "R"
+      ],
+      "class_members": [
+        "P5_P1"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "N",
+        "W",
+        "R",
+        "I"
+      ],
+      "task": "P5_P1",
+      "triple": {
+        "a": 9,
+        "b": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|9|111111"
+    },
+    "P5_P2": {
+      "adjacency": [
+        "W",
+        "T"
+      ],
+      "class_members": [
+        "P5_P2"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "N",
+        "W",
+        "T",
+        "A"
+      ],
+      "task": "P5_P2",
+      "triple": {
+        "a": 9,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          0,
+          3,
+          2,
+          5,
+          4,
+          1
+        ]
+      },
+      "triple_key": "032541|9|012345"
+    },
+    "P5_P3": {
+      "adjacency": [
+        "W",
+        "A"
+      ],
+      "class_members": [
+        "P5_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "N",
+        "W",
+        "A",
+        "R"
+      ],
+      "task": "P5_P3",
+      "triple": {
+        "a": 9,
+        "b": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|9|543210"
+    },
+    "P5_P4": {
+      "adjacency": [
+        "W",
+        "M"
+      ],
+      "class_members": [
+        "P5_P4"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "N",
+        "W",
+        "M",
+        "T"
+      ],
+      "task": "P5_P4",
+      "triple": {
+        "a": 7,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          0,
+          3,
+          2,
+          5,
+          4,
+          1
+        ]
+      },
+      "triple_key": "032541|7|000000"
+    },
+    "P5_P5": {
+      "adjacency": [
+        "W",
+        "N"
+      ],
+      "class_members": [
+        "P5_P5"
+      ],
+      "reason": "identity collapse: teaches nothing, muddies steps-per-token",
+      "split": "excluded",
+      "subop_chain": [
+        "N",
+        "W",
+        "N",
+        "W"
+      ],
+      "task": "P5_P5",
+      "triple": {
+        "a": 1,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|1|000000"
+    },
+    "P5_P6": {
+      "adjacency": [
+        "W",
+        "I"
+      ],
+      "class_members": [
+        "P5_P6"
+      ],
+      "reason": "registered choice: adjacency unique to this cell, untrained",
+      "split": "L2",
+      "subop_chain": [
+        "N",
+        "W",
+        "I",
+        "M"
+      ],
+      "task": "P5_P6",
+      "triple": {
+        "a": 7,
+        "b": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "pi": [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4
+        ]
+      },
+      "triple_key": "103254|7|333333"
+    },
+    "P5_P7": {
+      "adjacency": [
+        "W",
+        "W"
+      ],
+      "class_members": [
+        "P5_P7"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "N",
+        "W",
+        "W",
+        "A"
+      ],
+      "task": "P5_P7",
+      "triple": {
+        "a": 9,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|9|012345"
+    },
+    "P5_P8": {
+      "adjacency": [
+        "W",
+        "T"
+      ],
+      "class_members": [
+        "P5_P8"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "N",
+        "W",
+        "T",
+        "N"
+      ],
+      "task": "P5_P8",
+      "triple": {
+        "a": 1,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          0,
+          3,
+          2,
+          5,
+          4,
+          1
+        ]
+      },
+      "triple_key": "032541|1|000000"
+    },
+    "P6_P1": {
+      "adjacency": [
+        "M",
+        "R"
+      ],
+      "class_members": [
+        "P6_P1"
+      ],
+      "reason": "registered choice: adjacency unique to this cell, untrained",
+      "split": "L2",
+      "subop_chain": [
+        "I",
+        "M",
+        "R",
+        "I"
+      ],
+      "task": "P6_P1",
+      "triple": {
+        "a": 3,
+        "b": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "pi": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      "triple_key": "543210|3|444444"
+    },
+    "P6_P2": {
+      "adjacency": [
+        "M",
+        "T"
+      ],
+      "class_members": [
+        "P6_P2"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "I",
+        "M",
+        "T",
+        "A"
+      ],
+      "task": "P6_P2",
+      "triple": {
+        "a": 3,
+        "b": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "triple_key": "123450|3|345678"
+    },
+    "P6_P3": {
+      "adjacency": [
+        "M",
+        "A"
+      ],
+      "class_members": [
+        "P6_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "I",
+        "M",
+        "A",
+        "R"
+      ],
+      "task": "P6_P3",
+      "triple": {
+        "a": 3,
+        "b": [
+          8,
+          7,
+          6,
+          5,
+          4,
+          3
+        ],
+        "pi": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      "triple_key": "543210|3|876543"
+    },
+    "P6_P4": {
+      "adjacency": [
+        "M",
+        "M"
+      ],
+      "class_members": [
+        "P6_P4"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "I",
+        "M",
+        "M",
+        "T"
+      ],
+      "task": "P6_P4",
+      "triple": {
+        "a": 9,
+        "b": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "triple_key": "123450|9|999999"
+    },
+    "P6_P5": {
+      "adjacency": [
+        "M",
+        "N"
+      ],
+      "class_members": [
+        "P6_P5"
+      ],
+      "reason": "registered choice: adjacency unique to this cell, untrained",
+      "split": "L2",
+      "subop_chain": [
+        "I",
+        "M",
+        "N",
+        "W"
+      ],
+      "task": "P6_P5",
+      "triple": {
+        "a": 7,
+        "b": [
+          7,
+          7,
+          7,
+          7,
+          7,
+          7
+        ],
+        "pi": [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4
+        ]
+      },
+      "triple_key": "103254|7|777777"
+    },
+    "P6_P6": {
+      "adjacency": [
+        "M",
+        "I"
+      ],
+      "class_members": [
+        "P6_P6"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "I",
+        "M",
+        "I",
+        "M"
+      ],
+      "task": "P6_P6",
+      "triple": {
+        "a": 9,
+        "b": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|9|222222"
+    },
+    "P6_P7": {
+      "adjacency": [
+        "M",
+        "W"
+      ],
+      "class_members": [
+        "P6_P7"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "I",
+        "M",
+        "W",
+        "A"
+      ],
+      "task": "P6_P7",
+      "triple": {
+        "a": 3,
+        "b": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "pi": [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4
+        ]
+      },
+      "triple_key": "103254|3|345678"
+    },
+    "P6_P8": {
+      "adjacency": [
+        "M",
+        "T"
+      ],
+      "class_members": [
+        "P6_P8"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "I",
+        "M",
+        "T",
+        "N"
+      ],
+      "task": "P6_P8",
+      "triple": {
+        "a": 7,
+        "b": [
+          7,
+          7,
+          7,
+          7,
+          7,
+          7
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "triple_key": "123450|7|777777"
+    },
+    "P7_P1": {
+      "adjacency": [
+        "A",
+        "R"
+      ],
+      "class_members": [
+        "P7_P1"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "W",
+        "A",
+        "R",
+        "I"
+      ],
+      "task": "P7_P1",
+      "triple": {
+        "a": 1,
+        "b": [
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|1|654321"
+    },
+    "P7_P2": {
+      "adjacency": [
+        "A",
+        "T"
+      ],
+      "class_members": [
+        "P7_P2"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "W",
+        "A",
+        "T",
+        "A"
+      ],
+      "task": "P7_P2",
+      "triple": {
+        "a": 1,
+        "b": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          5
+        ],
+        "pi": [
+          0,
+          3,
+          2,
+          5,
+          4,
+          1
+        ]
+      },
+      "triple_key": "032541|1|135795"
+    },
+    "P7_P3": {
+      "adjacency": [
+        "A",
+        "A"
+      ],
+      "class_members": [
+        "P7_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "W",
+        "A",
+        "A",
+        "R"
+      ],
+      "task": "P7_P3",
+      "triple": {
+        "a": 1,
+        "b": [
+          0,
+          8,
+          6,
+          4,
+          2,
+          0
+        ],
+        "pi": [
+          4,
+          5,
+          2,
+          3,
+          0,
+          1
+        ]
+      },
+      "triple_key": "452301|1|086420"
+    },
+    "P7_P4": {
+      "adjacency": [
+        "A",
+        "M"
+      ],
+      "class_members": [
+        "P7_P4"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "W",
+        "A",
+        "M",
+        "T"
+      ],
+      "task": "P7_P4",
+      "triple": {
+        "a": 3,
+        "b": [
+          3,
+          6,
+          9,
+          2,
+          5,
+          0
+        ],
+        "pi": [
+          0,
+          3,
+          2,
+          5,
+          4,
+          1
+        ]
+      },
+      "triple_key": "032541|3|369250"
+    },
+    "P7_P5": {
+      "adjacency": [
+        "A",
+        "N"
+      ],
+      "class_members": [
+        "P7_P5"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "W",
+        "A",
+        "N",
+        "W"
+      ],
+      "task": "P7_P5",
+      "triple": {
+        "a": 9,
+        "b": [
+          9,
+          0,
+          7,
+          8,
+          5,
+          6
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|9|907856"
+    },
+    "P7_P6": {
+      "adjacency": [
+        "A",
+        "I"
+      ],
+      "class_members": [
+        "P7_P6"
+      ],
+      "reason": "registered choice: unseen surface pair, adjacency trained via sibling",
+      "split": "L1",
+      "subop_chain": [
+        "W",
+        "A",
+        "I",
+        "M"
+      ],
+      "task": "P7_P6",
+      "triple": {
+        "a": 3,
+        "b": [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8
+        ],
+        "pi": [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4
+        ]
+      },
+      "triple_key": "103254|3|369258"
+    },
+    "P7_P7": {
+      "adjacency": [
+        "A",
+        "W"
+      ],
+      "class_members": [
+        "P7_P7"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "W",
+        "A",
+        "W",
+        "A"
+      ],
+      "task": "P7_P7",
+      "triple": {
+        "a": 1,
+        "b": [
+          1,
+          1,
+          5,
+          5,
+          9,
+          9
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "triple_key": "012345|1|115599"
+    },
+    "P7_P8": {
+      "adjacency": [
+        "A",
+        "T"
+      ],
+      "class_members": [
+        "P7_P8"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "W",
+        "A",
+        "T",
+        "N"
+      ],
+      "task": "P7_P8",
+      "triple": {
+        "a": 9,
+        "b": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          0
+        ],
+        "pi": [
+          0,
+          3,
+          2,
+          5,
+          4,
+          1
+        ]
+      },
+      "triple_key": "032541|9|987650"
+    },
+    "P8_P1": {
+      "adjacency": [
+        "N",
+        "R"
+      ],
+      "class_members": [
+        "P8_P1"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "N",
+        "R",
+        "I"
+      ],
+      "task": "P8_P1",
+      "triple": {
+        "a": 9,
+        "b": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "pi": [
+          0,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      },
+      "triple_key": "054321|9|111111"
+    },
+    "P8_P2": {
+      "adjacency": [
+        "N",
+        "T"
+      ],
+      "class_members": [
+        "P8_P2"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "N",
+        "T",
+        "A"
+      ],
+      "task": "P8_P2",
+      "triple": {
+        "a": 9,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|9|012345"
+    },
+    "P8_P3": {
+      "adjacency": [
+        "N",
+        "A"
+      ],
+      "class_members": [
+        "P8_P3"
+      ],
+      "reason": "dax test: P3 trained only as a singleton",
+      "split": "L3",
+      "subop_chain": [
+        "T",
+        "N",
+        "A",
+        "R"
+      ],
+      "task": "P8_P3",
+      "triple": {
+        "a": 9,
+        "b": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "pi": [
+          0,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      },
+      "triple_key": "054321|9|543210"
+    },
+    "P8_P4": {
+      "adjacency": [
+        "N",
+        "M"
+      ],
+      "class_members": [
+        "P4_P8",
+        "P8_P4"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "N",
+        "M",
+        "T"
+      ],
+      "task": "P8_P4",
+      "triple": {
+        "a": 7,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|7|000000"
+    },
+    "P8_P5": {
+      "adjacency": [
+        "N",
+        "N"
+      ],
+      "class_members": [
+        "P8_P5"
+      ],
+      "reason": "registered choice: adjacency unique to this cell, untrained",
+      "split": "L2",
+      "subop_chain": [
+        "T",
+        "N",
+        "N",
+        "W"
+      ],
+      "task": "P8_P5",
+      "triple": {
+        "a": 1,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          2,
+          1,
+          4,
+          3,
+          0,
+          5
+        ]
+      },
+      "triple_key": "214305|1|000000"
+    },
+    "P8_P6": {
+      "adjacency": [
+        "N",
+        "I"
+      ],
+      "class_members": [
+        "P8_P6"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "N",
+        "I",
+        "M"
+      ],
+      "task": "P8_P6",
+      "triple": {
+        "a": 7,
+        "b": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "triple_key": "123450|7|333333"
+    },
+    "P8_P7": {
+      "adjacency": [
+        "N",
+        "W"
+      ],
+      "class_members": [
+        "P8_P7"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "N",
+        "W",
+        "A"
+      ],
+      "task": "P8_P7",
+      "triple": {
+        "a": 9,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          2,
+          1,
+          4,
+          3,
+          0,
+          5
+        ]
+      },
+      "triple_key": "214305|9|012345"
+    },
+    "P8_P8": {
+      "adjacency": [
+        "N",
+        "T"
+      ],
+      "class_members": [
+        "P8_P8"
+      ],
+      "reason": "remainder",
+      "split": "train",
+      "subop_chain": [
+        "T",
+        "N",
+        "T",
+        "N"
+      ],
+      "task": "P8_P8",
+      "triple": {
+        "a": 1,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          1
+        ]
+      },
+      "triple_key": "234501|1|000000"
+    }
+  },
+  "excluded": [
+    "P5_P5"
+  ],
+  "format": "atomv2-split-v1",
+  "heldout": {
+    "L1": [
+      "P1_P2",
+      "P2_P1",
+      "P2_P5",
+      "P4_P2",
+      "P5_P2",
+      "P6_P8",
+      "P7_P4",
+      "P7_P6"
+    ],
+    "L2": [
+      "P1_P4",
+      "P4_P6",
+      "P5_P6",
+      "P6_P1",
+      "P6_P5",
+      "P8_P5"
+    ],
+    "L3": [
+      "P1_P3",
+      "P2_P3",
+      "P3_P1",
+      "P3_P2",
+      "P3_P3",
+      "P3_P4",
+      "P3_P5",
+      "P3_P6",
+      "P3_P7",
+      "P3_P8",
+      "P4_P3",
+      "P5_P3",
+      "P6_P3",
+      "P7_P3",
+      "P8_P3"
+    ]
+  },
+  "registered_choices": {
+    "dax": "P3",
+    "heldout_L1": [
+      "P2_P1",
+      "P2_P5",
+      "P7_P4",
+      "P7_P6",
+      "P1_P2",
+      "P5_P2",
+      "P6_P8",
+      "P4_P2"
+    ],
+    "heldout_L2": [
+      "P1_P4",
+      "P5_P6",
+      "P6_P1",
+      "P6_P5",
+      "P4_P6",
+      "P8_P5"
+    ]
+  },
+  "singletons_train": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "train_pairs": [
+    "P1_P1",
+    "P1_P5",
+    "P1_P6",
+    "P1_P7",
+    "P1_P8",
+    "P2_P2",
+    "P2_P4",
+    "P2_P6",
+    "P2_P7",
+    "P2_P8",
+    "P4_P1",
+    "P4_P4",
+    "P4_P5",
+    "P4_P7",
+    "P4_P8",
+    "P5_P1",
+    "P5_P4",
+    "P5_P7",
+    "P5_P8",
+    "P6_P2",
+    "P6_P4",
+    "P6_P6",
+    "P6_P7",
+    "P7_P1",
+    "P7_P2",
+    "P7_P5",
+    "P7_P7",
+    "P7_P8",
+    "P8_P1",
+    "P8_P2",
+    "P8_P4",
+    "P8_P6",
+    "P8_P7",
+    "P8_P8"
+  ],
+  "world": {
+    "p8_note": "T and N commute; P8's internal order is unrecoverable. The answer key for P8 is the SET {T, N}. Any probe touching P8 must be written set-wise.",
+    "seq_len": 6,
+    "subops": {
+      "A": {
+        "a": 1,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "I": {
+        "a": 1,
+        "b": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "M": {
+        "a": 3,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "N": {
+        "a": 9,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "R": {
+        "a": 1,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      "T": {
+        "a": 1,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "W": {
+        "a": 1,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4
+        ]
+      }
+    },
+    "surface_recipes": {
+      "P1": [
+        "R",
+        "I"
+      ],
+      "P2": [
+        "T",
+        "A"
+      ],
+      "P3": [
+        "A",
+        "R"
+      ],
+      "P4": [
+        "M",
+        "T"
+      ],
+      "P5": [
+        "N",
+        "W"
+      ],
+      "P6": [
+        "I",
+        "M"
+      ],
+      "P7": [
+        "W",
+        "A"
+      ],
+      "P8": [
+        "T",
+        "N"
+      ]
+    },
+    "surface_triples": {
+      "P1": {
+        "a": 1,
+        "b": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "pi": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      "P2": {
+        "a": 1,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "P3": {
+        "a": 1,
+        "b": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "pi": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      },
+      "P4": {
+        "a": 3,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      },
+      "P5": {
+        "a": 9,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4
+        ]
+      },
+      "P6": {
+        "a": 3,
+        "b": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "pi": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "P7": {
+        "a": 1,
+        "b": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "pi": [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4
+        ]
+      },
+      "P8": {
+        "a": 9,
+        "b": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pi": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          0
+        ]
+      }
+    },
+    "vocab": 10
+  }
+}

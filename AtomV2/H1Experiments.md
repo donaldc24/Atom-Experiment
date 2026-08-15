@@ -19,9 +19,9 @@ Fallback: Even if a query needs only a small working resident set but has a larg
 Key Components:
 
 - Encoder
-	- Function: maps raw input (length-6 digit list, 0–9, all arithmetic mod 10 by definition) + the opaque task tokens into a shared representation space
-	- Shape: embedding layer (10 digits → 64) + task token embedding (8 tokens → 64, <1k params) + 1 transformer layer with 4 heads (~50k params)
-	- Output Dimension: 384 (width 64 × length 6, flattened into one state vector), with task info baked into the state - without this the system has no way to know which task its even doing
+	- Function: maps the raw length-6 digit list (0–9, all arithmetic mod 10) into a canonical, task-independent shared representation. **E0 amendment R8:** opaque task control moved to the composer after the pre-amendment oracle exposed pair-context shortcuts.
+	- Shape: embedding layer (10 digits → 64) + 1 transformer layer with 4 heads (~50k params)
+	- Output Dimension: 384 (width 64 × length 6, flattened into one state vector). Task identity is not present in the atom state.
 	- Trained jointly with Atoms (representational co-design - allowed by design; the encoder and atoms are permitted to shape each other, atoms shaping *each other* is what we measure against)
 
 - Atoms
@@ -38,9 +38,9 @@ Key Components:
 	- Known confound: the old world was 512 wide, this one is 384. Narrower channels favor specialization, so this world is slightly friendlier to factorization as a side effect. Acknowledged here, isolated later with the registered bandwidth knob
 
 - Composer
-	- Function: at each step, looks at the current state + which step it's on, and picks one atom (compares its query against atom keys, Gumbel top-1)
+	- Function: at each step, looks at the current content state + the active opaque surface token + micro-step within that token, and picks one atom (compares its query against atom keys, Gumbel top-1). It never receives the partner token or absolute token position.
 	- Routing options: 17 total - 16 atom keys + 1 dedicated pass key. Pass is a real routing choice with its own key, not an atom that learned to do nothing, so pass usage is inspectable and logged
-	- Step embedding encodes both the token index AND the micro-step index (1-3), otherwise the composer cant know where it is inside a token's budget
+	- The micro-step embedding resets to 1–3 for each token. Removing absolute token position is load-bearing for calling a singleton-learned P3 program in either L3 position.
 	- Shape: small feedforward MLP (~28k params) - logged separately every run, must not grow when atom count grows
 	- Memoryless on purpose: no GRU, no carried state. Last time the composer's memory became a side-channel to smuggle answers around the atoms. A memoryless composer means everything must travel through the interface we're measuring
 	- Free routing only. No oracle, no forced assignments anywhere in training
@@ -58,7 +58,7 @@ Key Components:
 - Invariants (hard rules)
 	- Task tokens are opaque IDs. Sub-op structure never appears in inputs, tokens, or any training signal
 	- Probes read, never write - no gradient from any probe or diagnostic ever touches the model
-	- The interface is the only inter-atom channel (guaranteed by the memoryless composer)
+	- The interface is the only inter-atom data channel. The active opaque token is exogenous routing control and carries no prior atom output.
 	- "Atom in use" for the census: picked by hard routing more than ε% of the time on eval (ε fixed before first run)
 	- Census logs two numbers, not one: atoms-in-use AND steps-per-token. The pair together is the granularity signal, neither alone carries the verdict
 	- Routing evaluated with hard top-1; report soft and hard accuracy both — a big gap between them is itself weak evidence of co-adaptation
@@ -143,7 +143,7 @@ Tiers of difficulty in how I hold out test tasks. Not all unseen is equally unse
 	- P2 contains A, P4 contains M. If accross the entire training set no task ever causes the sub-op chain "...M then A..." to occur back to back then any test task that does create that hidden adjacency is L2
 	- The surface primitives are all trained but a specific sub-op interaction is new
 - L3 - The Dax Test
-	- One surface operation appears in training only as a singleton, never inside any pair. Its sub-ops all appear elsewhere in other primitives. At test, I compose it so the only route to passing is having factorized that primitive into reusable sub atoms that already know how to talk to everything else. This idea comes from Lake & Baroni jump experiment.
+	- One surface operation appears in training only as a singleton, never inside any pair. At test it is composed in both positions, following the Lake & Baroni jump idea. **E0 amendment R8:** L3 tests transfer of a singleton-learned reusable program, but does not uniquely prove hidden-sub-op factorization—a context-independent P3 surface atom can also pass. Granularity is determined jointly by census, steps/token, standalone semantics, and surface-vs-sub-op probes.
 
 **Metrics**
 Split into the question they answer:

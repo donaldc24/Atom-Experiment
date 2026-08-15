@@ -1,0 +1,8 @@
+# smoke_e0 summary
+
+| arm | n | acc_seen_hard | acc_seen_soft | acc_unseen_L1_hard | acc_unseen_L2_hard | acc_unseen_L3_hard | dissociation_gap_hard | soft_hard_gap_seen | closed_map_seen | closed_map_unseen_L1 | closed_map_unseen_L3 | closed_map_target_seen | closed_map_target_unseen_L1 | closed_map_target_unseen_L3 | census_atoms_in_use | census_steps_per_token | census_pass_rate | ablation_cv_median | standalone_best_acc_mean_in_use | closed_map_atom_matched_error | closed_map_atom_coverage | decodability_subop_from_delta | decodability_subop_h0_floor | decodability_surface_from_delta | decodability_surface_h0_floor | transfer_task_row_std_mean | transfer_transplant_row_std_mean |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A0-free | 3 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0000±0.0000 | 0.6181±0.0152 | 0.6448±0.0149 | 0.6955±0.0046 | 1.4112±0.0019 | 1.4099±0.0037 | 1.4171±0.0035 | 2.6667±0.5774 | 2.4983±0.1565 | 0.1778±0.0566 | - | 0.0000±0.0000 | 1.3182±0.0049 | 1.0000±0.0000 | 0.5073±0.0061 | 0.5004±0.0137 | 0.1531±0.0014 | 0.1375±0.0019 | 0.0000±0.0000 | 0.0000±0.0000 |
+| A0-oracle | 3 | 0.0003±0.0006 | 0.0017±0.0006 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0000±0.0000 | 0.0013±0.0011 | 0.1460±0.0327 | 0.1536±0.0306 | 0.1553±0.0321 | 0.2072±0.0308 | 0.2059±0.0300 | 0.2055±0.0281 | 2.0000±1.0000 | 0.9221±0.1336 | 0.6931±0.0455 | 8.1394±0.3524 | 0.0255±0.0328 | 0.2609±0.0314 | 1.0000±0.0000 | 0.5765±0.0627 | 0.5050±0.0061 | 0.2904±0.1236 | 0.1408±0.0050 | 0.0000±0.0000 | 0.0000±0.0000 |
+
+Composer and atom library are separate line items by rule; never sum them into a 'system size'.

@@ -1,0 +1,703 @@
+{
+  "ablation_cv_median": null,
+  "ablation_cv_per_atom": {
+    "0": null,
+    "1": null,
+    "10": null,
+    "11": null,
+    "12": null,
+    "13": null,
+    "14": null,
+    "15": null,
+    "2": null,
+    "3": null,
+    "4": null,
+    "5": null,
+    "6": null,
+    "7": null,
+    "8": null,
+    "9": null
+  },
+  "acc_seen_hard": 0.005952380952380952,
+  "acc_seen_soft": 0.002976190476190476,
+  "acc_unseen_L1_hard": 0.0,
+  "acc_unseen_L1_soft": 0.0,
+  "acc_unseen_L2_hard": 0.0,
+  "acc_unseen_L2_soft": 0.0,
+  "acc_unseen_L3_hard": 0.0,
+  "acc_unseen_L3_soft": 0.0,
+  "arm": "A0-oracle",
+  "census_atoms_in_use": 1,
+  "census_pass_rate": 0.9614400584795322,
+  "census_steps_per_token": 0.12450396825396826,
+  "closed_map_atom_coverage": 1,
+  "closed_map_atom_matched_error": 0.2690085428766906,
+  "closed_map_seen": 0.028587393396134888,
+  "closed_map_unseen_L1": 0.04160657071042806,
+  "closed_map_unseen_L3": 0.058590983599424364,
+  "curve": [
+    {
+      "L1_hard": 0.0,
+      "L2_hard": 0.0,
+      "L3_hard": 0.0,
+      "atoms_in_use": 0,
+      "closed_map_seen": 0.0,
+      "closed_map_unseen_L1": 0.0,
+      "pass_rate": 1.0,
+      "seen_hard": 0.002976190476190476,
+      "step": 100,
+      "steps_per_token": 0.0
+    },
+    {
+      "L1_hard": 0.0,
+      "L2_hard": 0.0,
+      "L3_hard": 0.0,
+      "atoms_in_use": 0,
+      "closed_map_seen": 0.0,
+      "closed_map_unseen_L1": 0.0,
+      "pass_rate": 1.0,
+      "seen_hard": 0.006944444444444445,
+      "step": 200,
+      "steps_per_token": 0.0
+    },
+    {
+      "L1_hard": 0.0,
+      "L2_hard": 0.0,
+      "L3_hard": 0.0,
+      "atoms_in_use": 1,
+      "closed_map_seen": 0.028587393396134888,
+      "closed_map_unseen_L1": 0.04160657071042806,
+      "pass_rate": 0.9614400584795322,
+      "seen_hard": 0.005952380952380952,
+      "step": 300,
+      "steps_per_token": 0.12450396825396826
+    }
+  ],
+  "decodability_subop_from_delta": 0.6351959865008082,
+  "decodability_subop_from_delta_shuffled": 0.47802201179521425,
+  "decodability_subop_from_state": 0.5997001523418086,
+  "decodability_subop_from_state_shuffled": 0.5064223648181984,
+  "decodability_subop_h0_floor": 0.6302112455346754,
+  "decodability_subop_h0_floor_shuffled": 0.4981915612838098,
+  "decodability_surface_from_delta": 0.296875,
+  "decodability_surface_from_delta_shuffled": 0.125,
+  "decodability_surface_from_state": 0.3125,
+  "decodability_surface_from_state_shuffled": 0.25,
+  "decodability_surface_h0_floor": 0.5181518197059631,
+  "decodability_surface_h0_floor_shuffled": 0.14851485192775726,
+  "dissociation_gap_hard": 0.0,
+  "experiment": "e0",
+  "final_step": 300,
+  "init_calibration": {
+    "lambda_use": 0.0,
+    "loss_task_init": 2.44608473777771,
+    "rent_over_task_init": 0.0,
+    "rent_raw_init": 2.820505142211914,
+    "rent_weighted_init": 0.0
+  },
+  "param_counts": {
+    "atoms_each": 148032,
+    "atoms_total": 2368512,
+    "composer": 28960,
+    "decoder": 50634,
+    "encoder": 51712,
+    "keys": 544,
+    "n_atoms": 16,
+    "state_norm": 0,
+    "total": 2500362
+  },
+  "per_cell": {
+    "P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.022091442719101906,
+      "closed_map_final_dist_to_target": 0.27734798192977905,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P1_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.01161260437220335,
+      "closed_map_final_dist_to_target": 0.3028380870819092,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P1_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.025626931339502335,
+      "closed_map_final_dist_to_target": 0.25869324803352356,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P1_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0477835014462471,
+      "closed_map_final_dist_to_target": 0.2702937126159668,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P1_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.004835018888115883,
+      "closed_map_final_dist_to_target": 0.2712792456150055,
+      "level": "L2",
+      "set": "unseen_L2"
+    },
+    "P1_P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.01685432903468609,
+      "closed_map_final_dist_to_target": 0.28812047839164734,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P1_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.03232276439666748,
+      "closed_map_final_dist_to_target": 0.31119391322135925,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P1_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.010394266806542873,
+      "closed_map_final_dist_to_target": 0.2835843563079834,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P1_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.005919180810451508,
+      "closed_map_final_dist_to_target": 0.27282485365867615,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.04920941963791847,
+      "closed_map_final_dist_to_target": 0.24843458831310272,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P2_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.060340482741594315,
+      "closed_map_final_dist_to_target": 0.25590550899505615,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P2_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.07842496037483215,
+      "closed_map_final_dist_to_target": 0.24037672579288483,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P2_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.07494565844535828,
+      "closed_map_final_dist_to_target": 0.2199210375547409,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P2_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0609261579811573,
+      "closed_map_final_dist_to_target": 0.2554033100605011,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P2_P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.062051720917224884,
+      "closed_map_final_dist_to_target": 0.26196566224098206,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P2_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.09820030629634857,
+      "closed_map_final_dist_to_target": 0.2764796316623688,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P2_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.047207366675138474,
+      "closed_map_final_dist_to_target": 0.2509932219982147,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P2_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.042539894580841064,
+      "closed_map_final_dist_to_target": 0.25801482796669006,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.05256066843867302,
+      "closed_map_final_dist_to_target": 0.24741452932357788,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P3_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.04325588047504425,
+      "closed_map_final_dist_to_target": 0.2719396948814392,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P3_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.07542645931243896,
+      "closed_map_final_dist_to_target": 0.22766952216625214,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P3_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.08075221627950668,
+      "closed_map_final_dist_to_target": 0.2573593258857727,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P3_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.015918489545583725,
+      "closed_map_final_dist_to_target": 0.277832955121994,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P3_P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0611652210354805,
+      "closed_map_final_dist_to_target": 0.25636523962020874,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P3_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.07918573915958405,
+      "closed_map_final_dist_to_target": 0.28079473972320557,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P3_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.042388174682855606,
+      "closed_map_final_dist_to_target": 0.2673458755016327,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P3_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.05883638560771942,
+      "closed_map_final_dist_to_target": 0.25159433484077454,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.017516665160655975,
+      "closed_map_final_dist_to_target": 0.2682555317878723,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P4_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.010965683497488499,
+      "closed_map_final_dist_to_target": 0.2991081178188324,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P4_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.05315934866666794,
+      "closed_map_final_dist_to_target": 0.2461397796869278,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P4_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0477372445166111,
+      "closed_map_final_dist_to_target": 0.25377365946769714,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P4_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.005017314571887255,
+      "closed_map_final_dist_to_target": 0.28367066383361816,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P4_P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.022837189957499504,
+      "closed_map_final_dist_to_target": 0.2705112397670746,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P4_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.03278621658682823,
+      "closed_map_final_dist_to_target": 0.31147363781929016,
+      "level": "L2",
+      "set": "unseen_L2"
+    },
+    "P4_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.006196661852300167,
+      "closed_map_final_dist_to_target": 0.28663718700408936,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P4_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.02726852335035801,
+      "closed_map_final_dist_to_target": 0.2674287259578705,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.02410534769296646,
+      "closed_map_final_dist_to_target": 0.2731792628765106,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P5_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.01165847945958376,
+      "closed_map_final_dist_to_target": 0.2844128906726837,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P5_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.05911726504564285,
+      "closed_map_final_dist_to_target": 0.24789047241210938,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P5_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.06623142212629318,
+      "closed_map_final_dist_to_target": 0.2527502775192261,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P5_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.016701556742191315,
+      "closed_map_final_dist_to_target": 0.28618380427360535,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P5_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.021159430965781212,
+      "closed_map_final_dist_to_target": 0.3469129502773285,
+      "level": "L2",
+      "set": "unseen_L2"
+    },
+    "P5_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.010720930062234402,
+      "closed_map_final_dist_to_target": 0.28462663292884827,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P5_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.023686787113547325,
+      "closed_map_final_dist_to_target": 0.20042984187602997,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P6": {
+      "acc_hard": 0.25,
+      "acc_soft": 0.125,
+      "closed_map_error": 0.043356187641620636,
+      "closed_map_final_dist_to_target": 0.28982099890708923,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P6_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0,
+      "closed_map_final_dist_to_target": 0.33233633637428284,
+      "level": "L2",
+      "set": "unseen_L2"
+    },
+    "P6_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.09632238000631332,
+      "closed_map_final_dist_to_target": 0.2696625888347626,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P6_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.07895137369632721,
+      "closed_map_final_dist_to_target": 0.27329590916633606,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P6_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.03191286697983742,
+      "closed_map_final_dist_to_target": 0.31910428404808044,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P6_P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.04653337225317955,
+      "closed_map_final_dist_to_target": 0.32523176074028015,
+      "level": "L2",
+      "set": "unseen_L2"
+    },
+    "P6_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.01906098611652851,
+      "closed_map_final_dist_to_target": 0.3397761881351471,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P6_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.03082135319709778,
+      "closed_map_final_dist_to_target": 0.30395177006721497,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P6_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.03800905495882034,
+      "closed_map_final_dist_to_target": 0.3154224455356598,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.011204279959201813,
+      "closed_map_final_dist_to_target": 0.26913535594940186,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P7_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.027246946468949318,
+      "closed_map_final_dist_to_target": 0.2771892547607422,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P7_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.03387260064482689,
+      "closed_map_final_dist_to_target": 0.26045262813568115,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P7_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.051999494433403015,
+      "closed_map_final_dist_to_target": 0.24670083820819855,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P7_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.011146302334964275,
+      "closed_map_final_dist_to_target": 0.27814242243766785,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P7_P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.011596123687922955,
+      "closed_map_final_dist_to_target": 0.2745860815048218,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P7_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.02340145967900753,
+      "closed_map_final_dist_to_target": 0.3164607882499695,
+      "level": "L1",
+      "set": "unseen_L1"
+    },
+    "P7_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0,
+      "closed_map_final_dist_to_target": 0.28075048327445984,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P7_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.03305578604340553,
+      "closed_map_final_dist_to_target": 0.261333167552948,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0051225642673671246,
+      "closed_map_final_dist_to_target": 0.2670041620731354,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P8_P1": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0,
+      "closed_map_final_dist_to_target": 0.2828834652900696,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P8_P2": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.060169901698827744,
+      "closed_map_final_dist_to_target": 0.24459929764270782,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P8_P3": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.054287493228912354,
+      "closed_map_final_dist_to_target": 0.2540683150291443,
+      "level": "L3",
+      "set": "unseen_L3"
+    },
+    "P8_P4": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.027079559862613678,
+      "closed_map_final_dist_to_target": 0.2707172930240631,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P8_P5": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.02199079655110836,
+      "closed_map_final_dist_to_target": 0.18995387852191925,
+      "level": "L2",
+      "set": "unseen_L2"
+    },
+    "P8_P6": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.026087624952197075,
+      "closed_map_final_dist_to_target": 0.31377819180488586,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P8_P7": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.0220353826880455,
+      "closed_map_final_dist_to_target": 0.2721213400363922,
+      "level": "train",
+      "set": "seen_heldout"
+    },
+    "P8_P8": {
+      "acc_hard": 0.0,
+      "acc_soft": 0.0,
+      "closed_map_error": 0.01678747683763504,
+      "closed_map_final_dist_to_target": 0.2587977945804596,
+      "level": "train",
+      "set": "seen_heldout"
+    }
+  },
+  "seed": 2,
+  "smoke": true,
+  "soft_hard_gap_seen": -0.002976190476190476,
+  "standalone_best_acc_mean_in_use": 0.005208333333333333,
+  "standalone_best_candidates": {
+    "0": "surf:P1",
+    "1": "sub:R",
+    "10": "surf:P6",
+    "11": "surf:P6",
+    "12": "identity",
+    "13": "surf:P6",
+    "14": "surf:P6",
+    "15": "surf:P6",
+    "2": "surf:P3",
+    "3": "sub:R",
+    "4": "surf:P5",
+    "5": "surf:P6",
+    "6": "sub:R",
+    "7": "surf:P8",
+    "8": "surf:P6",
+    "9": "identity"
+  },
+  "transfer_task_row_std_mean": 0.0,
+  "transfer_transplant_row_std_mean": 0.0017224943431410093
+}
