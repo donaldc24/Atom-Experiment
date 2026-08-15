@@ -31,9 +31,24 @@ HEADLINE = (
     "census_atoms_in_use", "census_steps_per_token", "census_pass_rate",
     "ablation_cv_median", "standalone_best_acc_mean_in_use",
     "closed_map_atom_matched_error", "closed_map_atom_coverage",
-    "decodability_subop_from_delta", "decodability_subop_h0_floor",
+    # C1: renamed - these measure task-identity leakage, not sub-op structure
+    "leakage_subop_identity_from_delta", "leakage_subop_identity_h0_floor",
     "decodability_surface_from_delta", "decodability_surface_h0_floor",
     "transfer_task_row_std_mean", "transfer_transplant_row_std_mean",
+    # C2: the granularity instrument
+    "probe_transfer_subop_mean", "probe_transfer_subop_mean_taskscope",
+    # C3: canonical substitution, per level (train = seen_heldout pairs)
+    "canon_route_agree_hard_train", "canon_route_agree_hard_L1",
+    "canon_route_agree_hard_L2", "canon_route_agree_hard_L3",
+    "canon_repair_acc_train", "canon_repair_acc_L1",
+    "canon_repair_acc_L2", "canon_repair_acc_L3",
+    "canon_repair_delta_train", "canon_repair_delta_L1",
+    "canon_repair_delta_L2", "canon_repair_delta_L3",
+    "canon_route_kl_train", "canon_route_kl_L1",
+    "canon_route_kl_L2", "canon_route_kl_L3",
+    # C4: decomposed transplant variance (+ the legacy conflated number)
+    "transfer_partner_variance", "transfer_input_variance",
+    "transfer_row_std_legacy",
 )
 
 

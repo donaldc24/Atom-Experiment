@@ -115,11 +115,28 @@ def analyze(run_dir: Path) -> dict:
         metrics["closed_map_atom_coverage"] = cma["coverage"]
 
         dec = read_json(panel_dir / "decodability.json")
-        for key in ("subop_from_delta", "subop_from_state", "subop_h0_floor",
-                    "surface_from_delta", "surface_from_state", "surface_h0_floor"):
-            metrics[f"decodability_{key}"] = dec.get(key, {}).get("score")
-            metrics[f"decodability_{key}_shuffled"] = dec.get(
+        # AMENDMENT C1: the sub-op keys are renamed to say what they measure
+        # (task-identity leakage). The legacy decodability_subop_* keys are
+        # still emitted as deprecated aliases for one release so older
+        # summaries keep parsing; they carry identical values by construction.
+        for key in ("leakage_subop_identity_from_delta",
+                    "leakage_subop_identity_from_state",
+                    "leakage_subop_identity_h0_floor",
+                    "surface_from_delta", "surface_from_state",
+                    "surface_h0_floor"):
+            prefix = "" if key.startswith("leakage_") else "decodability_"
+            metrics[f"{prefix}{key}"] = dec.get(key, {}).get("score")
+            metrics[f"{prefix}{key}_shuffled"] = dec.get(
                 key + "_shuffled", {}).get("score")
+        for legacy, current in dec.get("deprecated_aliases", {}).items():
+            metrics[legacy] = metrics.get(current)
+            metrics[f"{legacy}_shuffled"] = metrics.get(f"{current}_shuffled")
+        metrics["deprecated_alias_note"] = (
+            "decodability_subop_* are DEPRECATED aliases of "
+            "leakage_subop_identity_* (amendment C1): the probe measures "
+            "task-identity leakage into deltas, not sub-op localization. "
+            "Removed after one release; use leakage_subop_identity_* and, for "
+            "granularity, probe_transfer_subop_*.")
 
         tr = read_json(panel_dir / "transfer.json")
         stds = [v for v in tr["task_row_stats"]["row_stds"]
@@ -129,6 +146,36 @@ def analyze(run_dir: Path) -> dict:
                  if not np.isnan(v)]
         metrics["transfer_transplant_row_std_mean"] = (
             float(np.mean(tstds)) if tstds else None)
+        # AMENDMENT C4: decomposition of the conflated row-std.
+        vd = tr.get("variance_decomposition")
+        if vd:
+            metrics["transfer_partner_variance"] = vd["partner_variance_mean"]
+            metrics["transfer_input_variance"] = vd["input_variance_mean"]
+            metrics["transfer_row_std_legacy"] = \
+                metrics["transfer_transplant_row_std_mean"]
+
+        # AMENDMENT C2: transfer-split sub-op probes (granularity instrument).
+        tsp_path = panel_dir / "transfer_split_subop.json"
+        if tsp_path.exists():
+            tsp = read_json(tsp_path)
+            metrics["probe_transfer_subop_mean"] = tsp.get("mean_across_subops")
+            metrics["probe_transfer_subop_mean_taskscope"] = tsp.get(
+                "mean_across_subops_taskscope")
+            for sub, entry in tsp.get("per_subop", {}).items():
+                metrics[f"probe_transfer_subop_{sub}_acc"] = \
+                    entry.get("mean_balanced_acc")
+
+        # AMENDMENT C3: canonical substitution.
+        canon_path = panel_dir / "canonical_substitution.json"
+        if canon_path.exists():
+            canon = read_json(canon_path)
+            metrics["canon_variants_agree"] = canon.get("all_variants_agree")
+            for level, block in canon.get("per_level", {}).items():
+                for k in ("canon_route_agree_hard", "canon_route_kl",
+                          "canon_repair_acc", "canon_repair_delta"):
+                    for tag in ("", "_alt"):
+                        metrics[f"{k}{tag}_{level}"] = block.get(k + tag)
+                metrics[f"canon_baseline_acc_{level}"] = block.get("baseline_acc")
 
     metrics["param_counts"] = read_json(run_dir / "param_counts.json")
     metrics["init_calibration"] = read_json(run_dir / "init_calibration.json")

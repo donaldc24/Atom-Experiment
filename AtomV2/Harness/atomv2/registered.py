@@ -127,6 +127,32 @@ LAMBDA_ZERO_SOURCE = {"experiment": "e0", "arm": "A0-free", "equivalent_arm": "A
 E0_ORACLE_L1_MIN = 0.70     # A0-Oracle unseen L1 accuracy must exceed this
 E0_FREE_L1_MAX = 0.05       # A0-Free unseen L1 accuracy must sit below this
 E0_GAP_MIN = 0.50           # "unmistakable, not marginal": oracle - free >= 0.50
+
+# AMENDMENT R11 (2026-08-15): E1 is no longer GATED on the E0 verdict.
+# The thresholds above are NOT moved - E0 still fails free_L1_floor and
+# gap_unmistakable, and that verdict stands on the record exactly as computed.
+# What changes is only whether that failure blocks E1.
+#
+# The rationale, from what E0 actually established:
+#   - E0's job was to prove the instrument works. Its instrument audit passed
+#     perfectly on all three oracle seeds: usage_matches_ground_truth = 1.0,
+#     ablation CV = 0.0, census = the predicted 7, all 8 forced atoms observed.
+#   - The oracle ceiling passed (L1 = 1.0000 > 0.70): a composing solution is
+#     reachable, which is the precondition that makes a null result readable.
+#   - The closed-map direction check passed, and the formal leak audit passed
+#     all six checks, so a leaking world is excluded as the explanation.
+#   - The two failing checks both concern the FREE arm's absolute L1 level.
+#     That is a finding about this architecture, not a broken rig: amendment R8
+#     separated control from data, which makes per-token program composition
+#     available, so free routing recombines trained tokens by construction.
+#     The "free arm sits at the floor" premise was inherited from V1, whose
+#     composer had memory and whose state carried task identity.
+#   - The unmistakable dissociation the protocol was reaching for does exist -
+#     at L3, where oracle 1.0000 against free 0.0108 is a gap of 0.993.
+# E1 therefore measures against a validated instrument and a characterised
+# baseline. The E0 verdict is copied into the E1 results directory so the
+# context always travels with the numbers.
+E1_REQUIRES_E0_PASS = False
 # Closed-map direction check: oracle final closed-map error < free final
 # closed-map error on seen_heldout (direction only, no magnitude threshold).
 

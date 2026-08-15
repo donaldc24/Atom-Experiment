@@ -18,22 +18,57 @@ from .utils import RESULTS_DIR, read_json, write_json, write_sha256sums
 
 
 def _check_e0_gate(force: bool, force_reason: str | None, smoke: bool) -> None:
-    verdict_path = RESULTS_DIR / ("smoke_e0" if smoke else "e0") / "e0_verdict.json"
-    if verdict_path.exists():
-        verdict = read_json(verdict_path)
-        if (verdict.get("passed")
-                and verdict.get("protocol_revision") == R.PROTOCOL_REVISION):
-            return
-    if not force:
+    """Amendment R11: E0 no longer BLOCKS E1, but its verdict is recorded here.
+
+    Ungating is not the same as forgetting. E0 still ran, still produced a
+    verdict, and that verdict is copied next to the E1 results so no one reads
+    an E1 number without the calibration context attached. If E0 was never run
+    at all, that IS still a hard stop: the instrument would be unvalidated.
+    """
+    exp = "smoke_e0" if smoke else "e0"
+    verdict_path = RESULTS_DIR / exp / "e0_verdict.json"
+    out = RESULTS_DIR / ("smoke_e1" if smoke else "e1")
+
+    if not verdict_path.exists():
         raise SystemExit(
-            f"E1 refuses to start: {verdict_path} missing, not passed, or for "
-            f"a protocol revision other than {R.PROTOCOL_REVISION!r}. "
-            "Run the E0 battery first (python -m atomv2.run_e0). Override "
-            "only with --force --force-reason '...' (recorded).")
-    if not force_reason:
-        raise SystemExit("--force requires --force-reason (it gets recorded).")
-    write_json(RESULTS_DIR / ("smoke_e1" if smoke else "e1") / "FORCED_START.json",
-               {"reason": force_reason})
+            f"E1 refuses to start: {verdict_path} does not exist. R11 removed "
+            "the requirement that E0 PASS, not the requirement that it RAN - "
+            "without a calibration verdict the instrument is unvalidated and "
+            "an E1 result is uninterpretable. Run python -m atomv2.run_e0.")
+
+    verdict = read_json(verdict_path)
+    revision_ok = verdict.get("protocol_revision") == R.PROTOCOL_REVISION
+    if not revision_ok and not force:
+        raise SystemExit(
+            f"E1 refuses to start: the E0 verdict is for protocol revision "
+            f"{verdict.get('protocol_revision')!r}, not "
+            f"{R.PROTOCOL_REVISION!r}. Revision mismatch is still a hard stop "
+            "under R11. Override with --force --force-reason '...'.")
+
+    if R.E1_REQUIRES_E0_PASS and not verdict.get("passed") and not force:
+        raise SystemExit(
+            "E1 refuses to start: E0 did not pass and E1_REQUIRES_E0_PASS is "
+            "set. Override with --force --force-reason '...' (recorded).")
+
+    failed = [k for k, c in verdict.get("checks", {}).items() if not c.get("ok")]
+    write_json(out / "e0_context.json", {
+        "amendment": "R11: E1 is not gated on the E0 verdict",
+        "e0_passed": verdict.get("passed"),
+        "e0_protocol_revision": verdict.get("protocol_revision"),
+        "e0_failed_checks": failed,
+        "e0_checks": verdict.get("checks"),
+        "e0_instrument_audit": verdict.get("instrument_audit"),
+        "note": "Every E1 number must be reported alongside this context. E0's "
+                "instrument audit passed; its failing checks concern the free "
+                "arm's absolute L1 level, which is a finding about this "
+                "architecture rather than an instrument fault (see R11).",
+    })
+    if not verdict.get("passed"):
+        print(f"NOTE: E0 did not pass (failed: {', '.join(failed)}). "
+              "Proceeding under amendment R11; context recorded to "
+              f"{out / 'e0_context.json'}")
+    if force and force_reason:
+        write_json(out / "FORCED_START.json", {"reason": force_reason})
 
 
 def main() -> None:

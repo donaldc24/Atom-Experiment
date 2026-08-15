@@ -204,14 +204,34 @@ class AtomModel(nn.Module):
         budget are dead: state frozen, no rent, choice logged as -1.
         """
         assert mode in self.ROUTING_MODES
-        b = digits.shape[0]
         state = self.code(digits)
         live_all = (torch.arange(N_STEPS)[None, :]
                     < (n_tokens * R.MICRO_STEPS)[:, None])       # [B,6]
+        return self._run_steps(state, tokens, live_all, mode, tau, forced,
+                               ablate, atom_mask, generator, start_step=0)
 
+    def _run_steps(self, state, tokens, live_all, mode, tau, forced, ablate,
+                   atom_mask, generator, start_step=0):
+        """The composition loop. THE single stepping code path.
+
+        forward() enters it at step 0 from code(digits); execute_from_state()
+        enters it at a token boundary from an injected state. Steps before
+        start_step are not executed at all - they contribute placeholder
+        entries (state unchanged, choice -1, zero logits/mass) so every
+        returned tensor keeps full [B, N_STEPS] indexing.
+        """
         states = [state]
         route_logits, choices, soft_atom_mass = [], [], []
         for k in range(N_STEPS):
+            if k < start_step:
+                states.append(state)
+                route_logits.append(torch.zeros(
+                    state.shape[0], self.cfg.n_atoms + 1, dtype=state.dtype))
+                choices.append(torch.full((state.shape[0],), -1,
+                                          dtype=torch.int64))
+                soft_atom_mass.append(torch.zeros(state.shape[0],
+                                                  dtype=state.dtype))
+                continue
             live = live_all[:, k]
             token_pos = k // R.MICRO_STEPS
             micro_step = k % R.MICRO_STEPS
@@ -253,6 +273,31 @@ class AtomModel(nn.Module):
             "soft_atom_mass": torch.stack(soft_atom_mass, dim=1),  # [B,6]
             "live": live_all,                                    # [B,6]
         }
+
+    def execute_from_state(self, state, tokens, n_tokens, start_token_idx,
+                           mode="hard", tau=1.0, forced=None, ablate=None,
+                           atom_mask=None):
+        """PANEL-SIDE ONLY. Continue execution from an injected state.
+
+        Used by the canonical substitution test: replace the state at a token
+        boundary with the encoding of the ground-truth partial result, then run
+        the remaining token's micro-steps through the SAME loop forward() uses.
+
+        state: [B, state_dim] injected at the boundary before token
+            start_token_idx. start_token_idx=0 with state=code(x) reproduces
+            forward() exactly (asserted in tests).
+        Returns forward()'s dict shape; entries for steps before the boundary
+        are placeholders, not executed.
+        """
+        assert mode in self.ROUTING_MODES
+        assert not self.training, (
+            "execute_from_state is a read-only panel probe; the model must be "
+            "in eval mode (probes read, never write)")
+        live_all = (torch.arange(N_STEPS)[None, :]
+                    < (n_tokens * R.MICRO_STEPS)[:, None])
+        return self._run_steps(state, tokens, live_all, mode, tau, forced,
+                               ablate, atom_mask, generator=None,
+                               start_step=start_token_idx * R.MICRO_STEPS)
 
 
 def param_counts(model: AtomModel) -> dict:
