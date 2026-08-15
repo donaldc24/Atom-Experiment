@@ -50,6 +50,37 @@ def test_run_e1_default_plan_omits_a1():
 
 # --- R10 --------------------------------------------------------------------
 
+def test_status_path_keeps_the_leading_space_column():
+    """Regression: `_git(...).strip()` ate the first porcelain line's leading
+    space, so line[3:] lost a character. An output path could then be misread
+    as source and spuriously refuse the run."""
+    # X is a SPACE for worktree-only modifications - the load-bearing case
+    assert utils._status_path(" M AtomV2/runs/e0/x/metrics.json") == \
+        "AtomV2/runs/e0/x/metrics.json"
+    assert utils._is_output_path(
+        utils._status_path(" M AtomV2/runs/e0/x/metrics.json"))
+    # staged, untracked, and renamed forms
+    assert utils._status_path("M  AtomV2/Harness/atomv2/model.py") == \
+        "AtomV2/Harness/atomv2/model.py"
+    assert utils._status_path("?? AtomV2/results/e1/") == "AtomV2/results/e1/"
+    assert utils._status_path("R  old/path.py -> AtomV2/Harness/new.py") == \
+        "AtomV2/Harness/new.py"
+    # a genuinely non-output source file is still detected as source
+    assert not utils._is_output_path(
+        utils._status_path(" M AtomV2/H1Experiments.md"))
+
+
+def test_git_status_is_read_without_stripping():
+    raw = utils._git("status", "--porcelain", "--untracked-files=all",
+                     strip=False)
+    stripped = utils._git("status", "--porcelain", "--untracked-files=all")
+    if raw.splitlines() and raw.splitlines()[0].startswith(" "):
+        # the unstripped read must preserve the column that strip() removed
+        assert raw.splitlines()[0] != stripped.splitlines()[0]
+    for line in raw.splitlines():
+        assert len(line) > 3 and line[2] == " "
+
+
 def test_source_fingerprint_is_content_based(tmp_path, monkeypatch):
     monkeypatch.setattr(utils, "HARNESS_ROOT", tmp_path)
     (tmp_path / "atomv2").mkdir()
