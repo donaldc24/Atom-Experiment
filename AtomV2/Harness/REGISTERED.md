@@ -167,6 +167,67 @@ This amendment is authorized by the E0 debugging clause. It freezes if the
 replacement E0 passes. The failed run is retained as pre-amendment evidence
 and must never be pooled with amended runs.
 
+## R9 — A1 is not re-run in the E1 battery (2026-08-15)
+
+E0's **A0-free arm is configurationally identical to E1's A1**. Verified
+mechanically: the two resolved configs differ only in the `arm` and
+`experiment` strings — same λ_use = 0, same free routing, same data, split,
+seeds, schedule, and losses. Re-running A1 would spend compute reproducing an
+existing result and would attach two arm names to one condition.
+
+- The E1 battery is `("A2", "A3", "A4")` (`registered.E1_BATTERY_ARMS`).
+  `run_e1` refuses `--arms A1` with a pointer to where that data lives.
+- `LAMBDA_GRID` is **unchanged**; A1 remains registered as the λ=0 cell and
+  `config_for_arm("A1")` still resolves (tests construct it).
+- E1 aggregation carries the λ=0 numbers as a **labelled reference row**
+  (`lambda_zero_reference.json`, and a `A1=A0-free (ref, from e0)` row in
+  `summary.md`), never pooled into the battery — no table may imply it was run
+  under E1.
+
+Consequence to state plainly when reporting E1: the λ=0 cell was run under the
+E0 protocol revision, so it is a reference point, not a within-battery arm.
+
+## R10 — Pooling identity is a harness-source content fingerprint (2026-08-15)
+
+The prior guard compared a dirty-tree snapshot fingerprint that (a) also
+covered files which cannot change a number — `.claude/*`, editor config, docs —
+and (b) **changed representation when an unmodified tree went from
+dirty-untracked to committed**. The five completed E0 runs recorded
+`dirty_source_sha256 = 46c8ed00…` at dirty `d354ffd`; committing the harness as
+`ff6a1b3` meant any further run recorded a clean `git_sha` instead, so
+byte-identical implementations were unpoolable. Result identity is a property
+of the code that runs, not of whether it happens to be committed yet.
+
+- Pooling now keys on `harness_source_sha256`: a content fingerprint over
+  `atomv2/*.py` and `splits/*.json` — the modules a run imports plus the frozen
+  split. Computed identically for clean and dirty trees.
+- **Deliberately excluded:** tests (never imported by a run), README/REGISTERED
+  (documentation), everything outside `AtomV2/Harness`.
+- **Nothing is discarded.** `git_sha`, `git_dirty`, `git_source_dirty` and the
+  dirty-snapshot fingerprint are all still written to `env.json`. R10 narrows
+  only the value that governs pooling, and the dirty-tree *refusal* (D33) is
+  untouched.
+- `collect()` **refuses** runs lacking the key rather than falling back to the
+  old scheme, so the two schemes can never be silently mixed.
+- Pre-R10 runs are repaired with `python -m atomv2.backfill --rev <commit>
+  --reason "…"`, which computes the fingerprint from the harness source *as
+  committed* at an explicit revision and marks it
+  `harness_source_provenance.recorded_by = "backfill"` — a backfilled value is
+  never indistinguishable from one a run recorded about itself. It rewrites
+  provenance fields in `env.json` only, then regenerates `SHA256SUMS`; no
+  artifact any metric derives from is touched.
+
+Evidence required before backfilling, and the evidence used here: A0-free seed
+2 was re-run from `ff6a1b3` after being interrupted at step 14,800, and its
+train_log reproduced the interrupted run's losses **bit-for-bit** over all
+14,800 shared steps. That establishes the committed source is behaviourally
+identical to the source that produced the batch, so recording `ff6a1b3` as the
+source identity of all six runs is an observation, not an assumption.
+
+Known limitation: the fingerprint covers file contents, not the interpreter or
+library versions. Those remain recorded separately in `env.json` (python,
+torch, numpy, platform, thread counts) and the hostname guard still applies.
+
 ## Errata found while building (doc bugs, not code bugs)
 
 - **SplitMath.md G6 table, row P2_P5**: says `train`, but the doc's own Split

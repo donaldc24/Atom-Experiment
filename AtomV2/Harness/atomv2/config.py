@@ -24,7 +24,11 @@ from . import registered as R
 from .utils import RUNS_DIR, git_info
 
 E0_ARMS = ("A0-oracle", "A0-free")
+# Every arm the lambda grid defines, all still constructible.
 E1_ARMS = tuple(R.LAMBDA_GRID)  # ('A1','A2','A3','A4')
+# What the E1 battery actually RUNS. A1 is excluded per amendment R9: E0's
+# A0-free is the same condition, so the lambda=0 row is sourced from there.
+E1_BATTERY_ARMS = R.E1_BATTERY_ARMS  # ('A2','A3','A4')
 
 
 @dataclass

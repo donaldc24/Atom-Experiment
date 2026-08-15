@@ -35,6 +35,60 @@ RESULTS_DIR = V2_ROOT / "results"
 # block a run: they are batch OUTPUT, not source.
 OUTPUT_PREFIXES = ("AtomV2/runs", "AtomV2/results")
 
+# AMENDMENT R10: the identity used to decide whether two runs may be POOLED is
+# a content fingerprint of the files that can actually change a number - the
+# harness modules and the frozen split. The older dirty-tree fingerprint also
+# covered incidental files (.claude/*, editor config, docs) and, worse, changed
+# representation when an unmodified tree went from dirty-untracked to
+# committed, which made byte-identical implementations look like different
+# ones. Result identity is a property of the code that runs, not of whether it
+# happens to be committed yet.
+#
+# Deliberately EXCLUDED: tests (never imported by a run), README/REGISTERED
+# (documentation), and everything outside AtomV2/Harness. Provenance is still
+# recorded in full - git_sha, git_dirty, and the dirty-snapshot fingerprint are
+# all still written to env.json. This narrower value governs pooling only.
+HARNESS_SOURCE_GLOBS = ("atomv2/*.py", "splits/*.json")
+
+
+def _hash_source_files(files: dict[str, bytes]) -> str:
+    """Fingerprint a {relative_posix_path: bytes} map, order-independent."""
+    h = hashlib.sha256()
+    h.update(b"atomv2-harness-source-v1\0")
+    for rel in sorted(files):
+        h.update(rel.encode() + b"\0")
+        h.update(hashlib.sha256(files[rel]).hexdigest().encode() + b"\0")
+    return h.hexdigest()
+
+
+def harness_source_sha256() -> str:
+    """Content fingerprint of the working tree's harness source."""
+    files = {}
+    for pattern in HARNESS_SOURCE_GLOBS:
+        for p in HARNESS_ROOT.glob(pattern):
+            if p.is_file():
+                files[p.relative_to(HARNESS_ROOT).as_posix()] = p.read_bytes()
+    return _hash_source_files(files)
+
+
+def harness_source_sha256_at(rev: str) -> str:
+    """Same fingerprint for the harness source as committed at `rev`.
+
+    Lets a run's source identity be established from a commit rather than from
+    whatever the working tree happens to hold now.
+    """
+    prefix = "AtomV2/Harness/"
+    listing = _git("ls-tree", "-r", "--name-only", rev, "--", prefix)
+    files = {}
+    for path in listing.splitlines():
+        rel = path[len(prefix):]
+        if not any(Path(rel).match(g) for g in HARNESS_SOURCE_GLOBS):
+            continue
+        blob = subprocess.run(["git", "show", f"{rev}:{path}"], cwd=HARNESS_ROOT,
+                              capture_output=True, check=True).stdout
+        files[rel] = blob
+    return _hash_source_files(files)
+
 
 def _is_output_path(rel: str) -> bool:
     rel = rel.replace("\\", "/")
@@ -221,6 +275,8 @@ def env_info() -> dict:
         "torch_num_threads": torch.get_num_threads(),
         "deterministic_algorithms": True,
         "utc_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        # Governs pooling (amendment R10); full provenance is in git_info().
+        "harness_source_sha256": harness_source_sha256(),
     }
 
 

@@ -108,8 +108,18 @@ PANEL_STEPS = (5000, 10_000, 15_000)   # + final; full metric panel checkpoints
 LOG_EVERY = 50
 SEEDS = (0, 1, 2)           # one master seed per run controls EVERYTHING
 
-# E1 arms: lambda_use grid (rent per atom APPLICATION; pass exempt)
+# E1 arms: lambda_use grid (rent per atom APPLICATION; pass exempt).
+# The grid itself is unchanged from registration; A1 is the lambda=0 cell.
 LAMBDA_GRID = {"A1": 0.0, "A2": 0.001, "A3": 0.01, "A4": 0.1}
+
+# AMENDMENT R9: A1 is NOT re-run as part of the E1 battery. E0's A0-free arm is
+# configurationally identical to A1 (verified: the resolved configs differ only
+# in the `arm` and `experiment` strings), so re-running it would spend compute
+# to reproduce an existing result and would put two names on one condition.
+# A1 stays constructible - config_for_arm("A1") still resolves, tests use it,
+# and the lambda=0 row is sourced from the E0 A0-free runs, labelled as such.
+E1_BATTERY_ARMS = ("A2", "A3", "A4")
+LAMBDA_ZERO_SOURCE = {"experiment": "e0", "arm": "A0-free", "equivalent_arm": "A1"}
 
 # ---------------------------------------------------------------------------
 # E0 calibration (H1Experiments.md "Experiment 0") - qualitative pattern match

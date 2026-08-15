@@ -1,0 +1,55 @@
+{
+  "checks": {
+    "closed_map_target_direction": {
+      "free": 1.1822157738700747,
+      "note": "direction only: oracle final distance-to-target < free; nearest-prefix headline remains reported but is all-pass gameable",
+      "ok": true,
+      "oracle": 0.01661741506633541
+    },
+    "free_L1_floor": {
+      "max": 0.05,
+      "ok": false,
+      "value": 0.8066666666666666
+    },
+    "gap_unmistakable": {
+      "gap": 0.19333333333333336,
+      "min": 0.5,
+      "ok": false
+    },
+    "oracle_L1_high": {
+      "min": 0.7,
+      "ok": true,
+      "value": 1.0
+    }
+  },
+  "instrument_audit": {
+    "A0-oracle_seed0": {
+      "all_8_forced_atoms_observed": true,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": 0.0,
+      "registered_census_expected": 7,
+      "registered_census_matches_expected": true,
+      "usage_matches_ground_truth": 1.0
+    },
+    "A0-oracle_seed1": {
+      "all_8_forced_atoms_observed": true,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": 0.0,
+      "registered_census_expected": 7,
+      "registered_census_matches_expected": true,
+      "usage_matches_ground_truth": 1.0
+    },
+    "A0-oracle_seed2": {
+      "all_8_forced_atoms_observed": true,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": 0.0,
+      "registered_census_expected": 7,
+      "registered_census_matches_expected": true,
+      "usage_matches_ground_truth": 1.0
+    }
+  },
+  "n_runs": 6,
+  "note": "qualitative pattern match, NOT number match - the world changed (length 6 not 8, 16 slots not 8, micro-steps added)",
+  "passed": false,
+  "protocol_revision": "e0a-control-separated"
+}

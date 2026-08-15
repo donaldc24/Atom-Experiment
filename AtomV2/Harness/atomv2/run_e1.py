@@ -11,7 +11,7 @@ import argparse
 from . import registered as R
 from .aggregate import aggregate
 from .analyze import analyze
-from .config import E1_ARMS, config_for_arm, run_dir_for
+from .config import E1_BATTERY_ARMS, config_for_arm, run_dir_for
 from .panel import run_all_panels
 from .train import train_run
 from .utils import RESULTS_DIR, read_json, write_json, write_sha256sums
@@ -40,12 +40,25 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Run the E1 battery (lambda_use sweep)")
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--seeds", type=int, nargs="*", default=list(R.SEEDS))
-    ap.add_argument("--arms", nargs="*", default=list(E1_ARMS))
+    ap.add_argument("--arms", nargs="*", default=list(E1_BATTERY_ARMS))
     ap.add_argument("--allow-dirty", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--force-reason", default=None)
     ap.add_argument("--plan", action="store_true")
     args = ap.parse_args()
+
+    # Amendment R9: A1 is the same condition as E0's A0-free. Running it here
+    # would spend compute reproducing an existing result and would attach two
+    # arm names to one condition in the summary tables.
+    if "A1" in args.arms:
+        raise SystemExit(
+            "A1 is not part of the E1 battery (amendment R9): it is "
+            "configurationally identical to E0's A0-free arm, which has "
+            "already been run. The lambda=0 row is sourced from "
+            f"{R.LAMBDA_ZERO_SOURCE['experiment']}/"
+            f"{R.LAMBDA_ZERO_SOURCE['arm']} and is labelled as such in the E1 "
+            "summary. Re-running it would duplicate a condition under a "
+            "second name.")
 
     batch = [(arm, seed) for arm in args.arms for seed in args.seeds]
     if args.plan:

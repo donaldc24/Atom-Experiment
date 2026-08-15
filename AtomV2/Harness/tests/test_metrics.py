@@ -143,7 +143,8 @@ def test_collect_rejects_duplicate_arm_seed(tmp_path, monkeypatch):
             "param_counts": {"composer": 1, "atoms_total": 2},
         })
         write_json(d / "env.json", {
-            "hostname": "test-host", "git_sha": "same-source"})
+            "hostname": "test-host", "git_sha": "same-source",
+            "harness_source_sha256": "same-source-content"})
     with pytest.raises(SystemExit, match="duplicate run key"):
         aggregate_mod.collect("e0")
 

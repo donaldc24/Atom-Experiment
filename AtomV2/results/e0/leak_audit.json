@@ -1,0 +1,183 @@
+{
+  "all_passed": true,
+  "checks": [
+    {
+      "all_runs_carry_exactly_those": true,
+      "check": "A_no_dax_pairs_in_training",
+      "dax": "P3",
+      "dax_pairs_in_seen_heldout": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-free_s2_e0a-control-separated_ff6a1b3": [],
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": []
+      },
+      "dax_pairs_in_train": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-free_s2_e0a-control-separated_ff6a1b3": [],
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": []
+      },
+      "dax_singleton_trained": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-free_s2_e0a-control-separated_ff6a1b3": true,
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": true
+      },
+      "n_dax_pairs_expected_in_unseen_L3": 15,
+      "note": "P3 as a SINGLETON is trained by design; only P3 PAIRS must be absent",
+      "ok": true
+    },
+    {
+      "all_runs_match_frozen": true,
+      "check": "B_split_hash_and_world_block",
+      "frozen_split_sha256": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff",
+      "note": "no world.json exists; the world block lives inside split_v2.json",
+      "ok": true,
+      "recorded_by_runs": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff",
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff",
+        "A0-free_s2_e0a-control-separated_ff6a1b3": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff",
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff",
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff",
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff"
+      },
+      "rederive_error": null,
+      "split_rederives_from_algebra": true,
+      "world_block_mismatches": []
+    },
+    {
+      "check": "C_dax_oversampling_is_presentation_frequency",
+      "dax_unique_count_equals_every_other_task": true,
+      "factor": 7,
+      "manifest_unique_count_for_dax": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": 1000,
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": 1000,
+        "A0-free_s2_e0a-control-separated_ff6a1b3": 1000,
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": 1000,
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": 1000,
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": 1000
+      },
+      "manifest_unique_counts_for_other_tasks": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [
+          1000
+        ],
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [
+          1000
+        ],
+        "A0-free_s2_e0a-control-separated_ff6a1b3": [
+          1000
+        ],
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [
+          1000
+        ],
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [
+          1000
+        ],
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": [
+          1000
+        ]
+      },
+      "note": "amendment R4: oversampling is presentation frequency; the manifest must show 1,000 unique examples for P3 like every other task, and the epoch array must repeat them 7x",
+      "ok": true,
+      "per_seed": {
+        "0": {
+          "blocks_are_exact_copies": true,
+          "expected_presentations": 7000,
+          "expected_total": 48000,
+          "expected_unique": 1000,
+          "presentations": 7000,
+          "total_presentations": 48000,
+          "unique_examples": 1000
+        },
+        "1": {
+          "blocks_are_exact_copies": true,
+          "expected_presentations": 7000,
+          "expected_total": 48000,
+          "expected_unique": 1000,
+          "presentations": 7000,
+          "total_presentations": 48000,
+          "unique_examples": 1000
+        },
+        "2": {
+          "blocks_are_exact_copies": true,
+          "expected_presentations": 7000,
+          "expected_total": 48000,
+          "expected_unique": 1000,
+          "presentations": 7000,
+          "total_presentations": 48000,
+          "unique_examples": 1000
+        }
+      }
+    },
+    {
+      "check": "D_seen_heldout_genuinely_fresh",
+      "note": "per-task disjointness is the guarantee; inputs may recur ACROSS tasks by birthday collision, which carries no answer",
+      "ok": true,
+      "per_seed": {
+        "0": {
+          "n_tasks": 42,
+          "task_sets_identical": true,
+          "tasks_with_duplicate_rows": {},
+          "tasks_with_input_overlap": {}
+        },
+        "1": {
+          "n_tasks": 42,
+          "task_sets_identical": true,
+          "tasks_with_duplicate_rows": {},
+          "tasks_with_input_overlap": {}
+        },
+        "2": {
+          "n_tasks": 42,
+          "task_sets_identical": true,
+          "tasks_with_duplicate_rows": {},
+          "tasks_with_input_overlap": {}
+        }
+      },
+      "tasks_whose_train_and_eval_hashes_collide": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-free_s2_e0a-control-separated_ff6a1b3": [],
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": [],
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": []
+      }
+    },
+    {
+      "check": "E_manifest_reproducible_from_config",
+      "note": "rebuilds each run's dataset from its saved config and compares content hashes: proves the data on record is what the current generator produces",
+      "ok": true,
+      "per_run": {
+        "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-free_s2_e0a-control-separated_ff6a1b3": true,
+        "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00": true,
+        "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00": true
+      }
+    },
+    {
+      "check": "F_no_heldout_function_is_trained",
+      "leaked_cells": {},
+      "n_train_functions": 41,
+      "note": "extensional check: a held-out cell computing the same function as a trained task would be training on test",
+      "ok": true
+    }
+  ],
+  "experiment": "e0",
+  "n_runs_audited": 6,
+  "protocol_revision": "e0a-control-separated",
+  "runs": [
+    "A0-free_s0_e0a-control-separated_d354ffd-dirty46c8ed00",
+    "A0-free_s1_e0a-control-separated_d354ffd-dirty46c8ed00",
+    "A0-free_s2_e0a-control-separated_ff6a1b3",
+    "A0-oracle_s0_e0a-control-separated_d354ffd-dirty46c8ed00",
+    "A0-oracle_s1_e0a-control-separated_d354ffd-dirty46c8ed00",
+    "A0-oracle_s2_e0a-control-separated_d354ffd-dirty46c8ed00"
+  ]
+}

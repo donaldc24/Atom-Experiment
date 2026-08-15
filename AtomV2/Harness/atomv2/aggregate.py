@@ -55,7 +55,19 @@ def collect(experiment: str, smoke: bool = False) -> list[dict]:
             raise SystemExit(
                 f"{run_dir}: protocol revision {revision!r} cannot be pooled "
                 f"with current revision {R.PROTOCOL_REVISION!r}")
-        source_ids.add(env.get("dirty_source_sha256") or env.get("git_sha", "unknown"))
+        # Amendment R10: pooling identity is the harness-source content
+        # fingerprint - the code that can change a number. Runs written before
+        # the key existed fall back to the old dirty-snapshot/commit id, which
+        # also covered incidental files; backfill them (atomv2.backfill) rather
+        # than pooling across the two schemes.
+        source = env.get("harness_source_sha256")
+        if source is None:
+            raise SystemExit(
+                f"{run_dir}: env.json predates the harness_source_sha256 "
+                "provenance key (amendment R10). Run "
+                "`python -m atomv2.backfill --rev <commit>` to record the "
+                "source identity of these runs before aggregating.")
+        source_ids.add(source)
         key = (m["arm"], int(m["seed"]))
         if key in seen_run_keys:
             raise SystemExit(
@@ -206,6 +218,22 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
         verdict["instrument_audit"] = e0_instrument_audit(rows)
         write_json(out / "e0_verdict.json", verdict)
 
+    # Amendment R9: E1's lambda=0 cell is not re-run; it IS E0's A0-free arm.
+    # Carried in as a clearly labelled reference row rather than pooled into
+    # the battery, so no table ever implies it was run under E1.
+    lambda_zero = None
+    if experiment == "e1" and not smoke:
+        try:
+            ref_rows = collect(R.LAMBDA_ZERO_SOURCE["experiment"], smoke=False)
+        except SystemExit:
+            ref_rows = []
+        ref_rows = [r for r in ref_rows if r["arm"] == R.LAMBDA_ZERO_SOURCE["arm"]]
+        if ref_rows:
+            lambda_zero = summarise(ref_rows)[R.LAMBDA_ZERO_SOURCE["arm"]]
+            lambda_zero["source"] = dict(R.LAMBDA_ZERO_SOURCE)
+            lambda_zero["lambda_use"] = R.LAMBDA_GRID["A1"]
+            write_json(out / "lambda_zero_reference.json", lambda_zero)
+
     lines = [f"# {sub} summary", "",
              "| arm | n | " + " | ".join(HEADLINE) + " |",
              "|" + "---|" * (len(HEADLINE) + 2)]
@@ -221,8 +249,27 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
             else:
                 cells.append(f"{mean:.4f}±{std:.4f}")
         lines.append(f"| {arm} | {e['n_seeds']} | " + " | ".join(cells) + " |")
+    if lambda_zero is not None:
+        cells = []
+        for k in HEADLINE:
+            mean = lambda_zero.get(k + "_mean")
+            std = lambda_zero.get(k + "_std")
+            if mean is None:
+                cells.append("-")
+            elif std is None:
+                cells.append(f"{mean:.4f}")
+            else:
+                cells.append(f"{mean:.4f}±{std:.4f}")
+        lines.append(f"| A1=A0-free (ref, from e0) | {lambda_zero['n_seeds']} | "
+                     + " | ".join(cells) + " |")
     lines += ["", "Composer and atom library are separate line items by rule; "
               "never sum them into a 'system size'.", ""]
+    if lambda_zero is not None:
+        lines += ["Amendment R9: the lambda=0 row is E0's A0-free arm, which is "
+                  "configurationally identical to A1 (the resolved configs "
+                  "differ only in the `arm` and `experiment` strings). It was "
+                  "NOT re-run under E1 and is shown as a reference row, not as "
+                  "a battery arm.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     return out
