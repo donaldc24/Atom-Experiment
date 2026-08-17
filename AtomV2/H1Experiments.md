@@ -285,3 +285,5 @@ E0 A0-Free run was identitcal for what E1 A1 is, so below is the real results fr
 | CC Transfer Matrix | ~0.3 unchanged | ~0.25-0.3, marginally flatter | flat-cold, low variance low level |
 | Soft-Hard Gap (seen) | ~0 | ~0 | small gap opens | 
 | Seed Stability | volatile like A1 | volatile | most volatile |
+
+I believe the A0-Free generalization lives in the smear...the 3-micro-step pipeline is the mix-and-match machine, so anything that compresses the pipeline drains the generalization.

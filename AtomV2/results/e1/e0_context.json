@@ -1,0 +1,59 @@
+{
+  "amendment": "R11: E1 is not gated on the E0 verdict",
+  "e0_checks": {
+    "closed_map_target_direction": {
+      "free": 1.1822157738700747,
+      "note": "direction only: oracle final distance-to-target < free; nearest-prefix headline remains reported but is all-pass gameable",
+      "ok": true,
+      "oracle": 0.01661741506633541
+    },
+    "free_L1_floor": {
+      "max": 0.05,
+      "ok": false,
+      "value": 0.8066666666666666
+    },
+    "gap_unmistakable": {
+      "gap": 0.19333333333333336,
+      "min": 0.5,
+      "ok": false
+    },
+    "oracle_L1_high": {
+      "min": 0.7,
+      "ok": true,
+      "value": 1.0
+    }
+  },
+  "e0_failed_checks": [
+    "free_L1_floor",
+    "gap_unmistakable"
+  ],
+  "e0_instrument_audit": {
+    "A0-oracle_seed0": {
+      "all_8_forced_atoms_observed": true,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": 0.0,
+      "registered_census_expected": 7,
+      "registered_census_matches_expected": true,
+      "usage_matches_ground_truth": 1.0
+    },
+    "A0-oracle_seed1": {
+      "all_8_forced_atoms_observed": true,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": 0.0,
+      "registered_census_expected": 7,
+      "registered_census_matches_expected": true,
+      "usage_matches_ground_truth": 1.0
+    },
+    "A0-oracle_seed2": {
+      "all_8_forced_atoms_observed": true,
+      "idle_atoms_stay_idle": true,
+      "oracle_ablation_cv_median": 0.0,
+      "registered_census_expected": 7,
+      "registered_census_matches_expected": true,
+      "usage_matches_ground_truth": 1.0
+    }
+  },
+  "e0_passed": false,
+  "e0_protocol_revision": "e0a-control-separated",
+  "note": "Every E1 number must be reported alongside this context. E0's instrument audit passed; its failing checks concern the free arm's absolute L1 level, which is a finding about this architecture rather than an instrument fault (see R11)."
+}
