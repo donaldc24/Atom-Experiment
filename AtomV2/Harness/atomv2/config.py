@@ -29,6 +29,9 @@ E1_ARMS = tuple(R.LAMBDA_GRID)  # ('A1','A2','A3','A4')
 # What the E1 battery actually RUNS. A1 is excluded per amendment R9: E0's
 # A0-free is the same condition, so the lambda=0 row is sourced from there.
 E1_BATTERY_ARMS = R.E1_BATTERY_ARMS  # ('A2','A3','A4')
+# E1b (H1-E1bExperiment.md): anti-saturation cosine router, exploration dose.
+E1B_ARMS = R.E1B_ARMS                # ('A5','A6','A7') - result-bearing
+E1B_ORACLE_ARM = R.E1B_ORACLE_ARM    # 'A5-oracle' - regression check only
 
 
 @dataclass
@@ -77,6 +80,16 @@ class Config:
     # loss
     lambda_use: float = 0.0
 
+    # router stack. 'scaled_dot' is the certified E0/E1 router (dot product /
+    # sqrt(key_dim), annealed Gumbel tau). 'cosine' is the E1b anti-saturation
+    # router: L2-normalized query/keys, one shared fixed scale alpha, arm-
+    # specific forward Gumbel noise sigma, fixed straight-through temperature.
+    router: str = "scaled_dot"
+    router_alpha: float = 0.0
+    router_sigma: float = 0.0
+    router_tau_backward: float = 1.0
+    router_norm_eps: float = R.E1B_NORM_EPS
+
     # oracle machinery - ONLY config_for_arm('A0-oracle') may enable these.
     forced_routing: bool = False
     oracle_state_sup_weight: float = 0.0
@@ -118,8 +131,29 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
     elif arm in E1_ARMS:
         cfg.experiment = "e1"
         cfg.lambda_use = R.LAMBDA_GRID[arm]
+    elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
+        cfg.experiment = "e1b"
+        cfg.protocol_revision = R.E1B_PROTOCOL_REVISION
+        cfg.lambda_use = 0.0            # no rent intervention in E1b
+        cfg.router = "cosine"
+        cfg.router_alpha = R.E1B_ALPHA
+        base = "A5" if arm == E1B_ORACLE_ARM else arm
+        cfg.router_sigma = R.E1B_SIGMA[base]
+        cfg.router_tau_backward = R.E1B_TAU_BACKWARD
+        cfg.router_norm_eps = R.E1B_NORM_EPS
+        # No temperature annealing. tau_end doubles as the no-noise soft-eval
+        # temperature everywhere downstream (evaluate/panel), registered = 1.0.
+        cfg.tau_start = 1.0
+        cfg.tau_end = 1.0
+        cfg.tau_anneal_steps = 1
+        if arm == E1B_ORACLE_ARM:
+            cfg.forced_routing = True
+            cfg.oracle_state_sup_weight = R.ORACLE_STATE_SUP_WEIGHT
+            cfg.oracle_routing_ce_weight = R.ORACLE_ROUTING_CE_WEIGHT
+            cfg.oracle_intermediate_ce_weight = R.ORACLE_INTERMEDIATE_CE_WEIGHT
     else:
-        raise ValueError(f"unknown arm {arm!r}; E0 arms {E0_ARMS}, E1 arms {E1_ARMS}")
+        raise ValueError(f"unknown arm {arm!r}; E0 arms {E0_ARMS}, E1 arms "
+                         f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}")
 
     if smoke:
         cfg.examples_per_train_task = 48

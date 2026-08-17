@@ -160,9 +160,26 @@ class AtomModel(nn.Module):
     # -- routing --------------------------------------------------------------
     def _route(self, state, active_token, micro_step, mode, tau,
                forced_idx=None, atom_mask=None, generator=None):
-        """Returns (weights [B,17], logits [B,17], soft [B,17])."""
-        logits = (self.composer.query(state, active_token, micro_step)
-                  @ self.atoms.all_keys().T) / math.sqrt(self.cfg.key_dim)
+        """Returns (weights [B,17], logits [B,17], soft [B,17]).
+
+        Routers (cfg.router):
+          'scaled_dot' - certified E0/E1: q.k / sqrt(key_dim), annealed tau.
+          'cosine'     - E1b anti-saturation stack: L2-normalized q and k,
+                         logits = alpha * cos(q, k) in [-alpha, alpha]; in
+                         gumbel mode the forward pick is argmax(z + sigma*g)
+                         and the straight-through surrogate is
+                         softmax((z + sigma*g) / tau_backward). Learned norm
+                         growth can no longer widen the logit gap.
+        """
+        q = self.composer.query(state, active_token, micro_step)
+        keys = self.atoms.all_keys()
+        if self.cfg.router == "cosine":
+            q = q / (q.norm(dim=-1, keepdim=True) + self.cfg.router_norm_eps)
+            keys = keys / (keys.norm(dim=-1, keepdim=True)
+                           + self.cfg.router_norm_eps)
+            logits = self.cfg.router_alpha * (q @ keys.T)
+        else:
+            logits = (q @ keys.T) / math.sqrt(self.cfg.key_dim)
         if atom_mask is not None:  # compensation probe: atom removed from routing
             masked = torch.zeros_like(logits)
             masked[:, : self.cfg.n_atoms] = torch.where(
@@ -178,12 +195,19 @@ class AtomModel(nn.Module):
         if mode == "soft":
             soft = F.softmax(logits / tau, dim=-1)
             return soft, logits, soft
-        # gumbel: straight-through top-1
+        # gumbel: straight-through top-1. The unit-Gumbel stream is drawn
+        # identically in both routers; the cosine router only SCALES it by
+        # sigma (E1b: same underlying draws across arms within a seed).
         u = torch.rand(logits.shape, generator=generator, dtype=logits.dtype)
         neg_log_u = -torch.log(u.clamp(1e-20, 1.0))          # >= 0
         gumbel = -torch.log(neg_log_u.clamp_min(1e-20))
-        soft = F.softmax((logits + gumbel) / tau, dim=-1)
-        idx = soft.argmax(dim=-1)
+        if self.cfg.router == "cosine":
+            noisy = logits + self.cfg.router_sigma * gumbel
+            soft = F.softmax(noisy / self.cfg.router_tau_backward, dim=-1)
+            idx = noisy.argmax(dim=-1)
+        else:
+            soft = F.softmax((logits + gumbel) / tau, dim=-1)
+            idx = soft.argmax(dim=-1)
         hard = F.one_hot(idx, self.cfg.n_atoms + 1).to(logits.dtype)
         weights = hard + soft - soft.detach()
         return weights, logits, soft

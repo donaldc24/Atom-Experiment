@@ -51,6 +51,21 @@ HEADLINE = (
     "transfer_row_std_legacy",
 )
 
+# E1b-only columns (liveness gates + telemetry, H1-E1bExperiment.md). Appended
+# to HEADLINE only when aggregating e1b so e0/e1 tables keep their shape.
+E1B_HEADLINE = (
+    "e1b_run_valid", "e1b_pmax_invariant_ok", "e1b_pmax_observed_max",
+    "e1b_deafness_violated", "e1b_router_grad_median_min_window",
+    "e1b_router_atom_ratio_median_min_window", "e1b_norm_growth_flagged",
+    "e1b_frac_base_prob_above_0999_final",
+    "e1b_programs_per_task_mean", "e1b_routing_entropy_nats_mean",
+    "e1b_stochastic_unique_seqs_mean", "e1b_stochastic_disagreement_rate",
+)
+
+
+def headline_for(experiment: str) -> tuple:
+    return HEADLINE + E1B_HEADLINE if experiment == "e1b" else HEADLINE
+
 
 def collect(experiment: str, smoke: bool = False) -> list[dict]:
     sub = f"smoke_{experiment}" if smoke else experiment
@@ -66,10 +81,12 @@ def collect(experiment: str, smoke: bool = False) -> list[dict]:
         env = read_json(run_dir / "env.json")
         hostnames.add(env.get("hostname", "unknown"))
         revision = m.get("protocol_revision", "pre-revision")
-        if revision != R.PROTOCOL_REVISION:
+        expected_revision = R.EXPERIMENT_REVISIONS.get(
+            experiment, R.PROTOCOL_REVISION)
+        if revision != expected_revision:
             raise SystemExit(
                 f"{run_dir}: protocol revision {revision!r} cannot be pooled "
-                f"with current revision {R.PROTOCOL_REVISION!r}")
+                f"with {experiment}'s expected revision {expected_revision!r}")
         # Amendment R10: pooling identity is the harness-source content
         # fingerprint - the code that can change a number. Runs written before
         # the key existed fall back to the old dirty-snapshot/commit id, which
@@ -91,7 +108,7 @@ def collect(experiment: str, smoke: bool = False) -> list[dict]:
         seen_run_keys[key] = run_dir
         row = {"run_dir": str(run_dir), "arm": m["arm"], "seed": m["seed"]}
         row["protocol_revision"] = revision
-        for k in HEADLINE:
+        for k in headline_for(experiment):
             row[k] = m.get(k)
         row["params_composer"] = m["param_counts"]["composer"]
         row["params_atoms_total"] = m["param_counts"]["atoms_total"]
@@ -106,20 +123,20 @@ def collect(experiment: str, smoke: bool = False) -> list[dict]:
     return rows
 
 
-def summarise(rows: list[dict]) -> dict:
+def summarise(rows: list[dict], headline: tuple = HEADLINE) -> dict:
     by_arm: dict[str, list[dict]] = {}
     for r in rows:
         by_arm.setdefault(r["arm"], []).append(r)
     summary = {}
     for arm, rs in sorted(by_arm.items()):
         entry = {"n_seeds": len(rs), "seeds": sorted(r["seed"] for r in rs)}
-        for k in HEADLINE:
-            vals = [r[k] for r in rs if r[k] is not None]
+        for k in headline:
+            vals = [r.get(k) for r in rs if r.get(k) is not None]
             if vals:
                 entry[k + "_mean"] = float(np.mean(vals))
                 entry[k + "_std"] = (float(np.std(vals, ddof=1))
                                      if len(vals) > 1 else None)
-                entry[k + "_per_seed"] = {str(r["seed"]): r[k] for r in rs}
+                entry[k + "_per_seed"] = {str(r["seed"]): r.get(k) for r in rs}
         summary[arm] = entry
     return summary
 
@@ -218,10 +235,11 @@ def e0_instrument_audit(rows: list[dict]) -> dict:
 
 
 def aggregate(experiment: str, smoke: bool = False) -> Path:
+    headline = headline_for(experiment)
     rows = collect(experiment, smoke=smoke)
     if not rows:
         raise SystemExit(f"no completed runs found for {experiment} (smoke={smoke})")
-    summary = summarise(rows)
+    summary = summarise(rows, headline)
     sub = f"smoke_{experiment}" if smoke else experiment
     out = RESULTS_DIR / sub
     out.mkdir(parents=True, exist_ok=True)
@@ -235,9 +253,10 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
 
     # Amendment R9: E1's lambda=0 cell is not re-run; it IS E0's A0-free arm.
     # Carried in as a clearly labelled reference row rather than pooled into
-    # the battery, so no table ever implies it was run under E1.
+    # the battery, so no table ever implies it was run under E1. E1b's primary
+    # comparisons are also against A1, so the same reference row is attached.
     lambda_zero = None
-    if experiment == "e1" and not smoke:
+    if experiment in ("e1", "e1b") and not smoke:
         try:
             ref_rows = collect(R.LAMBDA_ZERO_SOURCE["experiment"], smoke=False)
         except SystemExit:
@@ -250,11 +269,11 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
             write_json(out / "lambda_zero_reference.json", lambda_zero)
 
     lines = [f"# {sub} summary", "",
-             "| arm | n | " + " | ".join(HEADLINE) + " |",
-             "|" + "---|" * (len(HEADLINE) + 2)]
+             "| arm | n | " + " | ".join(headline) + " |",
+             "|" + "---|" * (len(headline) + 2)]
     for arm, e in sorted(summary.items()):
         cells = []
-        for k in HEADLINE:
+        for k in headline:
             mean = e.get(k + "_mean")
             std = e.get(k + "_std")
             if mean is None:
@@ -266,7 +285,7 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
         lines.append(f"| {arm} | {e['n_seeds']} | " + " | ".join(cells) + " |")
     if lambda_zero is not None:
         cells = []
-        for k in HEADLINE:
+        for k in headline:
             mean = lambda_zero.get(k + "_mean")
             std = lambda_zero.get(k + "_std")
             if mean is None:
@@ -293,7 +312,7 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
-    ap.add_argument("--experiment", required=True, choices=["e0", "e1"])
+    ap.add_argument("--experiment", required=True, choices=["e0", "e1", "e1b"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

@@ -78,6 +78,15 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
     if cfg.forced_routing:
         from . import oracle  # QUARANTINE: imported only on the A0-oracle path
 
+    # E1b liveness telemetry: one fixed diagnostic batch, measured at every
+    # scheduled eval. Measurement only - liveness.measure never steps an
+    # optimizer and never consumes the training Gumbel stream.
+    liveness_diag = None
+    if cfg.experiment == "e1b":
+        from . import liveness as liveness_mod
+        liveness_diag = liveness_mod.diag_batch(arrays, cfg)
+        (run_dir / "liveness").mkdir(exist_ok=True)
+
     write_json(run_dir / "config.json", cfg.to_dict())
     write_json(run_dir / "split_ref.json", split_mod.split_ref())
     write_json(run_dir / "data_manifest.json", data_mod.data_manifest(bundle))
@@ -189,6 +198,23 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                         atoms_in_use=summary["routing"]["atoms_in_use"],
                         pass_rate=summary["routing"]["pass_rate"],
                         steps_per_token=summary["routing"]["steps_per_token"])
+                if liveness_diag is not None:
+                    lv = liveness_mod.measure(model, cfg, liveness_diag, step)
+                    lv["deterministic_programs"] = \
+                        liveness_mod.deterministic_programs(
+                            {k.split("/")[1]: traces[k] for k in traces
+                             if k.startswith("seen_heldout/")
+                             and k.endswith("/choices")})
+                    write_json(run_dir / "liveness" / f"step{step:06d}.json", lv)
+                    log.log(event="liveness", step=step,
+                            router_grad_median=lv["learning_signal"][
+                                "router_total"]["median"],
+                            router_atom_ratio_median=lv["learning_signal"][
+                                "router_atom_ratio"]["median"],
+                            max_base_prob=lv["base_geometry"][
+                                "max_base_prob_observed"],
+                            pmax_invariant_ok=lv["base_geometry"][
+                                "pmax_invariant_ok"])
                 peak_rss = max(peak_rss, check_rss())
 
             if save_checkpoint:

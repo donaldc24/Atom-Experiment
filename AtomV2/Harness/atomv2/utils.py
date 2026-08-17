@@ -118,6 +118,8 @@ _STREAMS = {
     "init": 4,          # torch parameter init (via torch.manual_seed)
     "gumbel": 5,        # torch generator for Gumbel noise
     "probe_train": 6,   # decodability probe training (init + example split)
+    "e1b_diag": 7,      # E1b fixed diagnostic batch selection
+    "e1b_liveness": 8,  # E1b liveness Gumbel draws (indexed by step*draws+d)
 }
 
 

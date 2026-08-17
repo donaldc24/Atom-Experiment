@@ -214,3 +214,56 @@ PROBE_TRAIN_FRACTION = 0.7
 NUM_THREADS = 4
 NUM_INTEROP_THREADS = 1
 RSS_FAIL_GB = 4.0
+
+# ---------------------------------------------------------------------------
+# E1b (H1-E1bExperiment.md): anti-saturation router + exploration dose.
+# Registered BEFORE the first E1b run. One conceptual routing-stack change:
+# bounded cosine logits, fixed shared scale, arm-specific forward Gumbel
+# noise, fixed straight-through temperature, no annealing. lambda_use = 0 in
+# every free arm; there is no rent intervention in E1b.
+# ---------------------------------------------------------------------------
+import math as _math
+
+E1B_PROTOCOL_REVISION = "e1b-cosine-router"
+
+# Registered p_max targets (full precision; the table in the doc is rounded).
+# A6 uses 0.90 ** (1/6) so that P(any exploratory decision in six) = 10%.
+E1B_P_MAX = {"A5": 0.99, "A6": 0.90 ** (1.0 / 6.0), "A7": 0.90}
+
+# Shared cosine-logit scale, fixed by anchoring A5 at (p_max=0.99, sigma=1):
+# alpha = 0.5 * ln(16 * p_max / (1 - p_max)) with 16 = n_routes - 1.
+E1B_N_ALTERNATIVES = 16              # 17 routes: 16 atoms + pass
+E1B_ALPHA = 0.5 * _math.log(E1B_N_ALTERNATIVES * 0.99 / (1 - 0.99))
+
+# Per-arm forward Gumbel noise scale, derived (never transcribed) from the
+# full-precision p_max: sigma = 2 * alpha / ln(16 * p_max / (1 - p_max)).
+E1B_SIGMA = {
+    arm: 2.0 * E1B_ALPHA / _math.log(E1B_N_ALTERNATIVES * p / (1.0 - p))
+    for arm, p in E1B_P_MAX.items()
+}
+
+E1B_TAU_BACKWARD = 1.0               # straight-through surrogate temperature
+E1B_NORM_EPS = 1e-6                  # the one fixed epsilon in q/(|q|+eps)
+E1B_ARMS = ("A5", "A6", "A7")
+E1B_ORACLE_ARM = "A5-oracle"         # architectural regression check only
+
+# Liveness telemetry (one fixed diagnostic batch at every eval; stochastic
+# measurements over eight independently seeded Gumbel draws).
+E1B_DIAG_DRAWS = 8
+E1B_PMAX_TOL = 1e-6                  # implementation invariant tolerance
+E1B_DEAF_GRAD_NORM = 1e-8            # deafness rule, condition 1
+E1B_DEAF_RATIO = 1e-3                # deafness rule, condition 2 (conjunction)
+E1B_DEAF_WINDOW = (2000, 18000)      # steps included in the validity rule
+E1B_NORM_GROWTH_FLAG = 10.0          # raw q/k norm growth audit flag (x median@1k)
+
+# Oracle regression thresholds ("approximately perfect accuracy and
+# closed-map error near 0.015"): pattern check, not number match.
+E1B_ORACLE_ACC_MIN = 0.99
+E1B_ORACLE_CLOSED_MAP_MAX = 0.05
+
+# Which protocol revision each experiment's runs must carry to be pooled.
+EXPERIMENT_REVISIONS = {
+    "e0": PROTOCOL_REVISION,
+    "e1": PROTOCOL_REVISION,
+    "e1b": E1B_PROTOCOL_REVISION,
+}

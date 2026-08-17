@@ -177,10 +177,92 @@ def analyze(run_dir: Path) -> dict:
                         metrics[f"{k}{tag}_{level}"] = block.get(k + tag)
                 metrics[f"canon_baseline_acc_{level}"] = block.get("baseline_acc")
 
+    # E1b liveness artifacts -> validity gates + telemetry headlines
+    # (H1-E1bExperiment.md). Evaluated here, from disk, never in the loop.
+    lv_dir = run_dir / "liveness"
+    if lv_dir.exists():
+        metrics.update(_liveness_metrics(lv_dir))
+
     metrics["param_counts"] = read_json(run_dir / "param_counts.json")
     metrics["init_calibration"] = read_json(run_dir / "init_calibration.json")
     write_json(run_dir / "metrics.json", metrics)
     return metrics
+
+
+def _liveness_metrics(lv_dir: Path) -> dict:
+    """Summarize E1b liveness telemetry and evaluate the registered gates.
+
+    Implementation invariant: every eval's max base probability must be at or
+    below the arm's p_max + tolerance. Deafness rule: within (2k, 18k), two
+    CONSECUTIVE scheduled evals with BOTH median router task-gradient norm
+    < 1e-8 AND median router/atom ratio < 1e-3 invalidate the run. Raw norm
+    growth beyond 10x the step-1k median for two consecutive evals is a
+    non-invalidating audit flag.
+    """
+    records = [read_json(p) for p in sorted(lv_dir.glob("step*.json"))]
+    if not records:
+        return {}
+    lo, hi = R.E1B_DEAF_WINDOW
+
+    def _deaf(rec) -> bool:
+        sig = rec["learning_signal"]
+        g = sig["router_total"]["median"]
+        ratio = sig["router_atom_ratio"]["median"]
+        return (g is not None and g < R.E1B_DEAF_GRAD_NORM
+                and ratio is not None and ratio < R.E1B_DEAF_RATIO)
+
+    window = [r for r in records if lo <= r["step"] <= hi]
+    deaf_step = None
+    for a, b in zip(window, window[1:]):
+        if _deaf(a) and _deaf(b):
+            deaf_step = b["step"]
+            break
+
+    ref = next((r for r in records if r["step"] >= 1000), records[0])
+    ref_q = ref["base_geometry"]["raw_query_norm"]["p50"]
+    ref_k = ref["base_geometry"]["raw_key_norm"]["p50"]
+    growth_step = None
+    flags = [(r["step"],
+              ref_q > 0 and r["base_geometry"]["raw_query_norm"]["p50"]
+              > R.E1B_NORM_GROWTH_FLAG * ref_q
+              or ref_k > 0 and r["base_geometry"]["raw_key_norm"]["p50"]
+              > R.E1B_NORM_GROWTH_FLAG * ref_k) for r in records]
+    for (s1, f1), (s2, f2) in zip(flags, flags[1:]):
+        if f1 and f2:
+            growth_step = s2
+            break
+
+    grads = [r["learning_signal"]["router_total"]["median"] for r in window
+             if r["learning_signal"]["router_total"]["median"] is not None]
+    ratios = [r["learning_signal"]["router_atom_ratio"]["median"] for r in window
+              if r["learning_signal"]["router_atom_ratio"]["median"] is not None]
+    final = records[-1]
+    prog = final.get("deterministic_programs", {})
+    out = {
+        "e1b_pmax_observed_max": max(
+            r["base_geometry"]["max_base_prob_observed"] for r in records),
+        "e1b_pmax_invariant_ok": all(
+            r["base_geometry"]["pmax_invariant_ok"] for r in records),
+        "e1b_deafness_violated": deaf_step is not None,
+        "e1b_deafness_step": deaf_step,
+        "e1b_run_valid": deaf_step is None and all(
+            r["base_geometry"]["pmax_invariant_ok"] for r in records),
+        "e1b_norm_growth_flagged": growth_step is not None,
+        "e1b_norm_growth_step": growth_step,
+        "e1b_router_grad_median_min_window": (
+            float(np.min(grads)) if grads else None),
+        "e1b_router_atom_ratio_median_min_window": (
+            float(np.min(ratios)) if ratios else None),
+        "e1b_frac_base_prob_above_0999_final": final["base_geometry"][
+            "frac_above_0999"],
+        "e1b_programs_per_task_mean": prog.get("programs_per_task_mean"),
+        "e1b_routing_entropy_nats_mean": prog.get("routing_entropy_nats_mean"),
+        "e1b_stochastic_unique_seqs_mean": final["stochastic_diversity"][
+            "unique_sequences_per_input_mean"],
+        "e1b_stochastic_disagreement_rate": final["stochastic_diversity"][
+            "route_disagreement_rate"],
+    }
+    return out
 
 
 if __name__ == "__main__":
