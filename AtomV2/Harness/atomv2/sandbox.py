@@ -40,11 +40,13 @@ The three branches, computed per training step on the SAME batch's z0:
                pairs) so unused slots may remain unused.
 
 L_valid(z) (registered decision, see registered.py):
-  READ  - per-position CE of Dec_frozen(z) against its own hard readout
-          (-log p_max: the state must read as a DEFINITE digit list), plus
-  CYCLE - relative MSE from z to the frozen encoder's canonical code of that
-          readout, stop-grad target (same relative-MSE form as the oracle's
-          state supervision): the state must BE the code of what it reads as.
+  L_valid(z) = READ(z) - per-position CE of Dec_frozen(z) against its own
+  hard readout (-log p_max): the state must decode CONFIDENTLY into some
+  digit list. Representation-agnostic on purpose: no term pushes atom
+  outputs toward any particular latent encoding. CYCLE (relative MSE from z
+  to code(readout)) is measured as TELEMETRY ONLY and never backpropagated -
+  as a loss it would define what the intermediate representation should
+  look like.
 """
 from __future__ import annotations
 
@@ -71,15 +73,21 @@ class SandboxState:
         self.usage_ema = torch.full((R.N_ATOMS,), R.E3_USAGE_EMA_INIT)
 
     def update_usage(self, choices: torch.Tensor) -> None:
-        """EMA of the REAL hard-routing atom-selection frequency, from the A6
-        forward's recorded choices [B, N_STEPS] (-1 dead, 16 pass). Pass picks
-        are excluded from the denominator, matching the registered census. A
-        batch with no atom picks at all leaves the EMA untouched."""
-        c = choices[(choices >= 0) & (choices < R.N_ATOMS)]
-        if c.numel() == 0:
+        """EMA of each atom's REAL hard-routing frequency over ACTIVE ROUTING
+        OPPORTUNITIES, from the A6 forward's recorded choices [B, N_STEPS]
+        (-1 dead, 16 pass). The denominator is live steps: a pass pick
+        contributes zero to every atom, so an all-pass batch decays every
+        weight toward zero - emergent pass usage fades uniqueness pressure
+        instead of freezing a stale weight. (This normalization deliberately
+        differs from the census, which excludes pass from its denominator.)
+        Only a batch with NO live steps at all leaves the EMA untouched."""
+        live = choices >= 0
+        n_live = int(live.sum())
+        if n_live == 0:
             return
-        freq = torch.bincount(c, minlength=R.N_ATOMS).to(
-            self.usage_ema.dtype) / c.numel()
+        atom_picks = choices[live & (choices < R.N_ATOMS)]
+        freq = torch.bincount(atom_picks, minlength=R.N_ATOMS).to(
+            self.usage_ema.dtype) / n_live
         self.usage_ema.mul_(R.E3_USAGE_EMA_DECAY).add_(
             (1.0 - R.E3_USAGE_EMA_DECAY) * freq)
 
@@ -138,15 +146,21 @@ def apply_chain(model, state: torch.Tensor, atom_ids) -> torch.Tensor:
 
 
 def validity_terms(model, z: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-    """(read, cycle) components of L_valid(z); see the module docstring.
-    Call under sandbox_grad_boundary: the decoder/encoder must be frozen."""
+    """(read, cycle) for a sandbox state z; see the module docstring.
+
+    READ is L_valid - the gradient-bearing loss. CYCLE is TELEMETRY ONLY,
+    computed entirely under no_grad (its result carries no graph): it is
+    never backpropagated, because as a loss it would prescribe the latent
+    representation. Call under sandbox_grad_boundary when training: the
+    decoder must be frozen."""
     logits = model.decoder(z)                                  # [B,6,10]
     readout = logits.argmax(dim=-1)                            # [B,6] int64
     read = F.cross_entropy(logits.reshape(-1, model.cfg.vocab),
                            readout.reshape(-1))
     with torch.no_grad():
         target = model.code(readout)
-    cycle = F.mse_loss(z, target) / target.pow(2).mean().clamp_min(1e-6)
+        cycle = (F.mse_loss(z.detach(), target)
+                 / target.pow(2).mean().clamp_min(1e-6))
     return read, cycle
 
 
@@ -176,8 +190,7 @@ def sandbox_losses(model, z0: torch.Tensor, sb: SandboxState,
         # -- standalone: clean encoder state, no predecessor required -------
         z_alone = model.step_once(z0, draws["standalone_atom"])
         read_s, cycle_s = validity_terms(model, z_alone)
-        loss_standalone = (R.E3_VALID_READ_WEIGHT * read_s
-                           + R.E3_VALID_CYCLE_WEIGHT * cycle_s)
+        loss_standalone = read_s        # L_valid = READ; cycle is telemetry
 
         # -- closure: arbitrary no-grad predecessors, stop-grad handoff -----
         with torch.no_grad():
@@ -187,8 +200,7 @@ def sandbox_losses(model, z0: torch.Tensor, sb: SandboxState,
         # predecessors can NEVER adapt themselves to help the target atom.
         z_close = model.step_once(z_ctx.detach(), draws["closure_atom"])
         read_c, cycle_c = validity_terms(model, z_close)
-        loss_closure = (R.E3_VALID_READ_WEIGHT * read_c
-                        + R.E3_VALID_CYCLE_WEIGHT * cycle_c)
+        loss_closure = read_c           # L_valid = READ; cycle is telemetry
 
         # -- functional uniqueness: clean standalone states + pass ----------
         atoms = draws["unique_atoms"]
@@ -210,12 +222,11 @@ def sandbox_losses(model, z0: torch.Tensor, sb: SandboxState,
         "loss_sandbox_unique": loss_pair + loss_nonidentity,
         "loss_sandbox_standalone": loss_standalone,
         "loss_sandbox_closure": loss_closure,
-        "loss_sandbox_read_standalone": read_s,
-        "loss_sandbox_cycle_standalone": cycle_s,
-        "loss_sandbox_read_closure": read_c,
-        "loss_sandbox_cycle_closure": cycle_c,
         "loss_sandbox_unique_pair": loss_pair,
         "loss_sandbox_nonidentity": loss_nonidentity,
+        # Telemetry only, no graph: never enters the total loss.
+        "sandbox_cycle_standalone": cycle_s,
+        "sandbox_cycle_closure": cycle_c,
         "sandbox_chain_len": draws["chain_len"],
     }
 

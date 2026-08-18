@@ -310,18 +310,19 @@ E3_LAMBDA_VALID = {"A11": 0.1, "A12": 0.3, "A13": 1.0}
 E3_LAMBDA_UNIQUE = {"A11": 0.1, "A12": 0.3, "A13": 1.0}
 
 # REGISTERED DECISION (validity criterion): the harness has no separate
-# validity evaluator, so L_valid(z) is defined against the FROZEN decoder
-# (and, for the cycle term, the frozen encoder) as
-#   READ:  per-position CE of Decoder(z) against its own hard readout
-#          (-log p_max: the state must read as a DEFINITE digit list), plus
-#   CYCLE: relative MSE from z to code(readout) with stop-grad target
-#          (the state must BE the canonical code of the list it reads as;
-#          same relative-MSE form as the oracle's state supervision).
-# Both components are logged separately; the registered combination is
-# READ + CYCLE with the weights below. Standalone and closure share this one
-# criterion and are logged separately (L_sandbox_valid = their mean).
-E3_VALID_READ_WEIGHT = 1.0
-E3_VALID_CYCLE_WEIGHT = 1.0
+# validity evaluator, so L_valid(z) is defined against the FROZEN decoder as
+#   L_valid(z) = READ(z): per-position CE of Decoder(z) against its own hard
+#   readout (-log p_max: the state must decode CONFIDENTLY into some digit
+#   list). Deliberately content-agnostic AND representation-agnostic: it does
+#   NOT push atom outputs toward any particular latent encoding - an atom may
+#   invent whatever representation it likes, provided the state is not
+#   gibberish to the frozen decoder.
+# CYCLE (relative MSE from z to code(readout), the oracle's relative-MSE
+# form) is measured as TELEMETRY ONLY and never backpropagated: as a loss it
+# would define what the intermediate representation should look like, which
+# is exactly the pressure this experiment refuses to apply.
+# Standalone and closure share this one criterion and are logged separately
+# (L_sandbox_valid = their mean).
 
 # Functional-uniqueness branch: behavioral fingerprints are frozen-decoder
 # softmax outputs on CLEAN standalone states F_i = softmax(Decoder(Apply_i(z0)));
@@ -332,11 +333,16 @@ E3_UNIQUE_MARGIN = 0.5               # TV lives in [0,1]
 E3_UNIQUE_ATOMS_PER_STEP = 4         # sampled atoms per step (all 6 pairs)
 
 # Usage weighting: unused slots may stay unused. usage_ema tracks the REAL
-# hard-routing atom-selection frequency of the A6 task path (pass excluded
-# from the denominator, matching the census); the detached weight is
-# w_i = clamp(usage_ema_i / CENSUS_EPS, 0, 1). EMA initialized uniform
-# (1/16 > CENSUS_EPS, so every atom starts fully weighted and unused slots
-# decay out; half-life ~69 steps at decay 0.99). No gradient enters routing.
+# hard-routing frequency of each atom over ACTIVE ROUTING OPPORTUNITIES of
+# the A6 task path (denominator = live steps; a pass pick contributes zero
+# to every atom), so an all-pass batch DECAYS every weight - emergent pass
+# usage shows up as fading uniqueness pressure, never as a frozen stale
+# weight. NOTE this normalization deliberately differs from the census
+# (which excludes pass from its denominator); CENSUS_EPS is reused only as
+# the clamp scale of w_i = clamp(usage_ema_i / CENSUS_EPS, 0, 1). EMA
+# initialized uniform (1/16 > CENSUS_EPS, so every atom starts fully
+# weighted and unused slots decay out; half-life ~69 steps at decay 0.99).
+# No gradient enters routing.
 E3_USAGE_EMA_DECAY = 0.99
 E3_USAGE_EMA_INIT = 1.0 / N_ATOMS
 E3_USAGE_WEIGHT_EPS = CENSUS_EPS

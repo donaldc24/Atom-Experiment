@@ -185,20 +185,28 @@ def test_usage_ema_and_weights():
     sb = SandboxState(cfg)
     w0 = sb.usage_weights()
     assert torch.all(w0 == 1.0)         # warm start: 1/16 > CENSUS_EPS
-    # Only atom 2 is ever picked (plus pass and dead steps, both excluded
-    # from the denominator): its weight stays 1, the rest decay to 0.
+    # Only atom 2 is ever picked; pass counts in the denominator (an active
+    # routing opportunity spent NOT on any atom), dead steps do not: its
+    # frequency converges to 4/5, weight 1; the rest decay to 0.
     choices = torch.full((8, 6), 2, dtype=torch.int64)
     choices[:, 3] = R.PASS_INDEX
     choices[:, 5] = -1
     for _ in range(1500):
         sb.update_usage(choices)
+    assert abs(float(sb.usage_ema[2]) - 0.8) < 1e-4
     w = sb.usage_weights()
     assert float(w[2]) == 1.0
     others = w[torch.arange(R.N_ATOMS) != 2]
     assert float(others.max()) < 1e-4   # decayed out (never exactly zero)
-    # An all-pass batch must not touch the EMA.
+    # An all-pass batch MUST decay every atom's usage: if the composer
+    # learns to pass, formerly-used atoms lose uniqueness pressure instead
+    # of keeping a frozen stale weight.
     before = sb.usage_ema.clone()
     sb.update_usage(torch.full((8, 6), R.PASS_INDEX, dtype=torch.int64))
+    assert torch.allclose(sb.usage_ema, R.E3_USAGE_EMA_DECAY * before)
+    # A batch with no live steps at all leaves the EMA untouched.
+    before = sb.usage_ema.clone()
+    sb.update_usage(torch.full((8, 6), -1, dtype=torch.int64))
     assert torch.equal(sb.usage_ema, before)
 
 
@@ -224,13 +232,16 @@ def test_no_torch_rng_consumed_and_draws_deterministic():
                if k.startswith("loss_"))
 
 
-def test_validity_terms_shapes_and_finiteness():
+def test_validity_terms_shapes_and_cycle_is_telemetry_only():
     model, _cfg = _model()
     z0 = _z0(model)
-    with torch.no_grad():
-        read, cycle = validity_terms(model, model.step_once(z0, 4))
+    read, cycle = validity_terms(model, model.step_once(z0, 4))
     assert read.ndim == 0 and cycle.ndim == 0
     assert torch.isfinite(read) and torch.isfinite(cycle)
+    # READ is the loss; CYCLE carries NO graph - it can never backpropagate
+    # a preferred latent representation into the atoms.
+    assert read.requires_grad
+    assert not cycle.requires_grad
     # TV distance is bounded by 1 and zero against itself.
     with torch.no_grad():
         f = fingerprint(model, z0)

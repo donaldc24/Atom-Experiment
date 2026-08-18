@@ -90,16 +90,23 @@ states - does not exist. The registration records this distinction deliberately.
 ### Registered decision: the validity criterion
 
 The harness has no pre-existing validity evaluator, so `L_valid(z)` is registered
-here, against the frozen decoder (and frozen encoder for the cycle term):
+here, against the frozen decoder:
 
 ```text
-READ(z)  = mean per-position CE of Decoder(z) against its own hard readout
-           (-log p_max: z must read as a DEFINITE digit list)
-CYCLE(z) = relative MSE from z to stopgrad(code(readout))
-           (z must BE the canonical code of the list it reads as;
-            same relative-MSE form as the oracle's state supervision)
-L_valid  = 1.0 * READ + 1.0 * CYCLE          # both components logged separately
+L_valid(z) = READ(z) = mean per-position CE of Decoder(z) against its own hard
+             readout (-log p_max: z must decode CONFIDENTLY into some digit list)
 ```
+
+READ is deliberately both content-agnostic and REPRESENTATION-agnostic: it demands
+only that the state not be gibberish to the frozen decoder, and never pushes an
+atom's output toward any particular latent encoding - an atom may invent whatever
+representation it likes.
+
+`CYCLE(z)` - relative MSE from z to `stopgrad(code(readout))`, the oracle's
+relative-MSE form - is measured as TELEMETRY ONLY and is never backpropagated: as a
+loss it would define what the intermediate representation should look like, which
+is exactly the pressure this experiment refuses to apply. (Unit-enforced: the
+computed cycle value carries no autograd graph.)
 
 Standalone and closure share this one criterion and are logged separately;
 `L_sandbox_valid` is their mean.
@@ -138,14 +145,19 @@ nonidentity terms are computed.
 Uniqueness pressure applies only to atoms the real A6 composer actually uses:
 
 ```text
-usage_ema[i] <- 0.99 * usage_ema[i] + 0.01 * (hard atom-selection freq of i)
+usage_ema[i] <- 0.99 * usage_ema[i] + 0.01 * (hard picks of atom i / live steps)
 w_i          = stopgrad(clamp(usage_ema[i] / CENSUS_EPS, 0, 1))
 L_unique     = E_{i,j}[ w_i w_j L_unique-pair ] + E_i[ w_i L_nonidentity ]
 ```
 
-The frequency denominator excludes pass picks, matching the registered census. The
-EMA warm-starts uniform (1/16 > 2% => every atom starts fully weighted; unused
-slots decay out with half-life ~69 steps). The weights are detached buffers: this
+Frequencies are over ACTIVE ROUTING OPPORTUNITIES (live steps): a pass pick
+contributes zero to every atom, so an all-pass batch decays every weight
+(`usage_i <- 0.99 * usage_i`). If sandbox training causes pass usage to emerge, a
+formerly-used atom's uniqueness pressure fades instead of freezing at a stale
+weight. This normalization deliberately differs from the census (which excludes
+pass from its denominator); CENSUS_EPS is reused only as the clamp scale. The EMA
+warm-starts uniform (1/16 > 2% => every atom starts fully weighted; unused slots
+decay out with half-life ~69 steps). The weights are detached buffers: this
 gradient NEVER enters routing.
 
 ## Arms
@@ -173,8 +185,9 @@ init, and (absent) noise draws are bit-identical to its A6 pair.
 - `init_calibration.json` additionally records raw sandbox magnitudes vs task loss
   before any update, so the dose grid's scale is on record per run.
 - `sandbox_telemetry/step*.json` at every scheduled eval (measurement only): per-atom
-  standalone READ/CYCLE, random-chain closure validity, the full 16x16 fingerprint
-  distance matrix plus distance-to-pass, and the usage EMA/weight snapshot.
+  standalone READ and CYCLE (CYCLE observed here and in the step records, never
+  trained on), random-chain closure validity, the full 16x16 fingerprint distance
+  matrix plus distance-to-pass, and the usage EMA/weight snapshot.
 - E1b liveness telemetry and the deafness gate are retained unchanged; headline
   evaluation is the untouched clean path.
 
@@ -194,8 +207,9 @@ failing to optimize is a RESULT, not an invalid run.
    target atom.
 4. An identity-behaving atom trips the nonidentity hinge.
 5. Zero-usage atoms feel exactly zero uniqueness pressure (loss and gradient).
-6. The usage EMA tracks hard atom picks only (pass and dead steps excluded) and an
-   all-pass batch leaves it untouched.
+6. The usage EMA normalizes over live steps: an all-pass batch decays every atom's
+   weight by exactly the EMA decay, and only a batch with no live steps leaves it
+   untouched. CYCLE carries no autograd graph.
 7. No torch RNG is consumed; draws are deterministic per seed with fixed per-step
    consumption; streams 11/12 are registered.
 8. E3 configs are A6 + the two lambdas and nothing else.
