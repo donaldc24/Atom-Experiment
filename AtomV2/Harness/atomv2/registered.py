@@ -292,10 +292,71 @@ E2_CM_EXAMPLES = 100                 # per-task subsample for the noisy
 # INCLUDING the A6 reference): target cosines, 8 draws per noisy point.
 E2_ROBUST_COSINES = (1.000, 0.999, 0.990, 0.950)
 
+# ---------------------------------------------------------------------------
+# E3 (H1-Experiment3.md): the atom sandbox. Three content-agnostic pressures
+# on the atom MLPs ONLY (standalone validity, random-context closure,
+# usage-weighted functional uniqueness), trained alongside the untouched A6
+# task path. Gradient boundary is absolute: encoder, decoder, composer,
+# routing keys and the pass key receive NO sandbox gradient; the decoder is
+# the frozen validity evaluator / fingerprint reader. lambda_use = 0.
+# ---------------------------------------------------------------------------
+E3_PROTOCOL_REVISION = "e3-atom-sandbox"
+E3_BASE_ARM = "A6"                   # registered base + paired control (e1b)
+E3_ARMS = ("A11", "A12", "A13")
+
+# Registered dose grid: (lambda_sandbox_valid, lambda_sandbox_unique) applied
+# jointly - the sandbox is one treatment at three intensities, not a factorial.
+E3_LAMBDA_VALID = {"A11": 0.1, "A12": 0.3, "A13": 1.0}
+E3_LAMBDA_UNIQUE = {"A11": 0.1, "A12": 0.3, "A13": 1.0}
+
+# REGISTERED DECISION (validity criterion): the harness has no separate
+# validity evaluator, so L_valid(z) is defined against the FROZEN decoder
+# (and, for the cycle term, the frozen encoder) as
+#   READ:  per-position CE of Decoder(z) against its own hard readout
+#          (-log p_max: the state must read as a DEFINITE digit list), plus
+#   CYCLE: relative MSE from z to code(readout) with stop-grad target
+#          (the state must BE the canonical code of the list it reads as;
+#          same relative-MSE form as the oracle's state supervision).
+# Both components are logged separately; the registered combination is
+# READ + CYCLE with the weights below. Standalone and closure share this one
+# criterion and are logged separately (L_sandbox_valid = their mean).
+E3_VALID_READ_WEIGHT = 1.0
+E3_VALID_CYCLE_WEIGHT = 1.0
+
+# Functional-uniqueness branch: behavioral fingerprints are frozen-decoder
+# softmax outputs on CLEAN standalone states F_i = softmax(Decoder(Apply_i(z0)));
+# distance is mean total variation across the batch and positions; hinge
+# margin below. Compared pairwise among sampled atoms AND against pass
+# (F_pass = softmax(Decoder(z0))) so identity cannot satisfy self-sufficiency.
+E3_UNIQUE_MARGIN = 0.5               # TV lives in [0,1]
+E3_UNIQUE_ATOMS_PER_STEP = 4         # sampled atoms per step (all 6 pairs)
+
+# Usage weighting: unused slots may stay unused. usage_ema tracks the REAL
+# hard-routing atom-selection frequency of the A6 task path (pass excluded
+# from the denominator, matching the census); the detached weight is
+# w_i = clamp(usage_ema_i / CENSUS_EPS, 0, 1). EMA initialized uniform
+# (1/16 > CENSUS_EPS, so every atom starts fully weighted and unused slots
+# decay out; half-life ~69 steps at decay 0.99). No gradient enters routing.
+E3_USAGE_EMA_DECAY = 0.99
+E3_USAGE_EMA_INIT = 1.0 / N_ATOMS
+E3_USAGE_WEIGHT_EPS = CENSUS_EPS
+
+# Random-context / closure branch: predecessor chains of K ~ Uniform{1..6}
+# no-grad atom applications (6 = the most atom applications A6 can execute on
+# a two-token task); self-predecessors included, no exclusions. The chain is
+# always drawn at full length so the sandbox stream's consumption per step is
+# fixed; only the first K draws are applied.
+E3_CHAIN_MAX = 2 * MICRO_STEPS       # 6
+
+# Telemetry (eval cadence, measurement only): random closure chains per
+# record, drawn from the indexed 'e3_sandbox_eval' stream.
+E3_TELEMETRY_CHAINS = 8
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
     "e1": PROTOCOL_REVISION,
     "e1b": E1B_PROTOCOL_REVISION,
     "e2": E2_PROTOCOL_REVISION,
+    "e3": E3_PROTOCOL_REVISION,
 }

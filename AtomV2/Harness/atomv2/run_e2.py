@@ -111,10 +111,17 @@ def _replay_first_steps(cfg, n_steps: int) -> dict:
     return records
 
 
-def a6_equivalence_gate(out_dir) -> None:
-    """Registered reuse condition: zero-noise path bit-identical to E1b A6."""
+def a6_equivalence_gate(out_dir,
+                        filename: str = "e2_a6_equivalence.json") -> None:
+    """Registered reuse condition: zero-noise path bit-identical to E1b A6.
+
+    E3 reuses this gate verbatim (run_e3 passes its own filename): the A6
+    config also carries lambda_sandbox_* = 0, so a replay under the current
+    harness certifies the zero-noise AND zero-sandbox path in one check."""
     cfg = config_for_arm(R.E2_BASE_ARM, 0)
     assert cfg.state_noise_sigma == 0.0
+    assert cfg.lambda_sandbox_valid == 0.0 \
+        and cfg.lambda_sandbox_unique == 0.0
     a6_dir = _find_run_dir("e1b", R.E2_BASE_ARM, 0)
     logged = {}
     import json
@@ -137,7 +144,7 @@ def a6_equivalence_gate(out_dir) -> None:
     record = {"reference_run": str(a6_dir), "steps_replayed": 50,
               "compared_steps": [1, 50], "bit_identical": not mismatches,
               "mismatches": mismatches}
-    write_json(out_dir / "e2_a6_equivalence.json", record)
+    write_json(out_dir / filename, record)
     if mismatches:
         raise SystemExit(
             f"A6 EQUIVALENCE GATE FAILED: zero-noise replay diverges from the "

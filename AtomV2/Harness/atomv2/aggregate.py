@@ -75,11 +75,25 @@ E2_HEADLINE = (
 )
 
 
+# E3-only columns (sandbox telemetry headlines, H1-Experiment3.md). Scalar
+# summaries only; the per-atom usage EMA stays in metrics.json.
+E3_HEADLINE = (
+    "e3_lambda_sandbox_valid", "e3_lambda_sandbox_unique",
+    "e3_usage_weighted_atoms_final",
+    "e3_standalone_read_final", "e3_standalone_cycle_final",
+    "e3_closure_read_final", "e3_closure_cycle_final",
+    "e3_unique_pair_dist_mean_final", "e3_unique_pair_dist_min_final",
+    "e3_nonidentity_dist_min_final", "e3_margin_satisfied_frac_final",
+)
+
+
 def headline_for(experiment: str) -> tuple:
     if experiment == "e1b":
         return HEADLINE + E1B_HEADLINE
     if experiment == "e2":
         return HEADLINE + E1B_HEADLINE + E2_HEADLINE
+    if experiment == "e3":
+        return HEADLINE + E1B_HEADLINE + E3_HEADLINE
     return HEADLINE
 
 
@@ -284,20 +298,22 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
             lambda_zero["source"] = dict(R.LAMBDA_ZERO_SOURCE)
             lambda_zero["lambda_use"] = R.LAMBDA_GRID["A1"]
             write_json(out / "lambda_zero_reference.json", lambda_zero)
-    # E2: the registered control is E1b's completed A6 arm (paired seeds),
+    # E2/E3: the registered control is E1b's completed A6 arm (paired seeds),
     # attached as a clearly labelled reference row, never pooled.
-    if experiment == "e2" and not smoke:
-        ref_label = "A6 (ref, from e1b)"
+    if experiment in ("e2", "e3") and not smoke:
+        base = R.E2_BASE_ARM if experiment == "e2" else R.E3_BASE_ARM
+        role = ("E2 no-noise control" if experiment == "e2"
+                else "E3 no-sandbox control")
+        ref_label = f"{base} (ref, from e1b)"
         try:
             ref_rows = collect("e1b", smoke=False)
         except SystemExit:
             ref_rows = []
-        ref_rows = [r for r in ref_rows if r["arm"] == R.E2_BASE_ARM]
+        ref_rows = [r for r in ref_rows if r["arm"] == base]
         if ref_rows:
-            lambda_zero = summarise(ref_rows)[R.E2_BASE_ARM]
-            lambda_zero["source"] = {"experiment": "e1b",
-                                     "arm": R.E2_BASE_ARM,
-                                     "role": "E2 no-noise control"}
+            lambda_zero = summarise(ref_rows)[base]
+            lambda_zero["source"] = {"experiment": "e1b", "arm": base,
+                                     "role": role}
             write_json(out / "a6_reference.json", lambda_zero)
 
     lines = [f"# {sub} summary", "",
@@ -330,16 +346,18 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                      + " | ".join(cells) + " |")
     lines += ["", "Composer and atom library are separate line items by rule; "
               "never sum them into a 'system size'.", ""]
-    if lambda_zero is not None and experiment != "e2":
+    if lambda_zero is not None and experiment in ("e1", "e1b"):
         lines += ["Amendment R9: the lambda=0 row is E0's A0-free arm, which is "
                   "configurationally identical to A1 (the resolved configs "
                   "differ only in the `arm` and `experiment` strings). It was "
                   "NOT re-run under E1 and is shown as a reference row, not as "
                   "a battery arm.", ""]
-    if lambda_zero is not None and experiment == "e2":
-        lines += ["The A6 row is E1b's completed A6 arm, reused as the E2 "
-                  "no-noise control under the registered equivalence gate. It "
-                  "was NOT re-run under E2 and is shown as a reference row, "
+    if lambda_zero is not None and experiment in ("e2", "e3"):
+        role = "no-noise" if experiment == "e2" else "no-sandbox"
+        lines += [f"The A6 row is E1b's completed A6 arm, reused as the "
+                  f"{experiment.upper()} {role} control under the registered "
+                  f"equivalence gate. It was NOT re-run under "
+                  f"{experiment.upper()} and is shown as a reference row, "
                   "not as a battery arm.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
@@ -350,7 +368,7 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
     ap.add_argument("--experiment", required=True,
-                    choices=["e0", "e1", "e1b", "e2"])
+                    choices=["e0", "e1", "e1b", "e2", "e3"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

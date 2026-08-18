@@ -123,6 +123,10 @@ _STREAMS = {
     "state_noise": 9,   # E2 training interface-noise stream (dedicated: its
                         # draws never advance routing/data/init streams)
     "e2_noise_eval": 10,  # E2 telemetry + robustness noise draws (indexed)
+    "e3_sandbox": 11,   # E3 training sandbox draws (target atoms, chains,
+                        # uniqueness samples); dedicated: never advances the
+                        # routing, data, or init streams
+    "e3_sandbox_eval": 12,  # E3 init calibration + telemetry draws (indexed)
 }
 
 

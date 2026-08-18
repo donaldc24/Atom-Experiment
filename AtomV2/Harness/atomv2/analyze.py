@@ -191,6 +191,11 @@ def analyze(run_dir: Path) -> dict:
     if rob_path.exists():
         metrics.update(_robustness_metrics(read_json(rob_path)))
 
+    # E3 sandbox telemetry (H1-Experiment3.md).
+    st_dir = run_dir / "sandbox_telemetry"
+    if st_dir.exists():
+        metrics.update(_sandbox_metrics(st_dir))
+
     metrics["param_counts"] = read_json(run_dir / "param_counts.json")
     metrics["init_calibration"] = read_json(run_dir / "init_calibration.json")
     write_json(run_dir / "metrics.json", metrics)
@@ -299,6 +304,37 @@ def _noise_metrics(nt_dir: Path) -> dict:
             "transmitted_error_mean"],
         "e2_closed_map_producer_target_final": final[
             "closed_map_noisy_forward"]["producer_target_dist_mean"],
+    }
+
+
+def _sandbox_metrics(st_dir: Path) -> dict:
+    """E3 sandbox telemetry -> headline numbers. Descriptive only: the
+    sandbox carries no validity gate of its own (the E1b liveness gates still
+    apply to every E3 run); optimization failure under a correctly
+    implemented sandbox is a result, not an invalid run."""
+    records = [read_json(p) for p in sorted(st_dir.glob("step*.json"))]
+    if not records:
+        return {}
+    final = records[-1]
+    return {
+        "e3_lambda_sandbox_valid": final["lambda_sandbox_valid"],
+        "e3_lambda_sandbox_unique": final["lambda_sandbox_unique"],
+        "e3_usage_weighted_atoms_final": final["usage"]["n_weighted"],
+        "e3_usage_ema_final": final["usage"]["ema"],
+        "e3_standalone_read_final": final["standalone"]["read_mean_weighted"],
+        "e3_standalone_cycle_final": final["standalone"][
+            "cycle_mean_weighted"],
+        "e3_standalone_read_all_final": final["standalone"]["read_mean"],
+        "e3_closure_read_final": final["closure"]["read_mean"],
+        "e3_closure_cycle_final": final["closure"]["cycle_mean"],
+        "e3_unique_pair_dist_mean_final": final["uniqueness"][
+            "pair_dist_mean_weighted"],
+        "e3_unique_pair_dist_min_final": final["uniqueness"][
+            "pair_dist_min_weighted"],
+        "e3_nonidentity_dist_min_final": final["uniqueness"][
+            "pass_dist_min_weighted"],
+        "e3_margin_satisfied_frac_final": final["uniqueness"][
+            "margin_satisfied_frac_weighted"],
     }
 
 

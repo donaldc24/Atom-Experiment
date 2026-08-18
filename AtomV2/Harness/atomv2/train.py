@@ -7,7 +7,10 @@ Free-arm loss is task cross-entropy + lambda_use * rent, full stop. The rent
 is L1 on the SOFT atom-selection mass per micro-step (the same soft
 distribution the straight-through sample uses), pass exempt, charged per
 APPLICATION. Oracle terms exist only behind cfg.forced_routing (E0 arm
-'A0-oracle'), and the oracle module is imported only on that path.
+'A0-oracle'), and the oracle module is imported only on that path. E3 sandbox
+terms exist only behind cfg.lambda_sandbox_* > 0 (arms A11-A13), the sandbox
+module is imported only on that path, and its gradients reach the atom MLPs
+alone - the task path above stays byte-identical to A6.
 
 Per-run outputs (everything needed to reproduce results without retraining):
   config.json, env.json, split_ref.json, data_manifest.json,
@@ -83,7 +86,7 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
     # optimizer and never consumes the training Gumbel stream. E2 retains the
     # full E1b telemetry and deafness gate.
     liveness_diag = None
-    if cfg.experiment in ("e1b", "e2"):
+    if cfg.experiment in ("e1b", "e2", "e3"):
         from . import liveness as liveness_mod
         liveness_diag = liveness_mod.diag_batch(arrays, cfg)
         (run_dir / "liveness").mkdir(exist_ok=True)
@@ -96,6 +99,17 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
         noise_gen = torch.Generator().manual_seed(
             int(stream_seed(cfg.seed, "state_noise").generate_state(1)[0]))
         (run_dir / "noise_telemetry").mkdir(exist_ok=True)
+
+    # E3 atom sandbox: QUARANTINE - imported and constructed only when a
+    # sandbox lambda is nonzero, so the A6 path never touches the module and
+    # never consumes the dedicated 'e3_sandbox' stream (zero-sandbox
+    # equivalence). Sampling is numpy-only: no torch RNG is consumed, so the
+    # routing/noise/init draws stay bit-identical to the A6 pair.
+    sandbox_state = None
+    if cfg.lambda_sandbox_valid > 0 or cfg.lambda_sandbox_unique > 0:
+        from . import sandbox as sandbox_mod
+        sandbox_state = sandbox_mod.SandboxState(cfg)
+        (run_dir / "sandbox_telemetry").mkdir(exist_ok=True)
 
     write_json(run_dir / "config.json", cfg.to_dict())
     write_json(run_dir / "split_ref.json", split_mod.split_ref())
@@ -126,6 +140,29 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                 "rent_weighted_init": cfg.lambda_use * rent0,
                 "rent_over_task_init": (cfg.lambda_use * rent0 / task0
                                         if task0 > 0 else None)}
+    if sandbox_state is not None:
+        # Raw sandbox magnitudes vs task loss BEFORE any update, so the dose
+        # grid's scale is on record per run. Draws come from the indexed
+        # eval stream (index 0); the training 'e3_sandbox' stream is not
+        # advanced, keeping its position a pure function of the step count.
+        with torch.no_grad():
+            sb0 = sandbox_mod.SandboxState(cfg, stream="e3_sandbox_eval",
+                                           stream_index=0)
+            terms0 = sandbox_mod.sandbox_losses(
+                model, out0["states"][0].detach(), sb0)
+        valid0 = float(terms0["loss_sandbox_valid"])
+        unique0 = float(terms0["loss_sandbox_unique"])
+        init_cal.update({
+            "loss_sandbox_valid_init": valid0,
+            "loss_sandbox_unique_init": unique0,
+            "lambda_sandbox_valid": cfg.lambda_sandbox_valid,
+            "lambda_sandbox_unique": cfg.lambda_sandbox_unique,
+            "sandbox_weighted_init": (cfg.lambda_sandbox_valid * valid0
+                                      + cfg.lambda_sandbox_unique * unique0),
+            "sandbox_over_task_init": (
+                (cfg.lambda_sandbox_valid * valid0
+                 + cfg.lambda_sandbox_unique * unique0) / task0
+                if task0 > 0 else None)})
     write_json(run_dir / "init_calibration.json", init_cal)
     log.log(event="init_calibration", **init_cal)
 
@@ -169,6 +206,18 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
             record = {"loss_task": loss_task.item(),
                       "loss_rent_raw": rent_raw.item(),
                       "loss_rent_weighted": cfg.lambda_use * rent_raw.item()}
+            if sandbox_state is not None:
+                # Usage EMA reads THIS step's real hard-routing choices; the
+                # sandbox then trains atoms only, on the detached z0.
+                sandbox_state.update_usage(out["choices"].detach())
+                sb_terms = sandbox_mod.sandbox_losses(
+                    model, out["states"][0].detach(), sandbox_state)
+                loss = (loss
+                        + cfg.lambda_sandbox_valid
+                        * sb_terms["loss_sandbox_valid"]
+                        + cfg.lambda_sandbox_unique
+                        * sb_terms["loss_sandbox_unique"])
+                record.update({k: float(v) for k, v in sb_terms.items()})
             if cfg.forced_routing:
                 oracle_terms = oracle.oracle_losses(
                     model, out, xb, tb, nb,
@@ -237,6 +286,18 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                             cosine_target=nt["target_cosine"],
                             route_flip_rate=nt["route_flip_rate"],
                             pred_disagreement=nt["pred_disagreement_mean"])
+                if sandbox_state is not None:
+                    st = sandbox_mod.measure(model, cfg, liveness_diag,
+                                             sandbox_state, step)
+                    write_json(run_dir / "sandbox_telemetry"
+                               / f"step{step:06d}.json", st)
+                    log.log(event="sandbox", step=step,
+                            usage_weighted_atoms=st["usage"]["n_weighted"],
+                            standalone_read_weighted=st["standalone"][
+                                "read_mean_weighted"],
+                            closure_read=st["closure"]["read_mean"],
+                            unique_pair_dist_min=st["uniqueness"][
+                                "pair_dist_min_weighted"])
                 peak_rss = max(peak_rss, check_rss())
 
             if save_checkpoint:

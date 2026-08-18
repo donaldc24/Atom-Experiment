@@ -34,6 +34,8 @@ E1B_ARMS = R.E1B_ARMS                # ('A5','A6','A7') - result-bearing
 E1B_ORACLE_ARM = R.E1B_ORACLE_ARM    # 'A5-oracle' - regression check only
 # E2 (H1-Experiment2.md): interface noise on the A6 base; A6 is the control.
 E2_ARMS = R.E2_ARMS                  # ('A8','A9','A10')
+# E3 (H1-Experiment3.md): atom sandbox on the A6 base; A6 is the control.
+E3_ARMS = R.E3_ARMS                  # ('A11','A12','A13')
 
 
 @dataclass
@@ -97,6 +99,13 @@ class Config:
     # completely - the registered no-noise equivalence condition.
     state_noise_sigma: float = 0.0
 
+    # E3 atom sandbox (training-only; the normal A6 path is untouched). Both
+    # 0.0 means the sandbox is never constructed and its stream is never
+    # consumed - the registered zero-sandbox equivalence condition. Only atom
+    # MLP parameters ever receive sandbox gradients.
+    lambda_sandbox_valid: float = 0.0
+    lambda_sandbox_unique: float = 0.0
+
     # oracle machinery - ONLY config_for_arm('A0-oracle') may enable these.
     forced_routing: bool = False
     oracle_state_sup_weight: float = 0.0
@@ -148,6 +157,18 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
         cfg.protocol_revision = R.E2_PROTOCOL_REVISION
         cfg.state_noise_sigma = R.E2_STATE_NOISE_SIGMA[arm]
         return cfg
+    elif arm in E3_ARMS:
+        # E3 = the registered A6 base + one delta: the training-only atom
+        # sandbox. Everything else (router stack, schedules, lambda_use=0,
+        # no interface noise) is inherited from the A6 branch so the arms
+        # stay paired by seed.
+        cfg = config_for_arm(R.E3_BASE_ARM, seed, smoke=smoke)
+        cfg.arm = arm
+        cfg.experiment = "e3"
+        cfg.protocol_revision = R.E3_PROTOCOL_REVISION
+        cfg.lambda_sandbox_valid = R.E3_LAMBDA_VALID[arm]
+        cfg.lambda_sandbox_unique = R.E3_LAMBDA_UNIQUE[arm]
+        return cfg
     elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
         cfg.experiment = "e1b"
         cfg.protocol_revision = R.E1B_PROTOCOL_REVISION
@@ -170,7 +191,8 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
             cfg.oracle_intermediate_ce_weight = R.ORACLE_INTERMEDIATE_CE_WEIGHT
     else:
         raise ValueError(f"unknown arm {arm!r}; E0 arms {E0_ARMS}, E1 arms "
-                         f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}")
+                         f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}, "
+                         f"E2 arms {E2_ARMS}, E3 arms {E3_ARMS}")
 
     if smoke:
         cfg.examples_per_train_task = 48
