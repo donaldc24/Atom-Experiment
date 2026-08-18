@@ -63,8 +63,24 @@ E1B_HEADLINE = (
 )
 
 
+# E2-only columns (noise gates + telemetry + robustness, H1-Experiment2.md).
+E2_HEADLINE = (
+    "e2_state_noise_sigma", "e2_target_cosine", "e2_cosine_observed_final",
+    "e2_cosine_gate_ok", "e2_route_flip_rate_final",
+    "e2_pred_disagreement_final",
+    "e2_closed_map_producer_final", "e2_closed_map_transmitted_final",
+    "e2_robust_seen_acc_c1000", "e2_robust_seen_acc_c0999",
+    "e2_robust_seen_acc_c0990", "e2_robust_seen_acc_c0950",
+    "e2_robust_L1_acc_c1000", "e2_robust_L1_acc_c0950",
+)
+
+
 def headline_for(experiment: str) -> tuple:
-    return HEADLINE + E1B_HEADLINE if experiment == "e1b" else HEADLINE
+    if experiment == "e1b":
+        return HEADLINE + E1B_HEADLINE
+    if experiment == "e2":
+        return HEADLINE + E1B_HEADLINE + E2_HEADLINE
+    return HEADLINE
 
 
 def collect(experiment: str, smoke: bool = False) -> list[dict]:
@@ -256,6 +272,7 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
     # the battery, so no table ever implies it was run under E1. E1b's primary
     # comparisons are also against A1, so the same reference row is attached.
     lambda_zero = None
+    ref_label = "A1=A0-free (ref, from e0)"
     if experiment in ("e1", "e1b") and not smoke:
         try:
             ref_rows = collect(R.LAMBDA_ZERO_SOURCE["experiment"], smoke=False)
@@ -267,6 +284,21 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
             lambda_zero["source"] = dict(R.LAMBDA_ZERO_SOURCE)
             lambda_zero["lambda_use"] = R.LAMBDA_GRID["A1"]
             write_json(out / "lambda_zero_reference.json", lambda_zero)
+    # E2: the registered control is E1b's completed A6 arm (paired seeds),
+    # attached as a clearly labelled reference row, never pooled.
+    if experiment == "e2" and not smoke:
+        ref_label = "A6 (ref, from e1b)"
+        try:
+            ref_rows = collect("e1b", smoke=False)
+        except SystemExit:
+            ref_rows = []
+        ref_rows = [r for r in ref_rows if r["arm"] == R.E2_BASE_ARM]
+        if ref_rows:
+            lambda_zero = summarise(ref_rows)[R.E2_BASE_ARM]
+            lambda_zero["source"] = {"experiment": "e1b",
+                                     "arm": R.E2_BASE_ARM,
+                                     "role": "E2 no-noise control"}
+            write_json(out / "a6_reference.json", lambda_zero)
 
     lines = [f"# {sub} summary", "",
              "| arm | n | " + " | ".join(headline) + " |",
@@ -294,16 +326,21 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                 cells.append(f"{mean:.4f}")
             else:
                 cells.append(f"{mean:.4f}±{std:.4f}")
-        lines.append(f"| A1=A0-free (ref, from e0) | {lambda_zero['n_seeds']} | "
+        lines.append(f"| {ref_label} | {lambda_zero['n_seeds']} | "
                      + " | ".join(cells) + " |")
     lines += ["", "Composer and atom library are separate line items by rule; "
               "never sum them into a 'system size'.", ""]
-    if lambda_zero is not None:
+    if lambda_zero is not None and experiment != "e2":
         lines += ["Amendment R9: the lambda=0 row is E0's A0-free arm, which is "
                   "configurationally identical to A1 (the resolved configs "
                   "differ only in the `arm` and `experiment` strings). It was "
                   "NOT re-run under E1 and is shown as a reference row, not as "
                   "a battery arm.", ""]
+    if lambda_zero is not None and experiment == "e2":
+        lines += ["The A6 row is E1b's completed A6 arm, reused as the E2 "
+                  "no-noise control under the registered equivalence gate. It "
+                  "was NOT re-run under E2 and is shown as a reference row, "
+                  "not as a battery arm.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     return out
@@ -312,7 +349,8 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
-    ap.add_argument("--experiment", required=True, choices=["e0", "e1", "e1b"])
+    ap.add_argument("--experiment", required=True,
+                    choices=["e0", "e1", "e1b", "e2"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

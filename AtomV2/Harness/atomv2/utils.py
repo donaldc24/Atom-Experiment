@@ -120,6 +120,9 @@ _STREAMS = {
     "probe_train": 6,   # decodability probe training (init + example split)
     "e1b_diag": 7,      # E1b fixed diagnostic batch selection
     "e1b_liveness": 8,  # E1b liveness Gumbel draws (indexed by step*draws+d)
+    "state_noise": 9,   # E2 training interface-noise stream (dedicated: its
+                        # draws never advance routing/data/init streams)
+    "e2_noise_eval": 10,  # E2 telemetry + robustness noise draws (indexed)
 }
 
 

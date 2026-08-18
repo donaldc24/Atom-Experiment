@@ -261,9 +261,41 @@ E1B_NORM_GROWTH_FLAG = 10.0          # raw q/k norm growth audit flag (x median@
 E1B_ORACLE_ACC_MIN = 0.99
 E1B_ORACLE_CLOSED_MAP_MAX = 0.05
 
+# ---------------------------------------------------------------------------
+# E2 (H1-Experiment2.md): interface noise. One treatment - training-only
+# Gaussian noise at live, NONTERMINAL state handoffs, re-normalized by the
+# existing non-affine LayerNorm. Base condition is E1b's A6 (cosine router,
+# sigma = E1B_SIGMA['A6'], lambda_use = 0); the completed A6 runs are the
+# control, guarded by the registered no-noise equivalence gate. Headline
+# evaluation is always CLEAN (state_noise_sigma = 0).
+# ---------------------------------------------------------------------------
+E2_PROTOCOL_REVISION = "e2-interface-noise"
+E2_BASE_ARM = "A6"                   # registered base + paired control
+
+# Registered noise levels as target clean/noisy cosines; sigma is DERIVED
+# (registration receipt): sigma = sqrt(1 / cosine^2 - 1).
+E2_TARGET_COSINE = {"A8": 0.999, "A9": 0.990, "A10": 0.950}
+E2_STATE_NOISE_SIGMA = {
+    arm: _math.sqrt(1.0 / (c * c) - 1.0)
+    for arm, c in E2_TARGET_COSINE.items()
+}
+E2_ARMS = ("A8", "A9", "A10")
+
+# Noise telemetry + implementation gates.
+E2_NOISE_DRAWS = 8                   # registered draws on the diagnostic batch
+E2_COSINE_TOL = 0.005                # observed median cosine vs target gate
+E2_GRAD_DRAWS = 2                    # producer-gradient draws per eval (cost)
+E2_CM_EXAMPLES = 100                 # per-task subsample for the noisy
+                                     # producer/transmitted closed-map curves
+
+# Registered evaluation-only robustness sweep (final checkpoint, every arm
+# INCLUDING the A6 reference): target cosines, 8 draws per noisy point.
+E2_ROBUST_COSINES = (1.000, 0.999, 0.990, 0.950)
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
     "e1": PROTOCOL_REVISION,
     "e1b": E1B_PROTOCOL_REVISION,
+    "e2": E2_PROTOCOL_REVISION,
 }

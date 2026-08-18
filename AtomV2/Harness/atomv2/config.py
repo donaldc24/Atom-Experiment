@@ -32,6 +32,8 @@ E1_BATTERY_ARMS = R.E1_BATTERY_ARMS  # ('A2','A3','A4')
 # E1b (H1-E1bExperiment.md): anti-saturation cosine router, exploration dose.
 E1B_ARMS = R.E1B_ARMS                # ('A5','A6','A7') - result-bearing
 E1B_ORACLE_ARM = R.E1B_ORACLE_ARM    # 'A5-oracle' - regression check only
+# E2 (H1-Experiment2.md): interface noise on the A6 base; A6 is the control.
+E2_ARMS = R.E2_ARMS                  # ('A8','A9','A10')
 
 
 @dataclass
@@ -90,6 +92,11 @@ class Config:
     router_tau_backward: float = 1.0
     router_norm_eps: float = R.E1B_NORM_EPS
 
+    # E2 interface noise (training-only, live NONTERMINAL handoffs, re-normed
+    # by the existing non-affine LayerNorm). 0.0 bypasses noise generation
+    # completely - the registered no-noise equivalence condition.
+    state_noise_sigma: float = 0.0
+
     # oracle machinery - ONLY config_for_arm('A0-oracle') may enable these.
     forced_routing: bool = False
     oracle_state_sup_weight: float = 0.0
@@ -131,6 +138,16 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
     elif arm in E1_ARMS:
         cfg.experiment = "e1"
         cfg.lambda_use = R.LAMBDA_GRID[arm]
+    elif arm in E2_ARMS:
+        # E2 = the registered A6 base + one delta: training-only interface
+        # noise. Everything else (router stack, schedules, lambda_use=0) is
+        # inherited from the A6 branch so the arms stay paired by seed.
+        cfg = config_for_arm(R.E2_BASE_ARM, seed, smoke=smoke)
+        cfg.arm = arm
+        cfg.experiment = "e2"
+        cfg.protocol_revision = R.E2_PROTOCOL_REVISION
+        cfg.state_noise_sigma = R.E2_STATE_NOISE_SIGMA[arm]
+        return cfg
     elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
         cfg.experiment = "e1b"
         cfg.protocol_revision = R.E1B_PROTOCOL_REVISION

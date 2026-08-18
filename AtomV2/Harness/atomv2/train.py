@@ -80,12 +80,22 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
 
     # E1b liveness telemetry: one fixed diagnostic batch, measured at every
     # scheduled eval. Measurement only - liveness.measure never steps an
-    # optimizer and never consumes the training Gumbel stream.
+    # optimizer and never consumes the training Gumbel stream. E2 retains the
+    # full E1b telemetry and deafness gate.
     liveness_diag = None
-    if cfg.experiment == "e1b":
+    if cfg.experiment in ("e1b", "e2"):
         from . import liveness as liveness_mod
         liveness_diag = liveness_mod.diag_batch(arrays, cfg)
         (run_dir / "liveness").mkdir(exist_ok=True)
+
+    # E2 interface noise: dedicated stream so noise draws can never advance
+    # or alter the routing, data, or init streams (paired-seed requirement).
+    noise_gen = None
+    if cfg.state_noise_sigma > 0:
+        from . import noise as noise_mod
+        noise_gen = torch.Generator().manual_seed(
+            int(stream_seed(cfg.seed, "state_noise").generate_state(1)[0]))
+        (run_dir / "noise_telemetry").mkdir(exist_ok=True)
 
     write_json(run_dir / "config.json", cfg.to_dict())
     write_json(run_dir / "split_ref.json", split_mod.split_ref())
@@ -148,7 +158,9 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                 out = model(xb, tb, nb, mode="forced", forced=sched, tau=tau)
             else:
                 out = model(xb, tb, nb, mode="gumbel", tau=tau,
-                            generator=gumbel_gen)
+                            generator=gumbel_gen,
+                            noise_sigma=cfg.state_noise_sigma,
+                            noise_generator=noise_gen)
 
             loss_task = F.cross_entropy(out["logits"].reshape(-1, cfg.vocab),
                                         yb.reshape(-1))
@@ -215,6 +227,16 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                                 "max_base_prob_observed"],
                             pmax_invariant_ok=lv["base_geometry"][
                                 "pmax_invariant_ok"])
+                if noise_gen is not None:
+                    nt = noise_mod.measure(model, cfg, liveness_diag,
+                                           bundle.seen_heldout, step)
+                    write_json(run_dir / "noise_telemetry"
+                               / f"step{step:06d}.json", nt)
+                    log.log(event="noise", step=step,
+                            cosine_median=nt["handoff"]["cosine"]["p50"],
+                            cosine_target=nt["target_cosine"],
+                            route_flip_rate=nt["route_flip_rate"],
+                            pred_disagreement=nt["pred_disagreement_mean"])
                 peak_rss = max(peak_rss, check_rss())
 
             if save_checkpoint:

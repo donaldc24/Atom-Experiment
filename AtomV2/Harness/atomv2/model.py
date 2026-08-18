@@ -214,7 +214,8 @@ class AtomModel(nn.Module):
 
     # -- full forward ---------------------------------------------------------
     def forward(self, digits, tokens, n_tokens, mode="gumbel", tau=1.0,
-                forced=None, ablate=None, atom_mask=None, generator=None):
+                forced=None, ablate=None, atom_mask=None, generator=None,
+                noise_sigma=0.0, noise_generator=None):
         """
         digits [B,6], tokens [B,2] (PAD-filled), n_tokens [B] in {1,2}.
         mode: 'gumbel' (train) | 'hard'/'soft' (eval) | 'forced' (oracle/panel).
@@ -224,6 +225,13 @@ class AtomModel(nn.Module):
             untouched (registered F2 mechanism).
         atom_mask: bool [n_atoms] - remove atoms from routing (compensation
             probe, final checkpoint only, non-gating).
+        noise_sigma / noise_generator: E2 interface noise. When sigma > 0,
+            every live NONTERMINAL handoff transmits
+            LayerNorm(s_clean + Normal(0, sigma^2 I)) to the next composer
+            decision and atom; the final live state reaches the decoder clean;
+            dead steps receive no noise; pass gets the same channel noise as
+            atoms. sigma == 0 bypasses noise generation completely and never
+            touches noise_generator (registered no-noise equivalence).
         Number of composition steps = n_tokens * 3; steps beyond an example's
         budget are dead: state frozen, no rent, choice logged as -1.
         """
@@ -232,10 +240,13 @@ class AtomModel(nn.Module):
         live_all = (torch.arange(N_STEPS)[None, :]
                     < (n_tokens * R.MICRO_STEPS)[:, None])       # [B,6]
         return self._run_steps(state, tokens, live_all, mode, tau, forced,
-                               ablate, atom_mask, generator, start_step=0)
+                               ablate, atom_mask, generator, start_step=0,
+                               noise_sigma=noise_sigma,
+                               noise_generator=noise_generator)
 
     def _run_steps(self, state, tokens, live_all, mode, tau, forced, ablate,
-                   atom_mask, generator, start_step=0):
+                   atom_mask, generator, start_step=0, noise_sigma=0.0,
+                   noise_generator=None):
         """The composition loop. THE single stepping code path.
 
         forward() enters it at step 0 from code(digits); execute_from_state()
@@ -246,6 +257,7 @@ class AtomModel(nn.Module):
         """
         states = [state]
         route_logits, choices, soft_atom_mass = [], [], []
+        transmitted = []       # E2: what the next step actually received
         for k in range(N_STEPS):
             if k < start_step:
                 states.append(state)
@@ -289,7 +301,22 @@ class AtomModel(nn.Module):
             soft_atom_mass.append(
                 (soft[:, : self.cfg.n_atoms].sum(dim=-1) * live.to(soft.dtype)))
 
-        return {
+            # E2 interface noise: corrupt the handoff into step k+1 for every
+            # example whose NEXT step is live (prefix liveness makes that
+            # exactly "live nonterminal", token boundaries included). The
+            # clean producer state stays in `states` for diagnostics only;
+            # the carry - what composer and atom see next - is transmitted.
+            # One fixed-shape draw per handoff keeps the dedicated noise
+            # stream's consumption independent of batch masks.
+            if noise_sigma > 0 and k + 1 < N_STEPS:
+                nonterminal = live_all[:, k + 1]
+                eps = noise_sigma * torch.randn(
+                    state.shape, generator=noise_generator, dtype=state.dtype)
+                noisy = self._norm(state + eps)
+                state = torch.where(nonterminal[:, None], noisy, state)
+                transmitted.append(state)
+
+        out = {
             "logits": self.decoder(state),                       # [B,6,10]
             "states": states,                                    # 7 x [B,384]
             "route_logits": torch.stack(route_logits, dim=1),    # [B,6,17]
@@ -297,6 +324,9 @@ class AtomModel(nn.Module):
             "soft_atom_mass": torch.stack(soft_atom_mass, dim=1),  # [B,6]
             "live": live_all,                                    # [B,6]
         }
+        if noise_sigma > 0:
+            out["states_transmitted"] = transmitted  # entry k -> into step k+1
+        return out
 
     def execute_from_state(self, state, tokens, n_tokens, start_token_idx,
                            mode="hard", tau=1.0, forced=None, ablate=None,

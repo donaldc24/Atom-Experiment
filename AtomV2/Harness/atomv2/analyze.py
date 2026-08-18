@@ -183,6 +183,14 @@ def analyze(run_dir: Path) -> dict:
     if lv_dir.exists():
         metrics.update(_liveness_metrics(lv_dir))
 
+    # E2 noise telemetry + registered robustness sweep (H1-Experiment2.md).
+    nt_dir = run_dir / "noise_telemetry"
+    if nt_dir.exists():
+        metrics.update(_noise_metrics(nt_dir))
+    rob_path = run_dir / "noise_robustness.json"
+    if rob_path.exists():
+        metrics.update(_robustness_metrics(read_json(rob_path)))
+
     metrics["param_counts"] = read_json(run_dir / "param_counts.json")
     metrics["init_calibration"] = read_json(run_dir / "init_calibration.json")
     write_json(run_dir / "metrics.json", metrics)
@@ -262,6 +270,51 @@ def _liveness_metrics(lv_dir: Path) -> dict:
         "e1b_stochastic_disagreement_rate": final["stochastic_diversity"][
             "route_disagreement_rate"],
     }
+    return out
+
+
+def _noise_metrics(nt_dir: Path) -> dict:
+    """E2 noise telemetry -> headline numbers + the cosine implementation
+    gate (observed median clean/transmitted cosine within E2_COSINE_TOL of
+    the arm's registered target, at every eval)."""
+    records = [read_json(p) for p in sorted(nt_dir.glob("step*.json"))]
+    if not records:
+        return {}
+    final = records[-1]
+    return {
+        "e2_state_noise_sigma": final["state_noise_sigma"],
+        "e2_target_cosine": final["target_cosine"],
+        "e2_cosine_observed_final": final["handoff"]["cosine"]["p50"],
+        "e2_cosine_gate_ok": all(r["handoff"]["cosine_within_tol"]
+                                 for r in records),
+        "e2_route_flip_rate_final": final["route_flip_rate"],
+        "e2_pred_disagreement_final": final["pred_disagreement_mean"],
+        "e2_transmitted_pos_mean_abs_final": final["handoff"][
+            "transmitted_pos_mean_abs"],
+        "e2_transmitted_pos_var_final": final["handoff"][
+            "transmitted_pos_var"],
+        "e2_closed_map_producer_final": final["closed_map_noisy_forward"][
+            "producer_error_mean"],
+        "e2_closed_map_transmitted_final": final["closed_map_noisy_forward"][
+            "transmitted_error_mean"],
+        "e2_closed_map_producer_target_final": final[
+            "closed_map_noisy_forward"]["producer_target_dist_mean"],
+    }
+
+
+def _robustness_metrics(rob: dict) -> dict:
+    """Flatten the registered sweep: seen + L1 accuracy (plus flip/
+    disagreement on seen) at each target cosine."""
+    out = {}
+    for c in rob.get("target_cosines", []):
+        key = f"{c:.3f}"
+        tag = f"c{key.replace('.', '')}"
+        seen = rob["sets"]["seen_heldout"][key]
+        out[f"e2_robust_seen_acc_{tag}"] = seen["mean_acc"]
+        out[f"e2_robust_seen_flip_{tag}"] = seen["route_flip_rate"]
+        out[f"e2_robust_seen_disagree_{tag}"] = seen["pred_disagreement"]
+        out[f"e2_robust_L1_acc_{tag}"] = \
+            rob["sets"]["unseen_L1"][key]["mean_acc"]
     return out
 
 
