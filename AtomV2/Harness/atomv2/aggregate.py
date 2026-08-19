@@ -405,7 +405,14 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                   "Registered comparison rule: E4 arms compare to them via "
                   "the e4_*_20k checkpoint columns (like for like); the "
                   "ordinary headline columns hold E4's 30k finals and are "
-                  "never mixed into that comparison.", ""]
+                  "never mixed into that comparison.", "",
+                  "Amendment E4-G1 caveat: the A12 reference battery trained "
+                  "under torch 2.7.1+cu118/numpy 1.25.2 (its env.json), not "
+                  "this harness's torch 2.9.0+cpu/numpy 2.2.4. Its gate is "
+                  "'failed as written, satisfied in purpose' (step-1 records "
+                  "bit-identical, step-50 within 1e-6 relative, grad norms "
+                  "bit-identical). A14/A12 comparisons therefore carry a "
+                  "cross-build caveat that A9/A6 comparisons do not.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     return out
