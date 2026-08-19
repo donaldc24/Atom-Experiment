@@ -228,6 +228,46 @@ Known limitation: the fingerprint covers file contents, not the interpreter or
 library versions. Those remain recorded separately in `env.json` (python,
 torch, numpy, platform, thread counts) and the hostname guard still applies.
 
+## R11 — E1 is no longer gated on the E0 verdict (2026-08-15)
+
+**No E0 threshold is moved.** E0 still fails `free_L1_floor` (0.807 vs < 0.05)
+and `gap_unmistakable` (0.193 vs ≥ 0.50), and that verdict stands on the record
+exactly as computed. What changes is only whether that failure *blocks* E1.
+
+Rationale, from what E0 actually established:
+
+- **The instrument works** — which is what E0 was for. Its audit passed on all
+  three oracle seeds: `usage_matches_ground_truth = 1.0`, ablation CV = 0.0,
+  census = the predicted 7, all 8 forced atoms observed, idle atoms idle.
+- **The ceiling is reachable**: oracle L1 = 1.0000 > 0.70, so a composing
+  solution exists in this world — the precondition that makes a null result in
+  E1 readable rather than ambiguous.
+- **A leaking world is excluded**: the closed-map direction check passed, and
+  the formal leak audit passed all six checks with negative controls proving it
+  can fail.
+- **The two failures are one fact about the free arm's absolute L1 level**,
+  which is a *finding about this architecture*, not a broken rig. Amendment R8
+  separated control from data, making per-token program composition available,
+  so free routing recombines trained tokens by construction. The "free arm sits
+  at the floor" premise was inherited from V1, whose composer had memory and
+  whose state carried task identity.
+- **The dissociation the protocol wanted does exist** — at L3, where oracle
+  1.0000 against free 0.0108 is a gap of 0.993.
+
+Mechanically: `registered.E1_REQUIRES_E0_PASS = False`. Ungating is not
+forgetting — two hard stops remain, and E0's verdict is copied to
+`results/e1/e0_context.json` so no E1 number is ever read without its
+calibration context:
+
+- E0 must still have **run**. A missing verdict is still a refusal: without
+  calibration the instrument is unvalidated and E1 is uninterpretable.
+- A **protocol-revision mismatch** is still a refusal (override needs
+  `--force --force-reason`).
+
+Reporting requirement: every E1 result must be published alongside the E0
+context, stating that calibration failed its free-arm criterion and why that
+was judged not to impugn the instrument.
+
 ## Errata found while building (doc bugs, not code bugs)
 
 - **SplitMath.md G6 table, row P2_P5**: says `train`, but the doc's own Split

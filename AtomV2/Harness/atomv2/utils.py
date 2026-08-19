@@ -90,6 +90,15 @@ def harness_source_sha256_at(rev: str) -> str:
     return _hash_source_files(files)
 
 
+def _status_path(line: str) -> str:
+    """Path out of one `git status --porcelain` line.
+
+    Format is 'XY<space>path'; X is a SPACE for worktree-only modifications,
+    so the leading space is load-bearing and must not be stripped upstream.
+    """
+    return line[3:].split(" -> ")[-1].strip().strip('"')
+
+
 def _is_output_path(rel: str) -> bool:
     rel = rel.replace("\\", "/")
     return any(rel == pref or rel.startswith(pref + "/")
@@ -109,6 +118,15 @@ _STREAMS = {
     "init": 4,          # torch parameter init (via torch.manual_seed)
     "gumbel": 5,        # torch generator for Gumbel noise
     "probe_train": 6,   # decodability probe training (init + example split)
+    "e1b_diag": 7,      # E1b fixed diagnostic batch selection
+    "e1b_liveness": 8,  # E1b liveness Gumbel draws (indexed by step*draws+d)
+    "state_noise": 9,   # E2 training interface-noise stream (dedicated: its
+                        # draws never advance routing/data/init streams)
+    "e2_noise_eval": 10,  # E2 telemetry + robustness noise draws (indexed)
+    "e3_sandbox": 11,   # E3 training sandbox draws (target atoms, chains,
+                        # uniqueness samples); dedicated: never advances the
+                        # routing, data, or init streams
+    "e3_sandbox_eval": 12,  # E3 init calibration + telemetry draws (indexed)
 }
 
 
@@ -191,9 +209,18 @@ def write_sha256sums(run_dir: Path) -> None:
 # Git provenance
 # ---------------------------------------------------------------------------
 
-def _git(*args: str) -> str:
-    return subprocess.run(["git", *args], cwd=HARNESS_ROOT, capture_output=True,
-                          text=True, check=True).stdout.strip()
+def _git(*args: str, strip: bool = True) -> str:
+    """Run git. strip=False preserves leading whitespace.
+
+    Porcelain status lines are 'XY<space>path', and X is a SPACE for
+    worktree-only modifications (' M foo'). Stripping the whole output ate the
+    first line's leading space, so path parsing (line[3:]) lost a character on
+    that one line - which could misread an output path as source and refuse to
+    run, and corrupted the first entry of the dirty-snapshot fingerprint.
+    """
+    out = subprocess.run(["git", *args], cwd=HARNESS_ROOT, capture_output=True,
+                         text=True, check=True).stdout
+    return out.strip() if strip else out.rstrip("\n")
 
 
 def _dirty_source_fingerprint(sha: str, status: str, toplevel: str) -> str:
@@ -208,7 +235,7 @@ def _dirty_source_fingerprint(sha: str, status: str, toplevel: str) -> str:
     h.update(f"HEAD\0{sha}\0".encode())
     root = Path(toplevel)
     for line in sorted(status.splitlines()):
-        rel = line[3:].split(" -> ")[-1].strip().strip('"').replace("\\", "/")
+        rel = _status_path(line).replace("\\", "/")
         if _is_output_path(rel):
             continue
         h.update(line[:2].encode() + b"\0" + rel.encode() + b"\0")
@@ -224,15 +251,15 @@ def _dirty_source_fingerprint(sha: str, status: str, toplevel: str) -> str:
 def git_info() -> dict:
     try:
         sha = _git("rev-parse", "HEAD")
-        status = _git("status", "--porcelain", "--untracked-files=all")
+        status = _git("status", "--porcelain", "--untracked-files=all",
+                      strip=False)
         toplevel = _git("rev-parse", "--show-toplevel")
     except (subprocess.CalledProcessError, FileNotFoundError):
         return {"git_sha": "unknown", "git_sha_short": "nogit",
                 "git_dirty": True, "git_source_dirty": True}
     source_dirty = False
     for line in status.splitlines():
-        rel = line[3:].split(" -> ")[-1].strip().strip('"')
-        if not _is_output_path(rel):
+        if not _is_output_path(_status_path(line)):
             source_dirty = True
             break
     info = {"git_sha": sha, "git_sha_short": sha[:7], "git_toplevel": toplevel,

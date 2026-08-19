@@ -1,0 +1,143 @@
+{
+  "deprecated_aliases": {
+    "decodability_subop_from_delta": "leakage_subop_identity_from_delta",
+    "decodability_subop_from_state": "leakage_subop_identity_from_state",
+    "decodability_subop_h0_floor": "leakage_subop_identity_h0_floor"
+  },
+  "labels_subops": [
+    "R",
+    "T",
+    "W",
+    "I",
+    "N",
+    "M",
+    "A"
+  ],
+  "labels_surface": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "leakage_note": "leakage_subop_identity_* asks 'can the active primitive's sub-op set be read off this delta'. Sub-op set is a deterministic function of primitive identity, so a high score is task-identity leakage, not evidence of sub-op structure. Use transfer_split_subop_* for granularity.",
+  "leakage_subop_identity_from_delta": {
+    "n_test": 6811,
+    "n_train": 15926,
+    "per_label_balanced_acc": [
+      0.9282390177249908,
+      0.8402382135391235,
+      0.7478320300579071,
+      0.9353469908237457,
+      0.8822748363018036,
+      0.8962632417678833,
+      0.9784401953220367
+    ],
+    "score": 0.8869477893624987
+  },
+  "leakage_subop_identity_from_delta_shuffled": {
+    "n_test": 6811,
+    "n_train": 15926,
+    "per_label_balanced_acc": [
+      0.49982625246047974,
+      0.5021357461810112,
+      0.49853054888080806,
+      0.5011400281218812,
+      0.5002875705249608,
+      0.4999429852468893,
+      0.49844456696882844
+    ],
+    "score": 0.5000439569121227
+  },
+  "leakage_subop_identity_from_state": {
+    "n_test": 6815,
+    "n_train": 15922,
+    "per_label_balanced_acc": [
+      0.9340988993644714,
+      0.8749308586120605,
+      0.7900227010250092,
+      0.9543454051017761,
+      0.888487309217453,
+      0.9312518835067749,
+      0.9920689463615417
+    ],
+    "score": 0.9093151433127267
+  },
+  "leakage_subop_identity_from_state_shuffled": {
+    "n_test": 6815,
+    "n_train": 15922,
+    "per_label_balanced_acc": [
+      0.5036912001669407,
+      0.4886038601398468,
+      0.4994544479995966,
+      0.5073974560946226,
+      0.49455729499459267,
+      0.5003391895443201,
+      0.49780549481511116
+    ],
+    "score": 0.4988355633935758
+  },
+  "leakage_subop_identity_h0_floor": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "per_label_balanced_acc": [
+      0.5,
+      0.5023643672466278,
+      0.5015755866188556,
+      0.5014619883149862,
+      0.4922480583190918,
+      0.502207325771451,
+      0.5002937819808722
+    ],
+    "score": 0.5000215868931264
+  },
+  "leakage_subop_identity_h0_floor_shuffled": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "per_label_balanced_acc": [
+      0.5,
+      0.5224478095769882,
+      0.4998462591320276,
+      0.501552795059979,
+      0.4988776743412018,
+      0.5009879185818136,
+      0.4982817769050598
+    ],
+    "score": 0.50314203337101
+  },
+  "n_step_samples": 22737,
+  "p8_note": "sub-op labels are SETS; P8 contributes {T,N}",
+  "surface_from_delta": {
+    "n_test": 6823,
+    "n_train": 15914,
+    "score": 0.7986223101615906
+  },
+  "surface_from_delta_shuffled": {
+    "n_test": 6823,
+    "n_train": 15914,
+    "score": 0.13967463374137878
+  },
+  "surface_from_state": {
+    "n_test": 6806,
+    "n_train": 15931,
+    "score": 0.8072289228439331
+  },
+  "surface_from_state_shuffled": {
+    "n_test": 6806,
+    "n_train": 15931,
+    "score": 0.13590949773788452
+  },
+  "surface_h0_floor": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "score": 0.1587301641702652
+  },
+  "surface_h0_floor_shuffled": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "score": 0.12619048357009888
+  }
+}

@@ -115,11 +115,28 @@ def analyze(run_dir: Path) -> dict:
         metrics["closed_map_atom_coverage"] = cma["coverage"]
 
         dec = read_json(panel_dir / "decodability.json")
-        for key in ("subop_from_delta", "subop_from_state", "subop_h0_floor",
-                    "surface_from_delta", "surface_from_state", "surface_h0_floor"):
-            metrics[f"decodability_{key}"] = dec.get(key, {}).get("score")
-            metrics[f"decodability_{key}_shuffled"] = dec.get(
+        # AMENDMENT C1: the sub-op keys are renamed to say what they measure
+        # (task-identity leakage). The legacy decodability_subop_* keys are
+        # still emitted as deprecated aliases for one release so older
+        # summaries keep parsing; they carry identical values by construction.
+        for key in ("leakage_subop_identity_from_delta",
+                    "leakage_subop_identity_from_state",
+                    "leakage_subop_identity_h0_floor",
+                    "surface_from_delta", "surface_from_state",
+                    "surface_h0_floor"):
+            prefix = "" if key.startswith("leakage_") else "decodability_"
+            metrics[f"{prefix}{key}"] = dec.get(key, {}).get("score")
+            metrics[f"{prefix}{key}_shuffled"] = dec.get(
                 key + "_shuffled", {}).get("score")
+        for legacy, current in dec.get("deprecated_aliases", {}).items():
+            metrics[legacy] = metrics.get(current)
+            metrics[f"{legacy}_shuffled"] = metrics.get(f"{current}_shuffled")
+        metrics["deprecated_alias_note"] = (
+            "decodability_subop_* are DEPRECATED aliases of "
+            "leakage_subop_identity_* (amendment C1): the probe measures "
+            "task-identity leakage into deltas, not sub-op localization. "
+            "Removed after one release; use leakage_subop_identity_* and, for "
+            "granularity, probe_transfer_subop_*.")
 
         tr = read_json(panel_dir / "transfer.json")
         stds = [v for v in tr["task_row_stats"]["row_stds"]
@@ -129,11 +146,212 @@ def analyze(run_dir: Path) -> dict:
                  if not np.isnan(v)]
         metrics["transfer_transplant_row_std_mean"] = (
             float(np.mean(tstds)) if tstds else None)
+        # AMENDMENT C4: decomposition of the conflated row-std.
+        vd = tr.get("variance_decomposition")
+        if vd:
+            metrics["transfer_partner_variance"] = vd["partner_variance_mean"]
+            metrics["transfer_input_variance"] = vd["input_variance_mean"]
+            metrics["transfer_row_std_legacy"] = \
+                metrics["transfer_transplant_row_std_mean"]
+
+        # AMENDMENT C2: transfer-split sub-op probes (granularity instrument).
+        tsp_path = panel_dir / "transfer_split_subop.json"
+        if tsp_path.exists():
+            tsp = read_json(tsp_path)
+            metrics["probe_transfer_subop_mean"] = tsp.get("mean_across_subops")
+            metrics["probe_transfer_subop_mean_taskscope"] = tsp.get(
+                "mean_across_subops_taskscope")
+            for sub, entry in tsp.get("per_subop", {}).items():
+                metrics[f"probe_transfer_subop_{sub}_acc"] = \
+                    entry.get("mean_balanced_acc")
+
+        # AMENDMENT C3: canonical substitution.
+        canon_path = panel_dir / "canonical_substitution.json"
+        if canon_path.exists():
+            canon = read_json(canon_path)
+            metrics["canon_variants_agree"] = canon.get("all_variants_agree")
+            for level, block in canon.get("per_level", {}).items():
+                for k in ("canon_route_agree_hard", "canon_route_kl",
+                          "canon_repair_acc", "canon_repair_delta"):
+                    for tag in ("", "_alt"):
+                        metrics[f"{k}{tag}_{level}"] = block.get(k + tag)
+                metrics[f"canon_baseline_acc_{level}"] = block.get("baseline_acc")
+
+    # E1b liveness artifacts -> validity gates + telemetry headlines
+    # (H1-E1bExperiment.md). Evaluated here, from disk, never in the loop.
+    lv_dir = run_dir / "liveness"
+    if lv_dir.exists():
+        metrics.update(_liveness_metrics(lv_dir))
+
+    # E2 noise telemetry + registered robustness sweep (H1-Experiment2.md).
+    nt_dir = run_dir / "noise_telemetry"
+    if nt_dir.exists():
+        metrics.update(_noise_metrics(nt_dir))
+    rob_path = run_dir / "noise_robustness.json"
+    if rob_path.exists():
+        metrics.update(_robustness_metrics(read_json(rob_path)))
+
+    # E3 sandbox telemetry (H1-Experiment3.md).
+    st_dir = run_dir / "sandbox_telemetry"
+    if st_dir.exists():
+        metrics.update(_sandbox_metrics(st_dir))
 
     metrics["param_counts"] = read_json(run_dir / "param_counts.json")
     metrics["init_calibration"] = read_json(run_dir / "init_calibration.json")
     write_json(run_dir / "metrics.json", metrics)
     return metrics
+
+
+def _liveness_metrics(lv_dir: Path) -> dict:
+    """Summarize E1b liveness telemetry and evaluate the registered gates.
+
+    Implementation invariant: every eval's max base probability must be at or
+    below the arm's p_max + tolerance. Deafness rule: within (2k, 18k), two
+    CONSECUTIVE scheduled evals with BOTH median router task-gradient norm
+    < 1e-8 AND median router/atom ratio < 1e-3 invalidate the run. Raw norm
+    growth beyond 10x the step-1k median for two consecutive evals is a
+    non-invalidating audit flag.
+    """
+    records = [read_json(p) for p in sorted(lv_dir.glob("step*.json"))]
+    if not records:
+        return {}
+    lo, hi = R.E1B_DEAF_WINDOW
+
+    def _deaf(rec) -> bool:
+        sig = rec["learning_signal"]
+        g = sig["router_total"]["median"]
+        ratio = sig["router_atom_ratio"]["median"]
+        return (g is not None and g < R.E1B_DEAF_GRAD_NORM
+                and ratio is not None and ratio < R.E1B_DEAF_RATIO)
+
+    window = [r for r in records if lo <= r["step"] <= hi]
+    deaf_step = None
+    for a, b in zip(window, window[1:]):
+        if _deaf(a) and _deaf(b):
+            deaf_step = b["step"]
+            break
+
+    ref = next((r for r in records if r["step"] >= 1000), records[0])
+    ref_q = ref["base_geometry"]["raw_query_norm"]["p50"]
+    ref_k = ref["base_geometry"]["raw_key_norm"]["p50"]
+    growth_step = None
+    flags = [(r["step"],
+              ref_q > 0 and r["base_geometry"]["raw_query_norm"]["p50"]
+              > R.E1B_NORM_GROWTH_FLAG * ref_q
+              or ref_k > 0 and r["base_geometry"]["raw_key_norm"]["p50"]
+              > R.E1B_NORM_GROWTH_FLAG * ref_k) for r in records]
+    for (s1, f1), (s2, f2) in zip(flags, flags[1:]):
+        if f1 and f2:
+            growth_step = s2
+            break
+
+    grads = [r["learning_signal"]["router_total"]["median"] for r in window
+             if r["learning_signal"]["router_total"]["median"] is not None]
+    ratios = [r["learning_signal"]["router_atom_ratio"]["median"] for r in window
+              if r["learning_signal"]["router_atom_ratio"]["median"] is not None]
+    final = records[-1]
+    prog = final.get("deterministic_programs", {})
+    out = {
+        "e1b_pmax_observed_max": max(
+            r["base_geometry"]["max_base_prob_observed"] for r in records),
+        "e1b_pmax_invariant_ok": all(
+            r["base_geometry"]["pmax_invariant_ok"] for r in records),
+        "e1b_deafness_violated": deaf_step is not None,
+        "e1b_deafness_step": deaf_step,
+        "e1b_run_valid": deaf_step is None and all(
+            r["base_geometry"]["pmax_invariant_ok"] for r in records),
+        "e1b_norm_growth_flagged": growth_step is not None,
+        "e1b_norm_growth_step": growth_step,
+        "e1b_router_grad_median_min_window": (
+            float(np.min(grads)) if grads else None),
+        "e1b_router_atom_ratio_median_min_window": (
+            float(np.min(ratios)) if ratios else None),
+        "e1b_frac_base_prob_above_0999_final": final["base_geometry"][
+            "frac_above_0999"],
+        "e1b_programs_per_task_mean": prog.get("programs_per_task_mean"),
+        "e1b_routing_entropy_nats_mean": prog.get("routing_entropy_nats_mean"),
+        "e1b_stochastic_unique_seqs_mean": final["stochastic_diversity"][
+            "unique_sequences_per_input_mean"],
+        "e1b_stochastic_disagreement_rate": final["stochastic_diversity"][
+            "route_disagreement_rate"],
+    }
+    return out
+
+
+def _noise_metrics(nt_dir: Path) -> dict:
+    """E2 noise telemetry -> headline numbers + the cosine implementation
+    gate (observed median clean/transmitted cosine within E2_COSINE_TOL of
+    the arm's registered target, at every eval)."""
+    records = [read_json(p) for p in sorted(nt_dir.glob("step*.json"))]
+    if not records:
+        return {}
+    final = records[-1]
+    return {
+        "e2_state_noise_sigma": final["state_noise_sigma"],
+        "e2_target_cosine": final["target_cosine"],
+        "e2_cosine_observed_final": final["handoff"]["cosine"]["p50"],
+        "e2_cosine_gate_ok": all(r["handoff"]["cosine_within_tol"]
+                                 for r in records),
+        "e2_route_flip_rate_final": final["route_flip_rate"],
+        "e2_pred_disagreement_final": final["pred_disagreement_mean"],
+        "e2_transmitted_pos_mean_abs_final": final["handoff"][
+            "transmitted_pos_mean_abs"],
+        "e2_transmitted_pos_var_final": final["handoff"][
+            "transmitted_pos_var"],
+        "e2_closed_map_producer_final": final["closed_map_noisy_forward"][
+            "producer_error_mean"],
+        "e2_closed_map_transmitted_final": final["closed_map_noisy_forward"][
+            "transmitted_error_mean"],
+        "e2_closed_map_producer_target_final": final[
+            "closed_map_noisy_forward"]["producer_target_dist_mean"],
+    }
+
+
+def _sandbox_metrics(st_dir: Path) -> dict:
+    """E3 sandbox telemetry -> headline numbers. Descriptive only: the
+    sandbox carries no validity gate of its own (the E1b liveness gates still
+    apply to every E3 run); optimization failure under a correctly
+    implemented sandbox is a result, not an invalid run."""
+    records = [read_json(p) for p in sorted(st_dir.glob("step*.json"))]
+    if not records:
+        return {}
+    final = records[-1]
+    return {
+        "e3_lambda_sandbox_valid": final["lambda_sandbox_valid"],
+        "e3_lambda_sandbox_unique": final["lambda_sandbox_unique"],
+        "e3_usage_weighted_atoms_final": final["usage"]["n_weighted"],
+        "e3_usage_ema_final": final["usage"]["ema"],
+        "e3_standalone_read_final": final["standalone"]["read_mean_weighted"],
+        "e3_standalone_cycle_final": final["standalone"][
+            "cycle_mean_weighted"],
+        "e3_standalone_read_all_final": final["standalone"]["read_mean"],
+        "e3_closure_read_final": final["closure"]["read_mean"],
+        "e3_closure_cycle_final": final["closure"]["cycle_mean"],
+        "e3_unique_pair_dist_mean_final": final["uniqueness"][
+            "pair_dist_mean_weighted"],
+        "e3_unique_pair_dist_min_final": final["uniqueness"][
+            "pair_dist_min_weighted"],
+        "e3_nonidentity_dist_min_final": final["uniqueness"][
+            "pass_dist_min_weighted"],
+        "e3_margin_satisfied_frac_final": final["uniqueness"][
+            "margin_satisfied_frac_weighted"],
+    }
+
+
+def _robustness_metrics(rob: dict) -> dict:
+    """Flatten the registered sweep: seen + L1 accuracy (plus flip/
+    disagreement on seen) at each target cosine."""
+    out = {}
+    for c in rob.get("target_cosines", []):
+        key = f"{c:.3f}"
+        tag = f"c{key.replace('.', '')}"
+        seen = rob["sets"]["seen_heldout"][key]
+        out[f"e2_robust_seen_acc_{tag}"] = seen["mean_acc"]
+        out[f"e2_robust_seen_flip_{tag}"] = seen["route_flip_rate"]
+        out[f"e2_robust_seen_disagree_{tag}"] = seen["pred_disagreement"]
+        out[f"e2_robust_L1_acc_{tag}"] = \
+            rob["sets"]["unseen_L1"][key]["mean_acc"]
+    return out
 
 
 if __name__ == "__main__":

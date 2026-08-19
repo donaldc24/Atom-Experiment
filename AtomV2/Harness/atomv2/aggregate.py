@@ -31,10 +31,70 @@ HEADLINE = (
     "census_atoms_in_use", "census_steps_per_token", "census_pass_rate",
     "ablation_cv_median", "standalone_best_acc_mean_in_use",
     "closed_map_atom_matched_error", "closed_map_atom_coverage",
-    "decodability_subop_from_delta", "decodability_subop_h0_floor",
+    # C1: renamed - these measure task-identity leakage, not sub-op structure
+    "leakage_subop_identity_from_delta", "leakage_subop_identity_h0_floor",
     "decodability_surface_from_delta", "decodability_surface_h0_floor",
     "transfer_task_row_std_mean", "transfer_transplant_row_std_mean",
+    # C2: the granularity instrument
+    "probe_transfer_subop_mean", "probe_transfer_subop_mean_taskscope",
+    # C3: canonical substitution, per level (train = seen_heldout pairs)
+    "canon_route_agree_hard_train", "canon_route_agree_hard_L1",
+    "canon_route_agree_hard_L2", "canon_route_agree_hard_L3",
+    "canon_repair_acc_train", "canon_repair_acc_L1",
+    "canon_repair_acc_L2", "canon_repair_acc_L3",
+    "canon_repair_delta_train", "canon_repair_delta_L1",
+    "canon_repair_delta_L2", "canon_repair_delta_L3",
+    "canon_route_kl_train", "canon_route_kl_L1",
+    "canon_route_kl_L2", "canon_route_kl_L3",
+    # C4: decomposed transplant variance (+ the legacy conflated number)
+    "transfer_partner_variance", "transfer_input_variance",
+    "transfer_row_std_legacy",
 )
+
+# E1b-only columns (liveness gates + telemetry, H1-E1bExperiment.md). Appended
+# to HEADLINE only when aggregating e1b so e0/e1 tables keep their shape.
+E1B_HEADLINE = (
+    "e1b_run_valid", "e1b_pmax_invariant_ok", "e1b_pmax_observed_max",
+    "e1b_deafness_violated", "e1b_router_grad_median_min_window",
+    "e1b_router_atom_ratio_median_min_window", "e1b_norm_growth_flagged",
+    "e1b_frac_base_prob_above_0999_final",
+    "e1b_programs_per_task_mean", "e1b_routing_entropy_nats_mean",
+    "e1b_stochastic_unique_seqs_mean", "e1b_stochastic_disagreement_rate",
+)
+
+
+# E2-only columns (noise gates + telemetry + robustness, H1-Experiment2.md).
+E2_HEADLINE = (
+    "e2_state_noise_sigma", "e2_target_cosine", "e2_cosine_observed_final",
+    "e2_cosine_gate_ok", "e2_route_flip_rate_final",
+    "e2_pred_disagreement_final",
+    "e2_closed_map_producer_final", "e2_closed_map_transmitted_final",
+    "e2_robust_seen_acc_c1000", "e2_robust_seen_acc_c0999",
+    "e2_robust_seen_acc_c0990", "e2_robust_seen_acc_c0950",
+    "e2_robust_L1_acc_c1000", "e2_robust_L1_acc_c0950",
+)
+
+
+# E3-only columns (sandbox telemetry headlines, H1-Experiment3.md). Scalar
+# summaries only; the per-atom usage EMA stays in metrics.json.
+E3_HEADLINE = (
+    "e3_lambda_sandbox_valid", "e3_lambda_sandbox_unique",
+    "e3_usage_weighted_atoms_final",
+    "e3_standalone_read_final", "e3_standalone_cycle_final",
+    "e3_closure_read_final", "e3_closure_cycle_final",
+    "e3_unique_pair_dist_mean_final", "e3_unique_pair_dist_min_final",
+    "e3_nonidentity_dist_min_final", "e3_margin_satisfied_frac_final",
+)
+
+
+def headline_for(experiment: str) -> tuple:
+    if experiment == "e1b":
+        return HEADLINE + E1B_HEADLINE
+    if experiment == "e2":
+        return HEADLINE + E1B_HEADLINE + E2_HEADLINE
+    if experiment == "e3":
+        return HEADLINE + E1B_HEADLINE + E3_HEADLINE
+    return HEADLINE
 
 
 def collect(experiment: str, smoke: bool = False) -> list[dict]:
@@ -51,10 +111,12 @@ def collect(experiment: str, smoke: bool = False) -> list[dict]:
         env = read_json(run_dir / "env.json")
         hostnames.add(env.get("hostname", "unknown"))
         revision = m.get("protocol_revision", "pre-revision")
-        if revision != R.PROTOCOL_REVISION:
+        expected_revision = R.EXPERIMENT_REVISIONS.get(
+            experiment, R.PROTOCOL_REVISION)
+        if revision != expected_revision:
             raise SystemExit(
                 f"{run_dir}: protocol revision {revision!r} cannot be pooled "
-                f"with current revision {R.PROTOCOL_REVISION!r}")
+                f"with {experiment}'s expected revision {expected_revision!r}")
         # Amendment R10: pooling identity is the harness-source content
         # fingerprint - the code that can change a number. Runs written before
         # the key existed fall back to the old dirty-snapshot/commit id, which
@@ -76,7 +138,7 @@ def collect(experiment: str, smoke: bool = False) -> list[dict]:
         seen_run_keys[key] = run_dir
         row = {"run_dir": str(run_dir), "arm": m["arm"], "seed": m["seed"]}
         row["protocol_revision"] = revision
-        for k in HEADLINE:
+        for k in headline_for(experiment):
             row[k] = m.get(k)
         row["params_composer"] = m["param_counts"]["composer"]
         row["params_atoms_total"] = m["param_counts"]["atoms_total"]
@@ -91,20 +153,20 @@ def collect(experiment: str, smoke: bool = False) -> list[dict]:
     return rows
 
 
-def summarise(rows: list[dict]) -> dict:
+def summarise(rows: list[dict], headline: tuple = HEADLINE) -> dict:
     by_arm: dict[str, list[dict]] = {}
     for r in rows:
         by_arm.setdefault(r["arm"], []).append(r)
     summary = {}
     for arm, rs in sorted(by_arm.items()):
         entry = {"n_seeds": len(rs), "seeds": sorted(r["seed"] for r in rs)}
-        for k in HEADLINE:
-            vals = [r[k] for r in rs if r[k] is not None]
+        for k in headline:
+            vals = [r.get(k) for r in rs if r.get(k) is not None]
             if vals:
                 entry[k + "_mean"] = float(np.mean(vals))
                 entry[k + "_std"] = (float(np.std(vals, ddof=1))
                                      if len(vals) > 1 else None)
-                entry[k + "_per_seed"] = {str(r["seed"]): r[k] for r in rs}
+                entry[k + "_per_seed"] = {str(r["seed"]): r.get(k) for r in rs}
         summary[arm] = entry
     return summary
 
@@ -203,10 +265,11 @@ def e0_instrument_audit(rows: list[dict]) -> dict:
 
 
 def aggregate(experiment: str, smoke: bool = False) -> Path:
+    headline = headline_for(experiment)
     rows = collect(experiment, smoke=smoke)
     if not rows:
         raise SystemExit(f"no completed runs found for {experiment} (smoke={smoke})")
-    summary = summarise(rows)
+    summary = summarise(rows, headline)
     sub = f"smoke_{experiment}" if smoke else experiment
     out = RESULTS_DIR / sub
     out.mkdir(parents=True, exist_ok=True)
@@ -220,9 +283,11 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
 
     # Amendment R9: E1's lambda=0 cell is not re-run; it IS E0's A0-free arm.
     # Carried in as a clearly labelled reference row rather than pooled into
-    # the battery, so no table ever implies it was run under E1.
+    # the battery, so no table ever implies it was run under E1. E1b's primary
+    # comparisons are also against A1, so the same reference row is attached.
     lambda_zero = None
-    if experiment == "e1" and not smoke:
+    ref_label = "A1=A0-free (ref, from e0)"
+    if experiment in ("e1", "e1b") and not smoke:
         try:
             ref_rows = collect(R.LAMBDA_ZERO_SOURCE["experiment"], smoke=False)
         except SystemExit:
@@ -233,13 +298,30 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
             lambda_zero["source"] = dict(R.LAMBDA_ZERO_SOURCE)
             lambda_zero["lambda_use"] = R.LAMBDA_GRID["A1"]
             write_json(out / "lambda_zero_reference.json", lambda_zero)
+    # E2/E3: the registered control is E1b's completed A6 arm (paired seeds),
+    # attached as a clearly labelled reference row, never pooled.
+    if experiment in ("e2", "e3") and not smoke:
+        base = R.E2_BASE_ARM if experiment == "e2" else R.E3_BASE_ARM
+        role = ("E2 no-noise control" if experiment == "e2"
+                else "E3 no-sandbox control")
+        ref_label = f"{base} (ref, from e1b)"
+        try:
+            ref_rows = collect("e1b", smoke=False)
+        except SystemExit:
+            ref_rows = []
+        ref_rows = [r for r in ref_rows if r["arm"] == base]
+        if ref_rows:
+            lambda_zero = summarise(ref_rows)[base]
+            lambda_zero["source"] = {"experiment": "e1b", "arm": base,
+                                     "role": role}
+            write_json(out / "a6_reference.json", lambda_zero)
 
     lines = [f"# {sub} summary", "",
-             "| arm | n | " + " | ".join(HEADLINE) + " |",
-             "|" + "---|" * (len(HEADLINE) + 2)]
+             "| arm | n | " + " | ".join(headline) + " |",
+             "|" + "---|" * (len(headline) + 2)]
     for arm, e in sorted(summary.items()):
         cells = []
-        for k in HEADLINE:
+        for k in headline:
             mean = e.get(k + "_mean")
             std = e.get(k + "_std")
             if mean is None:
@@ -251,7 +333,7 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
         lines.append(f"| {arm} | {e['n_seeds']} | " + " | ".join(cells) + " |")
     if lambda_zero is not None:
         cells = []
-        for k in HEADLINE:
+        for k in headline:
             mean = lambda_zero.get(k + "_mean")
             std = lambda_zero.get(k + "_std")
             if mean is None:
@@ -260,16 +342,23 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                 cells.append(f"{mean:.4f}")
             else:
                 cells.append(f"{mean:.4f}±{std:.4f}")
-        lines.append(f"| A1=A0-free (ref, from e0) | {lambda_zero['n_seeds']} | "
+        lines.append(f"| {ref_label} | {lambda_zero['n_seeds']} | "
                      + " | ".join(cells) + " |")
     lines += ["", "Composer and atom library are separate line items by rule; "
               "never sum them into a 'system size'.", ""]
-    if lambda_zero is not None:
+    if lambda_zero is not None and experiment in ("e1", "e1b"):
         lines += ["Amendment R9: the lambda=0 row is E0's A0-free arm, which is "
                   "configurationally identical to A1 (the resolved configs "
                   "differ only in the `arm` and `experiment` strings). It was "
                   "NOT re-run under E1 and is shown as a reference row, not as "
                   "a battery arm.", ""]
+    if lambda_zero is not None and experiment in ("e2", "e3"):
+        role = "no-noise" if experiment == "e2" else "no-sandbox"
+        lines += [f"The A6 row is E1b's completed A6 arm, reused as the "
+                  f"{experiment.upper()} {role} control under the registered "
+                  f"equivalence gate. It was NOT re-run under "
+                  f"{experiment.upper()} and is shown as a reference row, "
+                  "not as a battery arm.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     return out
@@ -278,7 +367,8 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
-    ap.add_argument("--experiment", required=True, choices=["e0", "e1"])
+    ap.add_argument("--experiment", required=True,
+                    choices=["e0", "e1", "e1b", "e2", "e3"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

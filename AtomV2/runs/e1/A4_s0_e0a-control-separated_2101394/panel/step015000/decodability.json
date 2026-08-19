@@ -1,0 +1,91 @@
+{
+  "deprecated_aliases": {
+    "decodability_subop_from_delta": "leakage_subop_identity_from_delta",
+    "decodability_subop_from_state": "leakage_subop_identity_from_state",
+    "decodability_subop_h0_floor": "leakage_subop_identity_h0_floor"
+  },
+  "labels_subops": [
+    "R",
+    "T",
+    "W",
+    "I",
+    "N",
+    "M",
+    "A"
+  ],
+  "labels_surface": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8"
+  ],
+  "leakage_note": "leakage_subop_identity_* asks 'can the active primitive's sub-op set be read off this delta'. Sub-op set is a deterministic function of primitive identity, so a high score is task-identity leakage, not evidence of sub-op structure. Use transfer_split_subop_* for granularity.",
+  "leakage_subop_identity_from_delta": {
+    "n_test": 0,
+    "n_train": 0,
+    "note": "no probe material (e.g. router picked only pass)",
+    "score": null
+  },
+  "leakage_subop_identity_from_state": {
+    "n_test": 0,
+    "n_train": 0,
+    "note": "no probe material (e.g. router picked only pass)",
+    "score": null
+  },
+  "leakage_subop_identity_h0_floor": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "per_label_balanced_acc": [
+      0.5026998394168913,
+      0.5054871141910553,
+      0.48493748530745506,
+      0.5017826315015554,
+      0.49988020956516266,
+      0.4901219066232443,
+      0.49150774255394936
+    ],
+    "score": 0.4966309898799019
+  },
+  "leakage_subop_identity_h0_floor_shuffled": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "per_label_balanced_acc": [
+      0.502431255299598,
+      0.5254629552364349,
+      0.49237298034131527,
+      0.4926613885909319,
+      0.5125248655676842,
+      0.5055264178663492,
+      0.4961693100631237
+    ],
+    "score": 0.5038784532807767
+  },
+  "n_step_samples": 0,
+  "p8_note": "sub-op labels are SETS; P8 contributes {T,N}",
+  "surface_from_delta": {
+    "n_test": 0,
+    "n_train": 0,
+    "note": "no probe material (e.g. router picked only pass)",
+    "score": null
+  },
+  "surface_from_state": {
+    "n_test": 0,
+    "n_train": 0,
+    "note": "no probe material (e.g. router picked only pass)",
+    "score": null
+  },
+  "surface_h0_floor": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "score": 0.14047619700431824
+  },
+  "surface_h0_floor_shuffled": {
+    "n_test": 1260,
+    "n_train": 2940,
+    "score": 0.14444445073604584
+  }
+}

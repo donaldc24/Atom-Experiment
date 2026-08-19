@@ -1,4 +1,9 @@
 {
+  "deprecated_aliases": {
+    "decodability_subop_from_delta": "leakage_subop_identity_from_delta",
+    "decodability_subop_from_state": "leakage_subop_identity_from_state",
+    "decodability_subop_h0_floor": "leakage_subop_identity_h0_floor"
+  },
   "labels_subops": [
     "R",
     "T",
@@ -18,9 +23,8 @@
     "P7",
     "P8"
   ],
-  "n_step_samples": 22800,
-  "p8_note": "sub-op labels are SETS; P8 contributes {T,N}",
-  "subop_from_delta": {
+  "leakage_note": "leakage_subop_identity_* asks 'can the active primitive's sub-op set be read off this delta'. Sub-op set is a deterministic function of primitive identity, so a high score is task-identity leakage, not evidence of sub-op structure. Use transfer_split_subop_* for granularity.",
+  "leakage_subop_identity_from_delta": {
     "n_test": 6831,
     "n_train": 15969,
     "per_label_balanced_acc": [
@@ -34,7 +38,7 @@
     ],
     "score": 0.9534522720745632
   },
-  "subop_from_delta_shuffled": {
+  "leakage_subop_identity_from_delta_shuffled": {
     "n_test": 6831,
     "n_train": 15969,
     "per_label_balanced_acc": [
@@ -48,7 +52,7 @@
     ],
     "score": 0.5008303894885883
   },
-  "subop_from_state": {
+  "leakage_subop_identity_from_state": {
     "n_test": 6825,
     "n_train": 15975,
     "per_label_balanced_acc": [
@@ -62,7 +66,7 @@
     ],
     "score": 0.9534383033003125
   },
-  "subop_from_state_shuffled": {
+  "leakage_subop_identity_from_state_shuffled": {
     "n_test": 6825,
     "n_train": 15975,
     "per_label_balanced_acc": [
@@ -76,7 +80,7 @@
     ],
     "score": 0.4982408078919564
   },
-  "subop_h0_floor": {
+  "leakage_subop_identity_h0_floor": {
     "n_test": 1260,
     "n_train": 2940,
     "per_label_balanced_acc": [
@@ -90,7 +94,7 @@
     ],
     "score": 0.49916297303778784
   },
-  "subop_h0_floor_shuffled": {
+  "leakage_subop_identity_h0_floor_shuffled": {
     "n_test": 1260,
     "n_train": 2940,
     "per_label_balanced_acc": [
@@ -104,6 +108,8 @@
     ],
     "score": 0.5010700602683106
   },
+  "n_step_samples": 22800,
+  "p8_note": "sub-op labels are SETS; P8 contributes {T,N}",
   "surface_from_delta": {
     "n_test": 6795,
     "n_train": 16005,

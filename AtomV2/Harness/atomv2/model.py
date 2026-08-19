@@ -160,9 +160,26 @@ class AtomModel(nn.Module):
     # -- routing --------------------------------------------------------------
     def _route(self, state, active_token, micro_step, mode, tau,
                forced_idx=None, atom_mask=None, generator=None):
-        """Returns (weights [B,17], logits [B,17], soft [B,17])."""
-        logits = (self.composer.query(state, active_token, micro_step)
-                  @ self.atoms.all_keys().T) / math.sqrt(self.cfg.key_dim)
+        """Returns (weights [B,17], logits [B,17], soft [B,17]).
+
+        Routers (cfg.router):
+          'scaled_dot' - certified E0/E1: q.k / sqrt(key_dim), annealed tau.
+          'cosine'     - E1b anti-saturation stack: L2-normalized q and k,
+                         logits = alpha * cos(q, k) in [-alpha, alpha]; in
+                         gumbel mode the forward pick is argmax(z + sigma*g)
+                         and the straight-through surrogate is
+                         softmax((z + sigma*g) / tau_backward). Learned norm
+                         growth can no longer widen the logit gap.
+        """
+        q = self.composer.query(state, active_token, micro_step)
+        keys = self.atoms.all_keys()
+        if self.cfg.router == "cosine":
+            q = q / (q.norm(dim=-1, keepdim=True) + self.cfg.router_norm_eps)
+            keys = keys / (keys.norm(dim=-1, keepdim=True)
+                           + self.cfg.router_norm_eps)
+            logits = self.cfg.router_alpha * (q @ keys.T)
+        else:
+            logits = (q @ keys.T) / math.sqrt(self.cfg.key_dim)
         if atom_mask is not None:  # compensation probe: atom removed from routing
             masked = torch.zeros_like(logits)
             masked[:, : self.cfg.n_atoms] = torch.where(
@@ -178,19 +195,27 @@ class AtomModel(nn.Module):
         if mode == "soft":
             soft = F.softmax(logits / tau, dim=-1)
             return soft, logits, soft
-        # gumbel: straight-through top-1
+        # gumbel: straight-through top-1. The unit-Gumbel stream is drawn
+        # identically in both routers; the cosine router only SCALES it by
+        # sigma (E1b: same underlying draws across arms within a seed).
         u = torch.rand(logits.shape, generator=generator, dtype=logits.dtype)
         neg_log_u = -torch.log(u.clamp(1e-20, 1.0))          # >= 0
         gumbel = -torch.log(neg_log_u.clamp_min(1e-20))
-        soft = F.softmax((logits + gumbel) / tau, dim=-1)
-        idx = soft.argmax(dim=-1)
+        if self.cfg.router == "cosine":
+            noisy = logits + self.cfg.router_sigma * gumbel
+            soft = F.softmax(noisy / self.cfg.router_tau_backward, dim=-1)
+            idx = noisy.argmax(dim=-1)
+        else:
+            soft = F.softmax((logits + gumbel) / tau, dim=-1)
+            idx = soft.argmax(dim=-1)
         hard = F.one_hot(idx, self.cfg.n_atoms + 1).to(logits.dtype)
         weights = hard + soft - soft.detach()
         return weights, logits, soft
 
     # -- full forward ---------------------------------------------------------
     def forward(self, digits, tokens, n_tokens, mode="gumbel", tau=1.0,
-                forced=None, ablate=None, atom_mask=None, generator=None):
+                forced=None, ablate=None, atom_mask=None, generator=None,
+                noise_sigma=0.0, noise_generator=None):
         """
         digits [B,6], tokens [B,2] (PAD-filled), n_tokens [B] in {1,2}.
         mode: 'gumbel' (train) | 'hard'/'soft' (eval) | 'forced' (oracle/panel).
@@ -200,18 +225,49 @@ class AtomModel(nn.Module):
             untouched (registered F2 mechanism).
         atom_mask: bool [n_atoms] - remove atoms from routing (compensation
             probe, final checkpoint only, non-gating).
+        noise_sigma / noise_generator: E2 interface noise. When sigma > 0,
+            every live NONTERMINAL handoff transmits
+            LayerNorm(s_clean + Normal(0, sigma^2 I)) to the next composer
+            decision and atom; the final live state reaches the decoder clean;
+            dead steps receive no noise; pass gets the same channel noise as
+            atoms. sigma == 0 bypasses noise generation completely and never
+            touches noise_generator (registered no-noise equivalence).
         Number of composition steps = n_tokens * 3; steps beyond an example's
         budget are dead: state frozen, no rent, choice logged as -1.
         """
         assert mode in self.ROUTING_MODES
-        b = digits.shape[0]
         state = self.code(digits)
         live_all = (torch.arange(N_STEPS)[None, :]
                     < (n_tokens * R.MICRO_STEPS)[:, None])       # [B,6]
+        return self._run_steps(state, tokens, live_all, mode, tau, forced,
+                               ablate, atom_mask, generator, start_step=0,
+                               noise_sigma=noise_sigma,
+                               noise_generator=noise_generator)
 
+    def _run_steps(self, state, tokens, live_all, mode, tau, forced, ablate,
+                   atom_mask, generator, start_step=0, noise_sigma=0.0,
+                   noise_generator=None):
+        """The composition loop. THE single stepping code path.
+
+        forward() enters it at step 0 from code(digits); execute_from_state()
+        enters it at a token boundary from an injected state. Steps before
+        start_step are not executed at all - they contribute placeholder
+        entries (state unchanged, choice -1, zero logits/mass) so every
+        returned tensor keeps full [B, N_STEPS] indexing.
+        """
         states = [state]
         route_logits, choices, soft_atom_mass = [], [], []
+        transmitted = []       # E2: what the next step actually received
         for k in range(N_STEPS):
+            if k < start_step:
+                states.append(state)
+                route_logits.append(torch.zeros(
+                    state.shape[0], self.cfg.n_atoms + 1, dtype=state.dtype))
+                choices.append(torch.full((state.shape[0],), -1,
+                                          dtype=torch.int64))
+                soft_atom_mass.append(torch.zeros(state.shape[0],
+                                                  dtype=state.dtype))
+                continue
             live = live_all[:, k]
             token_pos = k // R.MICRO_STEPS
             micro_step = k % R.MICRO_STEPS
@@ -245,7 +301,22 @@ class AtomModel(nn.Module):
             soft_atom_mass.append(
                 (soft[:, : self.cfg.n_atoms].sum(dim=-1) * live.to(soft.dtype)))
 
-        return {
+            # E2 interface noise: corrupt the handoff into step k+1 for every
+            # example whose NEXT step is live (prefix liveness makes that
+            # exactly "live nonterminal", token boundaries included). The
+            # clean producer state stays in `states` for diagnostics only;
+            # the carry - what composer and atom see next - is transmitted.
+            # One fixed-shape draw per handoff keeps the dedicated noise
+            # stream's consumption independent of batch masks.
+            if noise_sigma > 0 and k + 1 < N_STEPS:
+                nonterminal = live_all[:, k + 1]
+                eps = noise_sigma * torch.randn(
+                    state.shape, generator=noise_generator, dtype=state.dtype)
+                noisy = self._norm(state + eps)
+                state = torch.where(nonterminal[:, None], noisy, state)
+                transmitted.append(state)
+
+        out = {
             "logits": self.decoder(state),                       # [B,6,10]
             "states": states,                                    # 7 x [B,384]
             "route_logits": torch.stack(route_logits, dim=1),    # [B,6,17]
@@ -253,6 +324,34 @@ class AtomModel(nn.Module):
             "soft_atom_mass": torch.stack(soft_atom_mass, dim=1),  # [B,6]
             "live": live_all,                                    # [B,6]
         }
+        if noise_sigma > 0:
+            out["states_transmitted"] = transmitted  # entry k -> into step k+1
+        return out
+
+    def execute_from_state(self, state, tokens, n_tokens, start_token_idx,
+                           mode="hard", tau=1.0, forced=None, ablate=None,
+                           atom_mask=None):
+        """PANEL-SIDE ONLY. Continue execution from an injected state.
+
+        Used by the canonical substitution test: replace the state at a token
+        boundary with the encoding of the ground-truth partial result, then run
+        the remaining token's micro-steps through the SAME loop forward() uses.
+
+        state: [B, state_dim] injected at the boundary before token
+            start_token_idx. start_token_idx=0 with state=code(x) reproduces
+            forward() exactly (asserted in tests).
+        Returns forward()'s dict shape; entries for steps before the boundary
+        are placeholders, not executed.
+        """
+        assert mode in self.ROUTING_MODES
+        assert not self.training, (
+            "execute_from_state is a read-only panel probe; the model must be "
+            "in eval mode (probes read, never write)")
+        live_all = (torch.arange(N_STEPS)[None, :]
+                    < (n_tokens * R.MICRO_STEPS)[:, None])
+        return self._run_steps(state, tokens, live_all, mode, tau, forced,
+                               ablate, atom_mask, generator=None,
+                               start_step=start_token_idx * R.MICRO_STEPS)
 
 
 def param_counts(model: AtomModel) -> dict:

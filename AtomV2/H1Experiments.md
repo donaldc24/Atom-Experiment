@@ -252,3 +252,38 @@ The old numbers cant be reproduced exactly because the world changed (length 6 n
 | CC Transfer Matrix | More Pidgin like / More Flat / More FLat / Less Flat |
 
 
+**Amendment 8/15/26** 
+E0 A0-Free run was identitcal for what E1 A1 is, so below is the real results from that and the new predicted ones based on that:
+
+|Metric| Prediction A0-Free/A1 |
+|--|--|
+| Seen Acc | 97.4% ± 0.6% |
+| Unseen Acc | L1: 80.7% ± 15.0%, L2: 66.5% ± 14.0%, L3: 0.8% ± 0.2% |
+| Dissociation Gap | 0.798 ± 0.152 |
+| Closed-map Error | seen: 1.051, L1: 1.076, L3: 1.146 (oracle: 0.015). Rises through training 0.74 to 1.05, slow co-adaptive drift shape, not the step-jump |
+| Task-identity Leakage (formerly decodability) | sub-op-set: 0.936 (floor 0.50), surface: 0.954 (floor 0.14). Task info highly present and linearly readable in deltas |
+| Census (atoms in use) | 7 ± 1.7 |
+| Steps per Token | 3.0 ± 0.0, pass rate 0.0. All micro-steps used every token, pass never chosen |
+| Ablation Variance (CV median) | 0.437 ± 0.061 (oracle: 0.000) |
+| Standalone Semantics | 0.096 ± 0.006 best-acc mean (oracle: 1.000). No atom computes a coherent function alone |
+| CC Transfer Matrix | task row std 0.295, transplant row std 0.300 (oracle: 0.000). Legacy conflated metric, partner/input variance decomposition added per amendment |
+| Soft-Hard Gap (seen) | -0.0001, none. Routing decisively hard, no mixture exploitation |
+| Seed Stability | L1 swings 15 points across seeds (oracle: 1.000 ± 0.000 on all levels, all seeds) |
+
+| Metric | A2 (0.001) | A3 (0.01) | A4 (0.1)
+|--|--|--|--|
+| Seen Acc | > 95% | > 95% | > 95% |
+| Unseen Acc | L1 < 60%, L2 < 30%, L3 ~0 | L1 < 40%, L2 < 20%, L3 ~0 | L1 < 20%, L2 < 10%, L3 ~0 | 
+| Dissociation Gap | > 0.70 | > 0.70 | > 0.70 |
+| Closed-map Error | > 1 | > 1 | > 1 |
+| Task-identity Leakage | No big change | No big change | No big change |
+| Canonical Substitution (new) | route agree low, repair delta ~0 | same | same, rent does not make states legible |
+| Census | 5-8 | 4-6 | 2-4 |
+| Steps per Token | 2.0-2.8, pass appears | 1.2-2.0, pass common | ~1.0, pass rate 0.5+ |
+| Ablation Variance | ~0.4, like A1 | 0.3-0.5, slightly lower | low but unstable, few atoms left | 
+| Standalone Semantics | ~0.1, slight | 0.1-0.25, slightly more | ~0.1 or worse |
+| CC Transfer Matrix | ~0.3 unchanged | ~0.25-0.3, marginally flatter | flat-cold, low variance low level |
+| Soft-Hard Gap (seen) | ~0 | ~0 | small gap opens | 
+| Seed Stability | volatile like A1 | volatile | most volatile |
+
+I believe the A0-Free generalization lives in the smear...the 3-micro-step pipeline is the mix-and-match machine, so anything that compresses the pipeline drains the generalization.
