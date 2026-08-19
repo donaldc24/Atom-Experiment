@@ -36,6 +36,9 @@ E1B_ORACLE_ARM = R.E1B_ORACLE_ARM    # 'A5-oracle' - regression check only
 E2_ARMS = R.E2_ARMS                  # ('A8','A9','A10')
 # E3 (H1-Experiment3.md): atom sandbox on the A6 base; A6 is the control.
 E3_ARMS = R.E3_ARMS                  # ('A11','A12','A13')
+# E4 (H1-Experiment4.md): E2 noise + E3 sandbox stacked on the A6 base;
+# A6/A9/A12 attach as labelled references.
+E4_ARMS = R.E4_ARMS                  # ('A14','A15')
 
 
 @dataclass
@@ -169,6 +172,22 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
         cfg.lambda_sandbox_valid = R.E3_LAMBDA_VALID[arm]
         cfg.lambda_sandbox_unique = R.E3_LAMBDA_UNIQUE[arm]
         return cfg
+    elif arm in E4_ARMS:
+        # E4 = the registered A6 base + BOTH prior treatments, unchanged:
+        # E2 interface noise and the E3 sandbox coexisting. No new mechanism.
+        # Registered budget change: 30k steps, panels at 20k + final (the
+        # smoke path keeps the smoke budget so pipeline checks stay cheap).
+        cfg = config_for_arm(R.E4_BASE_ARM, seed, smoke=smoke)
+        cfg.arm = arm
+        cfg.experiment = "e4"
+        cfg.protocol_revision = R.E4_PROTOCOL_REVISION
+        cfg.state_noise_sigma = R.E4_STATE_NOISE_SIGMA[arm]
+        cfg.lambda_sandbox_valid = R.E4_LAMBDA_VALID[arm]
+        cfg.lambda_sandbox_unique = R.E4_LAMBDA_UNIQUE[arm]
+        if not smoke:
+            cfg.total_steps = R.E4_TOTAL_STEPS
+            cfg.panel_steps = R.E4_PANEL_STEPS
+        return cfg
     elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
         cfg.experiment = "e1b"
         cfg.protocol_revision = R.E1B_PROTOCOL_REVISION
@@ -192,7 +211,8 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
     else:
         raise ValueError(f"unknown arm {arm!r}; E0 arms {E0_ARMS}, E1 arms "
                          f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}, "
-                         f"E2 arms {E2_ARMS}, E3 arms {E3_ARMS}")
+                         f"E2 arms {E2_ARMS}, E3 arms {E3_ARMS}, "
+                         f"E4 arms {E4_ARMS}")
 
     if smoke:
         cfg.examples_per_train_task = 48

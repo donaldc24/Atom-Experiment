@@ -358,6 +358,47 @@ E3_CHAIN_MAX = 2 * MICRO_STEPS       # 6
 # record, drawn from the indexed 'e3_sandbox_eval' stream.
 E3_TELEMETRY_CHAINS = 8
 
+# ---------------------------------------------------------------------------
+# E4 (H1-Experiment4.md): catching + throwing - do the two working pressures
+# stack? Both prior treatments coexist UNCHANGED: E2 interface noise exactly
+# as registered (training-only, nonterminal handoffs, re-LayerNormed, own RNG
+# stream) and the E3 sandbox exactly as registered (READ validity +
+# uniqueness on atom MLPs only, frozen decoder, own RNG streams). Interaction
+# rule: the sandbox sees CLEAN states only - z0 remains stopgrad of the task
+# forward's PRE-NOISE state and sandbox chains carry no channel noise. No new
+# mechanism, no third pressure. Doses are references into the E2/E3 grids,
+# never transcribed.
+# ---------------------------------------------------------------------------
+E4_PROTOCOL_REVISION = "e4-stacked-pressures"
+E4_BASE_ARM = "A6"                   # registered base; A6/A9/A12 are the
+                                     # labelled reference rows, never re-run
+E4_ARMS = ("A14", "A15")
+E4_STATE_NOISE_SIGMA = {
+    "A14": E2_STATE_NOISE_SIGMA["A9"],    # target cosine 0.990 (A9 dose)
+    "A15": E2_STATE_NOISE_SIGMA["A8"],    # target cosine 0.999 (A8 dose)
+}
+E4_LAMBDA_VALID = {
+    "A14": E3_LAMBDA_VALID["A12"],        # 0.3 (A12 dose)
+    "A15": E3_LAMBDA_VALID["A11"],        # 0.1 (A11 dose)
+}
+E4_LAMBDA_UNIQUE = {
+    "A14": E3_LAMBDA_UNIQUE["A12"],
+    "A15": E3_LAMBDA_UNIQUE["A11"],
+}
+
+# Step budget: 30k, registered with the E4 spec (A12 seed 0 was still climbing
+# at 20k). Paired-comparison rule: treatment arms compare to the references at
+# the 20k checkpoint (like for like) AND 30k finals are reported separately -
+# budgets are never mixed in one comparison. Checkpoint cadence unchanged;
+# panels at 20k and final (30k).
+E4_TOTAL_STEPS = 30_000
+E4_PANEL_STEPS = (20_000,)
+
+# The registered dax-crack check: any P3 cell at or above this raw hard
+# accuracy in any healthy arm is named in the results as the headline
+# regardless of the other outcome bins.
+E4_DAX_CRACK_THRESHOLD = 0.01
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
@@ -365,4 +406,5 @@ EXPERIMENT_REVISIONS = {
     "e1b": E1B_PROTOCOL_REVISION,
     "e2": E2_PROTOCOL_REVISION,
     "e3": E3_PROTOCOL_REVISION,
+    "e4": E4_PROTOCOL_REVISION,
 }

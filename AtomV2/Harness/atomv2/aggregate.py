@@ -87,6 +87,19 @@ E3_HEADLINE = (
 )
 
 
+# E4-only columns (H1-Experiment4.md): the dax-crack check and the registered
+# 20k like-for-like checkpoint block (never mixed with the 30k finals that
+# fill the ordinary headline keys).
+E4_HEADLINE = (
+    "e4_dax_crack", "e4_dax_max_cell_acc", "e4_dax_cells_at_threshold",
+    "e4_dax_crack_20k", "e4_dax_max_cell_acc_20k",
+    "e4_acc_seen_hard_20k", "e4_acc_unseen_L1_hard_20k",
+    "e4_acc_unseen_L2_hard_20k", "e4_acc_unseen_L3_hard_20k",
+    "e4_closed_map_seen_20k", "e4_closed_map_target_L3_20k",
+    "e4_canon_repair_acc_L3_20k", "e4_canon_repair_delta_L3_20k",
+)
+
+
 def headline_for(experiment: str) -> tuple:
     if experiment == "e1b":
         return HEADLINE + E1B_HEADLINE
@@ -94,6 +107,9 @@ def headline_for(experiment: str) -> tuple:
         return HEADLINE + E1B_HEADLINE + E2_HEADLINE
     if experiment == "e3":
         return HEADLINE + E1B_HEADLINE + E3_HEADLINE
+    if experiment == "e4":
+        return (HEADLINE + E1B_HEADLINE + E2_HEADLINE + E3_HEADLINE
+                + E4_HEADLINE)
     return HEADLINE
 
 
@@ -316,6 +332,31 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                                      "role": role}
             write_json(out / "a6_reference.json", lambda_zero)
 
+    # E4: three labelled reference rows - the shared A6 base plus the two
+    # single-pressure middles (A9 noise-only, A12 sandbox-only). All are
+    # completed 20k runs; the registered comparison against them uses the E4
+    # arms' e4_*_20k checkpoint columns, never the 30k finals.
+    references = ([] if lambda_zero is None
+                  else [(ref_label, lambda_zero)])
+    if experiment == "e4" and not smoke:
+        for src_exp, arm_name, role in (
+                ("e1b", R.E4_BASE_ARM, "shared no-treatment base"),
+                ("e2", "A9", "noise-only middle dose"),
+                ("e3", "A12", "sandbox-only middle dose")):
+            try:
+                rr = [r for r in collect(src_exp, smoke=False)
+                      if r["arm"] == arm_name]
+            except SystemExit:
+                rr = []
+            if rr:
+                entry = summarise(rr, headline_for(src_exp))[arm_name]
+                entry["source"] = {"experiment": src_exp, "arm": arm_name,
+                                   "role": role}
+                references.append((f"{arm_name} (ref, from {src_exp}, 20k)",
+                                   entry))
+        if references:
+            write_json(out / "references.json", dict(references))
+
     lines = [f"# {sub} summary", "",
              "| arm | n | " + " | ".join(headline) + " |",
              "|" + "---|" * (len(headline) + 2)]
@@ -331,18 +372,18 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
             else:
                 cells.append(f"{mean:.4f}±{std:.4f}")
         lines.append(f"| {arm} | {e['n_seeds']} | " + " | ".join(cells) + " |")
-    if lambda_zero is not None:
+    for label, entry in references:
         cells = []
         for k in headline:
-            mean = lambda_zero.get(k + "_mean")
-            std = lambda_zero.get(k + "_std")
+            mean = entry.get(k + "_mean")
+            std = entry.get(k + "_std")
             if mean is None:
                 cells.append("-")
             elif std is None:
                 cells.append(f"{mean:.4f}")
             else:
                 cells.append(f"{mean:.4f}±{std:.4f}")
-        lines.append(f"| {ref_label} | {lambda_zero['n_seeds']} | "
+        lines.append(f"| {label} | {entry['n_seeds']} | "
                      + " | ".join(cells) + " |")
     lines += ["", "Composer and atom library are separate line items by rule; "
               "never sum them into a 'system size'.", ""]
@@ -359,6 +400,12 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                   f"equivalence gate. It was NOT re-run under "
                   f"{experiment.upper()} and is shown as a reference row, "
                   "not as a battery arm.", ""]
+    if experiment == "e4" and references:
+        lines += ["A6/A9/A12 are completed 20k reference runs, never re-run. "
+                  "Registered comparison rule: E4 arms compare to them via "
+                  "the e4_*_20k checkpoint columns (like for like); the "
+                  "ordinary headline columns hold E4's 30k finals and are "
+                  "never mixed into that comparison.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     return out
@@ -368,7 +415,7 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
     ap.add_argument("--experiment", required=True,
-                    choices=["e0", "e1", "e1b", "e2", "e3"])
+                    choices=["e0", "e1", "e1b", "e2", "e3", "e4"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

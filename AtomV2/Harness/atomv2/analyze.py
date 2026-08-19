@@ -196,10 +196,86 @@ def analyze(run_dir: Path) -> dict:
     if st_dir.exists():
         metrics.update(_sandbox_metrics(st_dir))
 
+    # E4 (H1-Experiment4.md): the registered 20k like-for-like checkpoint
+    # block (never mixed with 30k finals) + the per-P3-cell dax-crack check.
+    if cfg.get("experiment") == "e4":
+        metrics.update(_e4_metrics(run_dir, metrics))
+
     metrics["param_counts"] = read_json(run_dir / "param_counts.json")
     metrics["init_calibration"] = read_json(run_dir / "init_calibration.json")
     write_json(run_dir / "metrics.json", metrics)
     return metrics
+
+
+def _e4_metrics(run_dir: Path, metrics: dict) -> dict:
+    """E4 dual-budget reporting + the dax-crack check (H1-Experiment4.md).
+
+    The paired comparison against A6/A9/A12 references happens at the 20k
+    checkpoint (like for like); 30k finals stay in the ordinary headline
+    keys. Dax crack: any P3 cell's raw hard accuracy at or above the
+    registered threshold, evaluated at both budgets, named either way.
+    """
+    out = {}
+
+    def _dax(cells: dict) -> dict:
+        l3 = {tid: c["acc_hard"] for tid, c in cells.items()
+              if c.get("level") == "L3" or c.get("set") == "unseen_L3"}
+        if not l3:
+            return {}
+        best = max(l3, key=l3.get)
+        return {
+            "per_cell": l3,
+            "n_cells": len(l3),
+            "max_cell_acc": l3[best],
+            "max_cell": best,
+            "cells_at_threshold": sorted(
+                t for t, a in l3.items() if a >= R.E4_DAX_CRACK_THRESHOLD),
+            "crack": bool(l3[best] >= R.E4_DAX_CRACK_THRESHOLD),
+        }
+
+    dax_final = _dax(metrics.get("per_cell", {}))
+    if dax_final:
+        out["e4_dax_final"] = dax_final
+        out["e4_dax_crack"] = dax_final["crack"]
+        out["e4_dax_max_cell_acc"] = dax_final["max_cell_acc"]
+        out["e4_dax_cells_at_threshold"] = len(dax_final["cells_at_threshold"])
+
+    ckpt_eval = run_dir / "evals" / "step020000.json"
+    if ckpt_eval.exists():
+        e = read_json(ckpt_eval)
+        s = e["sets"]
+        out.update({
+            "e4_acc_seen_hard_20k": s["seen_heldout"]["mean_acc_hard"],
+            "e4_acc_unseen_L1_hard_20k": s["unseen_L1"]["mean_acc_hard"],
+            "e4_acc_unseen_L2_hard_20k": s["unseen_L2"]["mean_acc_hard"],
+            "e4_acc_unseen_L3_hard_20k": s["unseen_L3"]["mean_acc_hard"],
+            "e4_closed_map_seen_20k": s["seen_heldout"][
+                "mean_closed_map_error"],
+            "e4_closed_map_target_L3_20k": s["unseen_L3"][
+                "mean_closed_map_final_dist_to_target"],
+        })
+        cells_20k = {}
+        for set_name, block in s.items():
+            for tid, t in block["tasks"].items():
+                cells_20k[tid] = {"set": set_name, "level": t["level"],
+                                  "acc_hard": t["acc_hard"]}
+        dax_20k = _dax(cells_20k)
+        if dax_20k:
+            out["e4_dax_20k"] = dax_20k
+            out["e4_dax_crack_20k"] = dax_20k["crack"]
+            out["e4_dax_max_cell_acc_20k"] = dax_20k["max_cell_acc"]
+
+    canon_20k = run_dir / "panel" / "step020000" / "canonical_substitution.json"
+    if canon_20k.exists():
+        canon = read_json(canon_20k)
+        for level, block in canon.get("per_level", {}).items():
+            out[f"e4_canon_repair_acc_{level}_20k"] = block.get(
+                "canon_repair_acc")
+            out[f"e4_canon_repair_delta_{level}_20k"] = block.get(
+                "canon_repair_delta")
+            out[f"e4_canon_baseline_acc_{level}_20k"] = block.get(
+                "baseline_acc")
+    return out
 
 
 def _liveness_metrics(lv_dir: Path) -> dict:
