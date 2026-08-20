@@ -234,3 +234,52 @@ A15 s0-2 added to the D2 roster (its runs landed with the E4-complete sync
 after D2 first ran). Read-only audit, same probes and thresholds; the
 light-dose arm tests whether specialist formation tracks dose and run
 health. No other change.
+
+## D3 registration (2026-08-20): boundary position probe (read-only)
+Registered BEFORE running. Question: do boundary states carry the FINISHED
+answer in a strange code (the atoms did the positional work in-state), or a
+rough draft plus editor (digits still at original positions; the decoder's
+attention performs the permutation at readout)? A linear probe cannot
+compute a permutation across positions, so wherever the digits physically
+sit is the answer.
+
+Mechanics: token-1 execution of any pair is bit-identical to its singleton
+(D1), so singleton states stand in for all pair boundaries. Per checkpoint:
+run the 8 singletons hard; for canonical z0 and states after micro-steps
+1/2/3, slice the state per position ([6 x 64]) and fit per-position linear
+probes (closed-form ridge to one-hot, lambda = 1.0, first 70% train / 30%
+held-out, N = 400 per task) with two targets:
+  y_moved[j] = Pa(x)[j]   (finished-answer content at position j)
+  y_orig[j]  = x[j]       (original-position content; any per-position
+                           bijection of it - value maps are probe-invisible)
+Families by net token-1 permutation: reverse (P1, P3), rotate (P2, P4,
+P8), swap (P5, P7); P6 (identity permutation) is the machinery control
+where both targets must score equally. z0 probes (target x[j]) are the
+encoder-localization baseline; if they sit near chance the code is not
+positionally organized and the question dissolves (recorded as
+DELOCALIZED).
+
+Verdict per family at the boundary (step 3), fixed now: IN-STATE if
+moved - orig >= +0.20; EDITOR if orig - moved >= +0.20; DELOCALIZED if
+max(moved, orig) < 0.30; MIXED otherwise. Chance = 0.10. Mid-token steps
+are descriptive (programs stage freely). Roster: the D2 roster incl. A15
+(11 checkpoints).
+
+## D3-A1 (2026-08-20): holography controls after the dichotomy dissolved
+First D3 pass: moved AND orig both probe at ~1.00 from every position slice
+on every checkpoint (z0 localization 1.00). The registered IN-STATE/EDITOR
+dichotomy presupposed positional exclusivity; the data suggest a
+holographic code instead - every slice may linearly carry everything. Two
+controls added BEFORE reading further:
+  (a) off-position probe: decode x[k] from slice j for k != j. ~1.0 =
+      holographic (position slices are not content-exclusive and the
+      "where do digits sit" question dissolves at slice granularity);
+  (b) head-only readout: decoder head applied per-slice WITHOUT the
+      decoder's transformer layer (its cross-position attention bypassed),
+      on z0 and boundary states, vs the full decoder. If head-only
+      collapses while the full decoder succeeds, the decoder's
+      cross-position machinery is load-bearing at readout (an editor
+      exists architecturally); if head-only holds, readout is per-slice
+      and the finished answer is linearly in-slice.
+Note recorded either way: the 1.00 moved-probe already proves a LINEAR
+per-position readout of the finished answer exists at the boundary.
