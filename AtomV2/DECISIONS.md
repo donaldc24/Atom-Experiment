@@ -170,3 +170,61 @@ Read-only diagnostic over A6/A14/A16, all local seeds (results/d1/).
 - Fix direction this licenses: emission toward the canonical family (or
   consumer exposure to unfamiliar products) - architectural/curricular, not
   another dose.
+
+## D2 registration (2026-08-20): Atom Factorization Audit (read-only)
+Registered BEFORE any probe ran. The question is causal atom factorization,
+not task accuracy. Definition fixed up front:
+
+> An atom is factorized if it implements the same primitive transformation
+> across inputs and contexts, and those atoms can be recombined to execute
+> novel programs without relying on surface-specific co-adaptation.
+
+Semantics are defined on the readout channel, dialect-independently:
+atom i "implements op f" on state h iff decode(A_i(h)) == f(decode(h)),
+where decode is the model's OWN frozen decoder readout. Probes, all
+@no_grad on final checkpoints (roster: A6 s0-2, A14 s0-2, A16 s0-1):
+
+- P-1 operator signature: one application on canonical states, match rates
+  against all 7 sub-ops + 8 surface ops + identity. Sharp = best rate
+  >= 0.95 (D2_SHARP); mapping threshold for P-3 = 0.90 (D2_MAP_THRESHOLD).
+- P-2 context invariance: the same test with h drawn from other programs'
+  states - singleton mid-token states (micro-steps 1, 2) and token-boundary
+  states of trained pairs, L1, L2, L3. Invariant = every context group
+  >= 0.80 (D2_INVARIANT_MIN) for that atom's P-1 best op.
+- P-3 composer-free recomposition (the guillotine): execute
+  encoder -> mapped atoms -> decoder from the empirically discovered
+  mapping only - no composer, no tokens, no routing - at both
+  granularities (sub-op chains; surface chains). Coverage reported; novel
+  recomposition "works" = forced accuracy >= 0.50 (D2_RECOMB_WORKS) on the
+  unseen level in question.
+- P-4 atom swaps: for any two atoms sharing a sharp signature, substitute
+  one for the other in P-3 programs and in forced replay of the routed
+  model's own recorded programs. Interchangeable = no collapse. Absence of
+  duplicates is recorded, not scored.
+- P-5 selective ablation: existing panel ablation damage regrouped into an
+  atom x primitive matrix (tasks containing vs not containing the atom's
+  P-1 op). Selective = in/out mean-damage ratio >= 3 (D2_SELECTIVE_RATIO).
+
+Verdict rule, fixed now: FACTORIZED requires sharp identity + context
+invariance + selective damage + composer-free novel recomposition (swaps
+where duplicates exist). High routed accuracy with collapsed forced
+programs reads as surface-conditioned routing programs, not atom
+factorization - the D1-suggested alternative. Ground-truth generator use is
+legal (read-only diagnosis; the quarantine covers the training path only).
+
+## D2-A1 (2026-08-20): dual-reference correction after a measurement confound
+Discovered AFTER the first D2 pass produced numbers (recorded honestly): the
+registered readout-channel definition decode(A_i(h)) == f(decode(h)) is
+confounded at canonical states by round-trip infidelity - decode(code(x))
+== x only ~0.86 on A16_s0 (the decoder never trains on raw z0; it trains on
+post-program states). Verified directly: atom 13 vs ground truth P3(x) is
+1.000 while the readout-referenced rate equals the 0.860 round-trip rate
+exactly. The atom was perfect; the probe was penalizing decoder misreads.
+Correction: P-1 sharpness and the P-3 mapping are judged GROUND-TRUTH-
+referenced (decode(A_i(h)) == f(truth content); at canonical states truth =
+x, at pair boundaries truth = Pa(x)), matching the certified panel probe.
+Readout-referenced rates stay reported beside them. Mid-token states carry
+no ground-truth content (programs stage freely), so P-2's invariance verdict
+is judged on the truth-referenced groups (canonical + boundaries); mid-token
+rates are descriptive. Thresholds unchanged. P-3/P-4/P-5 already compared
+against ground truth and are untouched.
