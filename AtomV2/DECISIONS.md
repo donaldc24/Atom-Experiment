@@ -113,3 +113,60 @@ for A14/A12 under E4-G1. Made at launch by the harness operator; if vetoed,
 the alternatives are (a) re-run E5 on Perrito after E4 completes, or (b)
 train a same-env A14 reference on Perro - the A16/A17 runs themselves remain
 valid under either choice.
+
+## A17 CUT (2026-08-20)
+Structural unreachability cannot be fixed by dose. A17 (the higher
+lambda_producer cell) is cut without being run; the dated rationale is D1's
+finding that the dax wall is not a dose-reachable failure (see below and
+results/d1/). No result from A17 would have changed the mechanism.
+
+## Gate-ladder freeze (2026-08-20)
+The equivalence-gate ladder is frozen, permanently, in this order of
+preference: (1) strict bit-identity; (2) E4-G1 three-part cross-BUILD form
+(step-1 bit-identical, drift within E4_GATE_REL_TOL, grad norms
+bit-identical, build difference documented); (3) E5-G1 forward-only
+cross-MACHINE form (step-1 non-grad records bit-identical, all mismatches
+within tolerance, hostname/processor difference documented). No new gate
+forms are minted mid-flight; a comparison that cannot pass any rung is not
+run.
+
+## E5 discipline break, named (2026-08-20)
+E5 launched without registered predictions - the only battery to do so. The
+cost: the A16~=A14 REDUNDANT outcome cannot be scored against a prior, so
+E5 contributes mechanism evidence (producer READ pressure does not move dax)
+but no forecast-calibration evidence. Noted as the discipline break it was.
+
+## A16 seeds 0-1 vs A14: REDUNDANT bin confirmed on local pairs (2026-08-20)
+A16 s0 seen 96.3 / L1 52.8 vs A14 s0 95.7 / 56.5; A16 s1 97.8 / 36.7 vs
+A14 s1 98.9 / 43.2; dax 0.0000 / 0.0025 vs 0.0000 / 0.0025. Combined ~= best
+single at both seeds; producer pressure adds nothing on top of A14's stack.
+Seed 2 is not present in this repo (trained on Perro); its line lands with
+the E5 sync.
+
+## D1 verdict (2026-08-20): CONDITIONING INNOCENT - and the repair metric is
+## no longer mysterious
+Read-only diagnostic over A6/A14/A16, all local seeds (results/d1/).
+- P-A: token-1 execution of every dax cell is BIT-IDENTICAL to its singleton
+  (routing and produced state, verified per cell, zero violations across 8
+  runs x 63 cells). The conditioning suspect had no object to act on: the R8
+  encoder is digit-only, and the premise "task tokens are baked into h0" is
+  false for this architecture.
+- P-B: the P3-first boundary state decodes to the correct intermediate at
+  97.3-100.0% (exactly singleton accuracy - it IS the singleton state) while
+  raw composition sits at 0. The state is right and readable by the frozen
+  decoder; the consumer cannot use it. Conditioning innocent; closure story
+  confirmed on the CONSUMER side.
+- P-C: dax boundary states sit 15-25% farther from the trained-consumption
+  pool than trained/L1/L2 states in every run - and L1 ~= L2 ~= trained, so
+  consumption-manifold geometry explains the L3 wall but NOT the L1/L2
+  ordering.
+- Mechanism resolution: every program's valid input domain is {canonical
+  codes} (its token-1 role trains it on enc-states extensively) UNION
+  {products of its trained partners}. Canonical repair works because
+  enc(P3(x)) looks like an h0 - in-domain for every program via its token-1
+  role. Dax fails because P3's products are in NEITHER set for any consumer.
+  The repair metric was never mysterious: it swaps an out-of-domain private
+  state for a universally in-domain canonical one.
+- Fix direction this licenses: emission toward the canonical family (or
+  consumer exposure to unfamiliar products) - architectural/curricular, not
+  another dose.
