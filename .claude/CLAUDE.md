@@ -1,4 +1,4 @@
-## vexp - Context-Aware AI Coding <!-- vexp v2.6.2 -->
+## vexp - Context-Aware AI Coding <!-- vexp v2.6.3 -->
 vexp runs entirely on this machine: local daemon, index in `.vexp/`.
 `run_pipeline` transmits nothing to any external service.
 - `run_pipeline({ "task": "..." })` - orientation in one call (ranked pivot

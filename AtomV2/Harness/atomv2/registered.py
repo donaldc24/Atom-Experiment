@@ -414,6 +414,70 @@ E4_DAX_CRACK_THRESHOLD = 0.01
 # every A12 reference row in E4 results.
 E4_GATE_REL_TOL = 1e-6
 
+# ---------------------------------------------------------------------------
+# E5 (H1-Experiment5.md): the producer branch - training atoms to EMIT states
+# that arbitrary frozen strangers can use. New branch from the SAME
+# stopgrad(z0) the sandbox already uses:
+#   z_out = Apply_i(z0)                       (trainable target atom i EMITS)
+#   chain_k = random frozen atoms, len ~ U{1..E5_CHAIN_MAX}, k = 1..K
+#   L_producer = mean_k READ(chain_k(z_out))  (frozen-decoder validity)
+# Gradient path (non-negotiable): unlike the receiver/closure branch
+# (stopgrad BEFORE the target), gradient flows THROUGH the frozen downstream
+# activations back into the producer atom ONLY - frozen parameters, live
+# activations, the same mechanism as training through the frozen decoder.
+# Base is A14 inherited byte-for-byte (noise at the A9 dose, sandbox at the
+# A12 dose, cosine router, lambda_use = 0, 30k steps); doses are references
+# into the E4 grid, never transcribed. The pressure speaks only the
+# architecture's language; the dax question is the registered HEADLINE,
+# never a training signal (no oversampling, no level-aware losses, no
+# per-task tuning).
+# ---------------------------------------------------------------------------
+E5_PROTOCOL_REVISION = "e5-producer-branch"
+E5_BASE_ARM = "A14"                  # registered base + reference row; A14 is
+                                     # never re-run, it attaches at aggregation
+E5_ARMS = ("A16", "A17")
+E5_LAMBDA_PRODUCER = {"A16": 0.1, "A17": 0.3}
+
+# K simultaneous listeners per step, registered. Why branching beats one
+# continuation: one listener per step lets the producer chase partner-
+# specific slang step to step; K simultaneous listeners force the
+# intersection - a state broadly usable, not privately usable. Same expected
+# objective, far lower variance, no listener-chasing.
+E5_PRODUCER_BRANCHES = 4
+
+# Continuation chains: length ~ U{1..E5_CHAIN_MAX}, always drawn at full
+# length with only the first k applied - fixed RNG consumption per step. The
+# maximum is the E3 registration by reference (the most atom applications a
+# two-token task can execute).
+E5_CHAIN_MAX = E3_CHAIN_MAX          # 6
+
+# Telemetry (eval cadence, measurement only): producer states per record for
+# the branch-READ-spread gauge, drawn from the indexed 'e5_producer_eval'
+# stream. The spread of READ across the K branches for the SAME emitted
+# state is the registered free metric: a direct gauge of remaining
+# context-sensitivity in production.
+E5_TELEMETRY_PRODUCERS = 8
+
+# Gaming audit (named before launch): the degenerate exit is a producer
+# emitting one fixed survives-anything state - the one-word language, gamed
+# twice in V1 - and K branches INCREASE the pull toward it (the trivial
+# message satisfies every listener). Guards: the task loss (a constant state
+# fails composition on seen tasks immediately), the inherited E3 uniqueness
+# fingerprints, and the NEW per-atom producer-output-variance telemetry row -
+# a collapsing producer must announce itself.
+
+# AMENDMENT E5-G1 (2026-08-19, E4-G1 lineage, PENDING RATIFICATION - see
+# DECISIONS.md): the A14 zero-path gate is "failed as written, satisfied in
+# purpose" when the environment difference is the MACHINE itself (E5 trains
+# on a different host/CPU than the A14 reference; identical torch/numpy
+# builds). Grad-norm bit-identity is unattainable cross-machine (backward
+# reduction kernels dispatch per CPU), so the substituted form is: step-1
+# NON-GRAD records bit-identical (identical weights/data/RNG streams - the
+# code-fidelity witness), every mismatch within E4_GATE_REL_TOL relative,
+# environment difference documented. The cross-machine caveat travels with
+# every A16/A17 vs A14 comparison: seed pairs are same-seed draws, not
+# bit-paired trajectories.
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
@@ -422,4 +486,5 @@ EXPERIMENT_REVISIONS = {
     "e2": E2_PROTOCOL_REVISION,
     "e3": E3_PROTOCOL_REVISION,
     "e4": E4_PROTOCOL_REVISION,
+    "e5": E5_PROTOCOL_REVISION,
 }

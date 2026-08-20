@@ -39,6 +39,9 @@ E3_ARMS = R.E3_ARMS                  # ('A11','A12','A13')
 # E4 (H1-Experiment4.md): E2 noise + E3 sandbox stacked on the A6 base;
 # A6/A9/A12 attach as labelled references.
 E4_ARMS = R.E4_ARMS                  # ('A14','A15')
+# E5 (H1-Experiment5.md): producer branch on the A14 base; A14 is the
+# reference row, never re-run.
+E5_ARMS = R.E5_ARMS                  # ('A16','A17')
 
 
 @dataclass
@@ -108,6 +111,13 @@ class Config:
     # MLP parameters ever receive sandbox gradients.
     lambda_sandbox_valid: float = 0.0
     lambda_sandbox_unique: float = 0.0
+
+    # E5 producer branch (training-only; the task path is untouched). 0.0
+    # means the producer is never constructed and its stream is never
+    # consumed - the registered zero-path equivalence condition. Only the
+    # emitting atom's MLP slice ever receives producer gradient; chains and
+    # decoder are frozen parameters with live activations.
+    lambda_producer: float = 0.0
 
     # oracle machinery - ONLY config_for_arm('A0-oracle') may enable these.
     forced_routing: bool = False
@@ -188,6 +198,17 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
             cfg.total_steps = R.E4_TOTAL_STEPS
             cfg.panel_steps = R.E4_PANEL_STEPS
         return cfg
+    elif arm in E5_ARMS:
+        # E5 = the registered A14 base (both E4 pressures unchanged, 30k
+        # budget, panels at 20k + final) + ONE new branch: the producer.
+        # Everything else is inherited byte-for-byte so the arms stay paired
+        # by seed with the A14 reference.
+        cfg = config_for_arm(R.E5_BASE_ARM, seed, smoke=smoke)
+        cfg.arm = arm
+        cfg.experiment = "e5"
+        cfg.protocol_revision = R.E5_PROTOCOL_REVISION
+        cfg.lambda_producer = R.E5_LAMBDA_PRODUCER[arm]
+        return cfg
     elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
         cfg.experiment = "e1b"
         cfg.protocol_revision = R.E1B_PROTOCOL_REVISION
@@ -212,7 +233,7 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
         raise ValueError(f"unknown arm {arm!r}; E0 arms {E0_ARMS}, E1 arms "
                          f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}, "
                          f"E2 arms {E2_ARMS}, E3 arms {E3_ARMS}, "
-                         f"E4 arms {E4_ARMS}")
+                         f"E4 arms {E4_ARMS}, E5 arms {E5_ARMS}")
 
     if smoke:
         cfg.examples_per_train_task = 48

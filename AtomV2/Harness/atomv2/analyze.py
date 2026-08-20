@@ -201,19 +201,30 @@ def analyze(run_dir: Path) -> dict:
     if cfg.get("experiment") == "e4":
         metrics.update(_e4_metrics(run_dir, metrics))
 
+    # E5 (H1-Experiment5.md): identical registered measurements (20k
+    # like-for-like block, dax-crack check) under the e5_ prefix, plus the
+    # two producer telemetry rows (output variance, branch-READ spread).
+    if cfg.get("experiment") == "e5":
+        metrics.update(_e4_metrics(run_dir, metrics, prefix="e5"))
+        pt_dir = run_dir / "producer_telemetry"
+        if pt_dir.exists():
+            metrics.update(_producer_metrics(pt_dir))
+
     metrics["param_counts"] = read_json(run_dir / "param_counts.json")
     metrics["init_calibration"] = read_json(run_dir / "init_calibration.json")
     write_json(run_dir / "metrics.json", metrics)
     return metrics
 
 
-def _e4_metrics(run_dir: Path, metrics: dict) -> dict:
+def _e4_metrics(run_dir: Path, metrics: dict, prefix: str = "e4") -> dict:
     """E4 dual-budget reporting + the dax-crack check (H1-Experiment4.md).
 
     The paired comparison against A6/A9/A12 references happens at the 20k
     checkpoint (like for like); 30k finals stay in the ordinary headline
     keys. Dax crack: any P3 cell's raw hard accuracy at or above the
     registered threshold, evaluated at both budgets, named either way.
+    E5 reuses these measurement definitions unchanged under prefix='e5'
+    (its references are the E4 arms, compared like for like at 20k).
     """
     out = {}
 
@@ -235,23 +246,27 @@ def _e4_metrics(run_dir: Path, metrics: dict) -> dict:
 
     dax_final = _dax(metrics.get("per_cell", {}))
     if dax_final:
-        out["e4_dax_final"] = dax_final
-        out["e4_dax_crack"] = dax_final["crack"]
-        out["e4_dax_max_cell_acc"] = dax_final["max_cell_acc"]
-        out["e4_dax_cells_at_threshold"] = len(dax_final["cells_at_threshold"])
+        out[f"{prefix}_dax_final"] = dax_final
+        out[f"{prefix}_dax_crack"] = dax_final["crack"]
+        out[f"{prefix}_dax_max_cell_acc"] = dax_final["max_cell_acc"]
+        out[f"{prefix}_dax_cells_at_threshold"] = len(
+            dax_final["cells_at_threshold"])
 
     ckpt_eval = run_dir / "evals" / "step020000.json"
     if ckpt_eval.exists():
         e = read_json(ckpt_eval)
         s = e["sets"]
         out.update({
-            "e4_acc_seen_hard_20k": s["seen_heldout"]["mean_acc_hard"],
-            "e4_acc_unseen_L1_hard_20k": s["unseen_L1"]["mean_acc_hard"],
-            "e4_acc_unseen_L2_hard_20k": s["unseen_L2"]["mean_acc_hard"],
-            "e4_acc_unseen_L3_hard_20k": s["unseen_L3"]["mean_acc_hard"],
-            "e4_closed_map_seen_20k": s["seen_heldout"][
+            f"{prefix}_acc_seen_hard_20k": s["seen_heldout"]["mean_acc_hard"],
+            f"{prefix}_acc_unseen_L1_hard_20k": s["unseen_L1"][
+                "mean_acc_hard"],
+            f"{prefix}_acc_unseen_L2_hard_20k": s["unseen_L2"][
+                "mean_acc_hard"],
+            f"{prefix}_acc_unseen_L3_hard_20k": s["unseen_L3"][
+                "mean_acc_hard"],
+            f"{prefix}_closed_map_seen_20k": s["seen_heldout"][
                 "mean_closed_map_error"],
-            "e4_closed_map_target_L3_20k": s["unseen_L3"][
+            f"{prefix}_closed_map_target_L3_20k": s["unseen_L3"][
                 "mean_closed_map_final_dist_to_target"],
         })
         cells_20k = {}
@@ -261,21 +276,48 @@ def _e4_metrics(run_dir: Path, metrics: dict) -> dict:
                                   "acc_hard": t["acc_hard"]}
         dax_20k = _dax(cells_20k)
         if dax_20k:
-            out["e4_dax_20k"] = dax_20k
-            out["e4_dax_crack_20k"] = dax_20k["crack"]
-            out["e4_dax_max_cell_acc_20k"] = dax_20k["max_cell_acc"]
+            out[f"{prefix}_dax_20k"] = dax_20k
+            out[f"{prefix}_dax_crack_20k"] = dax_20k["crack"]
+            out[f"{prefix}_dax_max_cell_acc_20k"] = dax_20k["max_cell_acc"]
 
     canon_20k = run_dir / "panel" / "step020000" / "canonical_substitution.json"
     if canon_20k.exists():
         canon = read_json(canon_20k)
         for level, block in canon.get("per_level", {}).items():
-            out[f"e4_canon_repair_acc_{level}_20k"] = block.get(
+            out[f"{prefix}_canon_repair_acc_{level}_20k"] = block.get(
                 "canon_repair_acc")
-            out[f"e4_canon_repair_delta_{level}_20k"] = block.get(
+            out[f"{prefix}_canon_repair_delta_{level}_20k"] = block.get(
                 "canon_repair_delta")
-            out[f"e4_canon_baseline_acc_{level}_20k"] = block.get(
+            out[f"{prefix}_canon_baseline_acc_{level}_20k"] = block.get(
                 "baseline_acc")
     return out
+
+
+def _producer_metrics(pt_dir: Path) -> dict:
+    """E5 producer telemetry -> headline numbers. Descriptive only: the
+    producer carries no validity gate of its own (the E1b liveness and E2
+    cosine gates still apply to every E5 run); the variance row is the
+    registered gaming-audit instrument, the branch-READ spread the
+    registered free metric."""
+    records = [read_json(p) for p in sorted(pt_dir.glob("step*.json"))]
+    if not records:
+        return {}
+    final = records[-1]
+    ov, br = final["output_variance"], final["branch_read"]
+    return {
+        "e5_lambda_producer": final["lambda_producer"],
+        "e5_producer_variance_per_atom_final": ov["per_atom"],
+        "e5_producer_variance_min_final": ov["min"],
+        "e5_producer_variance_mean_final": ov["mean"],
+        "e5_producer_variance_z0_final": ov["z0_reference"],
+        "e5_branch_read_mean_final": br["read_mean"],
+        "e5_branch_read_spread_mean_final": br["spread_mean"],
+        # Collapse trajectory: the variance-min curve, so a mid-training
+        # collapse-and-recover cannot hide in the final snapshot.
+        "e5_producer_variance_min_curve": [
+            {"step": r["step"], "min": r["output_variance"]["min"]}
+            for r in records],
+    }
 
 
 def _liveness_metrics(lv_dir: Path) -> dict:

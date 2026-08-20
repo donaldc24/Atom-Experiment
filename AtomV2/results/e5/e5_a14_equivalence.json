@@ -1,0 +1,70 @@
+{
+  "arm": "A14",
+  "bit_identical": false,
+  "compared_keys": [
+    "loss",
+    "loss_task",
+    "grad_norm",
+    "batch_acc",
+    "loss_sandbox_valid",
+    "loss_sandbox_unique"
+  ],
+  "compared_steps": [
+    1,
+    50
+  ],
+  "mismatches": [
+    {
+      "key": "grad_norm",
+      "reference": 0.8146759271621704,
+      "replayed": 0.8146759867668152,
+      "step": 1
+    },
+    {
+      "key": "loss",
+      "reference": 3.1624789237976074,
+      "replayed": 3.162478446960449,
+      "step": 50
+    },
+    {
+      "key": "loss_task",
+      "reference": 2.4095146656036377,
+      "replayed": 2.4095144271850586,
+      "step": 50
+    },
+    {
+      "key": "grad_norm",
+      "reference": 0.6766334176063538,
+      "replayed": 0.676633358001709,
+      "step": 50
+    }
+  ],
+  "reference_run": "C:\\Users\\donal\\Documents\\Atom-Experiment\\AtomV2\\runs\\e4\\A14_s0_e4-stacked-pressures_d0955fd",
+  "substitution": {
+    "amendment": "E4-G1 / E5-G1 lineage (see DECISIONS.md): failed as written, satisfied in purpose",
+    "cross_machine": true,
+    "e4g1_form_passed": false,
+    "e5g1_form_passed": true,
+    "environment_differences": {
+      "hostname": {
+        "current": "Perro",
+        "reference": "Perrito"
+      },
+      "processor": {
+        "current": "Intel64 Family 6 Model 189 Stepping 1, GenuineIntel",
+        "reference": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD"
+      },
+      "python": {
+        "current": "3.13.1 (tags/v3.13.1:0671451, Dec  3 2024, 19:06:28) [MSC v.1942 64 bit (AMD64)]",
+        "reference": "3.11.5 (tags/v3.11.5:cce6ba9, Aug 24 2023, 14:38:34) [MSC v.1936 64 bit (AMD64)]"
+      }
+    },
+    "environment_differs": true,
+    "grad_norms_bit_identical": false,
+    "passed": true,
+    "rel_tol": 1e-06,
+    "step1_bit_identical": false,
+    "step1_forward_bit_identical": true,
+    "within_rel_tol": true
+  }
+}

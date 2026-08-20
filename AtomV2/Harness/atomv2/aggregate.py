@@ -100,6 +100,23 @@ E4_HEADLINE = (
 )
 
 
+# E5-only columns (H1-Experiment5.md): the dax-crack check and 20k block
+# under the e5_ prefix (identical measurement definitions to E4's), plus the
+# two producer telemetry rows (gaming-audit variance, branch-READ spread).
+E5_HEADLINE = (
+    "e5_dax_crack", "e5_dax_max_cell_acc", "e5_dax_cells_at_threshold",
+    "e5_dax_crack_20k", "e5_dax_max_cell_acc_20k",
+    "e5_acc_seen_hard_20k", "e5_acc_unseen_L1_hard_20k",
+    "e5_acc_unseen_L2_hard_20k", "e5_acc_unseen_L3_hard_20k",
+    "e5_closed_map_seen_20k", "e5_closed_map_target_L3_20k",
+    "e5_canon_repair_acc_L3_20k", "e5_canon_repair_delta_L3_20k",
+    "e5_lambda_producer",
+    "e5_producer_variance_min_final", "e5_producer_variance_mean_final",
+    "e5_producer_variance_z0_final",
+    "e5_branch_read_mean_final", "e5_branch_read_spread_mean_final",
+)
+
+
 def headline_for(experiment: str) -> tuple:
     if experiment == "e1b":
         return HEADLINE + E1B_HEADLINE
@@ -110,6 +127,9 @@ def headline_for(experiment: str) -> tuple:
     if experiment == "e4":
         return (HEADLINE + E1B_HEADLINE + E2_HEADLINE + E3_HEADLINE
                 + E4_HEADLINE)
+    if experiment == "e5":
+        return (HEADLINE + E1B_HEADLINE + E2_HEADLINE + E3_HEADLINE
+                + E5_HEADLINE)
     return HEADLINE
 
 
@@ -357,6 +377,28 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
         if references:
             write_json(out / "references.json", dict(references))
 
+    # E5: one labelled reference row - the A14 base (E4's completed run),
+    # never re-run. The 20k like-for-like block and the dax check carry
+    # identical registered measurement definitions under either prefix, so
+    # the reference's e4_* columns are aliased into the e5_* columns to keep
+    # the paired comparison legible in one table.
+    if experiment == "e5" and not smoke:
+        try:
+            rr = [r for r in collect("e4", smoke=False)
+                  if r["arm"] == R.E5_BASE_ARM]
+        except SystemExit:
+            rr = []
+        if rr:
+            entry = summarise(rr, headline_for("e4"))[R.E5_BASE_ARM]
+            for k in list(entry):
+                if k.startswith("e4_"):
+                    entry["e5_" + k[3:]] = entry[k]
+            entry["source"] = {"experiment": "e4", "arm": R.E5_BASE_ARM,
+                               "role": "E5 no-producer base "
+                                       "(stacked pressures)"}
+            references.append((f"{R.E5_BASE_ARM} (ref, from e4)", entry))
+            write_json(out / "references.json", dict(references))
+
     lines = [f"# {sub} summary", "",
              "| arm | n | " + " | ".join(headline) + " |",
              "|" + "---|" * (len(headline) + 2)]
@@ -413,6 +455,17 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                   "bit-identical, step-50 within 1e-6 relative, grad norms "
                   "bit-identical). A14/A12 comparisons therefore carry a "
                   "cross-build caveat that A9/A6 comparisons do not.", ""]
+    if experiment == "e5" and references:
+        lines += ["A14 is E4's completed 30k run, attached as the reference "
+                  "row, never re-run. Its e4_*_20k columns are aliased into "
+                  "the e5_* columns (identical registered measurement "
+                  "definitions). Registered comparison rule: E5 arms compare "
+                  "to A14 via the *_20k checkpoint columns (like for like); "
+                  "the ordinary headline columns hold 30k finals and are "
+                  "never mixed into that comparison. The zero-path gate "
+                  "record (results/e5/e5_a14_equivalence.json) documents any "
+                  "environment difference between the A14 reference and the "
+                  "E5 battery.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     return out
@@ -422,7 +475,7 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
     ap.add_argument("--experiment", required=True,
-                    choices=["e0", "e1", "e1b", "e2", "e3", "e4"])
+                    choices=["e0", "e1", "e1b", "e2", "e3", "e4", "e5"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

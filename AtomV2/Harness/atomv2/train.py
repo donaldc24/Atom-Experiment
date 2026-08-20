@@ -10,7 +10,10 @@ APPLICATION. Oracle terms exist only behind cfg.forced_routing (E0 arm
 'A0-oracle'), and the oracle module is imported only on that path. E3 sandbox
 terms exist only behind cfg.lambda_sandbox_* > 0 (arms A11-A13), the sandbox
 module is imported only on that path, and its gradients reach the atom MLPs
-alone - the task path above stays byte-identical to A6.
+alone - the task path above stays byte-identical to A6. The E5 producer term
+exists only behind cfg.lambda_producer > 0 (arms A16-A17), quarantined the
+same way; its gradient reaches the emitting atom's MLP alone, THROUGH frozen
+continuation chains.
 
 Per-run outputs (everything needed to reproduce results without retraining):
   config.json, env.json, split_ref.json, data_manifest.json,
@@ -86,7 +89,7 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
     # optimizer and never consumes the training Gumbel stream. E2 retains the
     # full E1b telemetry and deafness gate.
     liveness_diag = None
-    if cfg.experiment in ("e1b", "e2", "e3", "e4"):
+    if cfg.experiment in ("e1b", "e2", "e3", "e4", "e5"):
         from . import liveness as liveness_mod
         liveness_diag = liveness_mod.diag_batch(arrays, cfg)
         (run_dir / "liveness").mkdir(exist_ok=True)
@@ -110,6 +113,17 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
         from . import sandbox as sandbox_mod
         sandbox_state = sandbox_mod.SandboxState(cfg)
         (run_dir / "sandbox_telemetry").mkdir(exist_ok=True)
+
+    # E5 producer branch: QUARANTINE - imported and constructed only when
+    # lambda_producer is nonzero, so the A14 path never touches the module
+    # and never consumes the dedicated 'e5_producer' stream (zero-path
+    # equivalence). Sampling is numpy-only: no torch RNG is consumed, so the
+    # routing/noise/sandbox/init draws stay bit-identical to the A14 pair.
+    producer_state = None
+    if cfg.lambda_producer > 0:
+        from . import producer as producer_mod
+        producer_state = producer_mod.ProducerState(cfg)
+        (run_dir / "producer_telemetry").mkdir(exist_ok=True)
 
     write_json(run_dir / "config.json", cfg.to_dict())
     write_json(run_dir / "split_ref.json", split_mod.split_ref())
@@ -163,6 +177,23 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                 (cfg.lambda_sandbox_valid * valid0
                  + cfg.lambda_sandbox_unique * unique0) / task0
                 if task0 > 0 else None)})
+    if producer_state is not None:
+        # Raw producer magnitude vs task loss BEFORE any update, so the dose
+        # grid's scale is on record per run. Draws come from the indexed
+        # eval stream (index 0); the training 'e5_producer' stream is not
+        # advanced, keeping its position a pure function of the step count.
+        with torch.no_grad():
+            ps0 = producer_mod.ProducerState(cfg, stream="e5_producer_eval",
+                                             stream_index=0)
+            pterms0 = producer_mod.producer_losses(
+                model, out0["states"][0].detach(), ps0)
+        prod0 = float(pterms0["loss_producer"])
+        init_cal.update({
+            "loss_producer_init": prod0,
+            "lambda_producer": cfg.lambda_producer,
+            "producer_weighted_init": cfg.lambda_producer * prod0,
+            "producer_over_task_init": (cfg.lambda_producer * prod0 / task0
+                                        if task0 > 0 else None)})
     write_json(run_dir / "init_calibration.json", init_cal)
     log.log(event="init_calibration", **init_cal)
 
@@ -218,6 +249,14 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                         + cfg.lambda_sandbox_unique
                         * sb_terms["loss_sandbox_unique"])
                 record.update({k: float(v) for k, v in sb_terms.items()})
+            if producer_state is not None:
+                # The producer emits from the SAME stopgrad(z0) the sandbox
+                # uses; gradient reaches the emitting atom only, THROUGH the
+                # frozen continuation chains.
+                p_terms = producer_mod.producer_losses(
+                    model, out["states"][0].detach(), producer_state)
+                loss = loss + cfg.lambda_producer * p_terms["loss_producer"]
+                record.update({k: float(v) for k, v in p_terms.items()})
             if cfg.forced_routing:
                 oracle_terms = oracle.oracle_losses(
                     model, out, xb, tb, nb,
@@ -298,6 +337,17 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                             closure_read=st["closure"]["read_mean"],
                             unique_pair_dist_min=st["uniqueness"][
                                 "pair_dist_min_weighted"])
+                if producer_state is not None:
+                    pt = producer_mod.measure(model, cfg, liveness_diag, step)
+                    write_json(run_dir / "producer_telemetry"
+                               / f"step{step:06d}.json", pt)
+                    log.log(event="producer", step=step,
+                            producer_variance_min=pt["output_variance"]["min"],
+                            producer_variance_mean=pt["output_variance"][
+                                "mean"],
+                            branch_read_mean=pt["branch_read"]["read_mean"],
+                            branch_read_spread_mean=pt["branch_read"][
+                                "spread_mean"])
                 peak_rss = max(peak_rss, check_rss())
 
             if save_checkpoint:

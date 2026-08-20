@@ -127,6 +127,10 @@ _STREAMS = {
                         # uniqueness samples); dedicated: never advances the
                         # routing, data, or init streams
     "e3_sandbox_eval": 12,  # E3 init calibration + telemetry draws (indexed)
+    "e5_producer": 13,  # E5 training producer draws (emitting atom + K frozen
+                        # continuation chains); dedicated: never advances the
+                        # routing, data, init, noise, or sandbox streams
+    "e5_producer_eval": 14,  # E5 init calibration + telemetry draws (indexed)
 }
 
 
