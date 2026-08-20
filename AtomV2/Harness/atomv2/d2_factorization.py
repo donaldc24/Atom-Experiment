@@ -422,7 +422,8 @@ def main() -> None:
         ab = res["p5_selective_ablation"]
         ab_txt = ", ".join(
             f"A{i}({v['op'].split(':')[-1]}): "
-            f"{'-' if v['in_out_ratio'] is None else f'{v['in_out_ratio']:.1f}'}"
+            + ("-" if v["in_out_ratio"] is None
+               else f"{v['in_out_ratio']:.1f}")
             for i, v in sorted(ab.items(), key=lambda kv: int(kv[0])))
         lines.append(f"| {res['label']} | {sw_txt} | {ab_txt or '-'} |")
 
