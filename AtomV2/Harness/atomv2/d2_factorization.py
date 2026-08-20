@@ -355,6 +355,7 @@ def main() -> None:
     run_specs = []
     for exp, arm_glob, label in (("e1b", "A6_s*", "A6"),
                                  ("e4", "A14_s*", "A14"),
+                                 ("e4", "A15_s*", "A15"),
                                  ("e5", "A16_s*", "A16")):
         for rd in sorted(glob.glob(str(RUNS_DIR / exp / arm_glob))):
             if os.path.exists(os.path.join(rd, "checkpoints", "final.pt")):

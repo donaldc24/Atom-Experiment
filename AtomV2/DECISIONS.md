@@ -228,3 +228,9 @@ no ground-truth content (programs stage freely), so P-2's invariance verdict
 is judged on the truth-referenced groups (canonical + boundaries); mid-token
 rates are descriptive. Thresholds unchanged. P-3/P-4/P-5 already compared
 against ground truth and are untouched.
+
+## D2-A2 (2026-08-20): roster extension
+A15 s0-2 added to the D2 roster (its runs landed with the E4-complete sync
+after D2 first ran). Read-only audit, same probes and thresholds; the
+light-dose arm tests whether specialist formation tracks dose and run
+health. No other change.
