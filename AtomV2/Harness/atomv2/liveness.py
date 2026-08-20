@@ -78,9 +78,9 @@ def _live_queries(model, out, toks) -> torch.Tensor:
         mask = live[:, k]
         if not bool(mask.any()):
             continue
+        ms = model.cfg.micro_steps
         q = model.composer.query(out["states"][k][mask],
-                                 toks[mask, k // R.MICRO_STEPS],
-                                 k % R.MICRO_STEPS)
+                                 toks[mask, k // ms], k % ms)
         qs.append(q)
     return torch.cat(qs, dim=0)
 

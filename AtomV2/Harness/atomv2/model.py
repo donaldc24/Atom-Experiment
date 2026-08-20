@@ -31,6 +31,10 @@ import torch.nn.functional as F
 from . import registered as R
 
 MAX_TOKENS = 2
+# Registered-baseline step count (micro_steps = 3). Kept as a module
+# constant for the quarantined oracle and 3-step-only callers; the model
+# itself uses self.n_steps = MAX_TOKENS * cfg.micro_steps (E7 arms run
+# one routing decision per token).
 N_STEPS = MAX_TOKENS * R.MICRO_STEPS      # 6 micro-steps for a pair task
 
 
@@ -41,7 +45,16 @@ def _encoder_layer(cfg) -> nn.TransformerEncoderLayer:
 
 
 class Encoder(nn.Module):
-    """Digit-only canonical encoder: digits [B,6] -> state [B,384]."""
+    """Digit-only canonical encoder: digits [B,6] -> state [B, state_dim].
+
+    When cfg.state_dim == seq_len * d_model (every certified arm through
+    E5) the state is the flattened per-position code, byte-identical to
+    the original implementation. E7's narrow arms (state_dim = 64, not
+    divisible by seq_len) abandon the per-position interface: a single
+    linear compression head - mechanical dimension bookkeeping inside the
+    encoder, not a learned canonicalizer - maps the flattened code to the
+    narrow flat state.
+    """
 
     def __init__(self, cfg):
         super().__init__()
@@ -49,6 +62,9 @@ class Encoder(nn.Module):
         self.digit_emb = nn.Embedding(cfg.vocab, cfg.d_model)
         self.pos = nn.Parameter(torch.randn(1, cfg.seq_len, cfg.d_model) * 0.02)
         self.layer = _encoder_layer(cfg)
+        if cfg.state_dim != cfg.seq_len * cfg.d_model:
+            self.compress = nn.Linear(cfg.seq_len * cfg.d_model,
+                                      cfg.state_dim)
 
     def forward(self, digits: torch.Tensor) -> torch.Tensor:
         h = self.digit_emb(digits) + self.pos            # [B,6,64]
@@ -101,7 +117,7 @@ class Composer(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.token_emb = nn.Embedding(R.N_SURFACE + 1, cfg.key_dim)  # +1 PAD
-        self.micro_emb = nn.Embedding(R.MICRO_STEPS, cfg.key_dim)
+        self.micro_emb = nn.Embedding(cfg.micro_steps, cfg.key_dim)
         self.net = nn.Sequential(
             nn.Linear(cfg.state_dim + cfg.key_dim, 64),
             nn.GELU(),
@@ -115,15 +131,26 @@ class Composer(nn.Module):
 
 
 class Decoder(nn.Module):
-    """state [B,384] -> per-position digit logits [B,6,10]."""
+    """state [B, state_dim] -> per-position digit logits [B,6,10].
+
+    Narrow flat states (E7) are first expanded back to the per-position
+    width by a single linear - mechanical dimension bookkeeping, the
+    mirror of the encoder's compression head - then read by the unchanged
+    transformer layer + head.
+    """
 
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
         self.layer = _encoder_layer(cfg)
         self.head = nn.Linear(cfg.d_model, cfg.vocab)
+        if cfg.state_dim != cfg.seq_len * cfg.d_model:
+            self.expand = nn.Linear(cfg.state_dim,
+                                    cfg.seq_len * cfg.d_model)
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
+        if hasattr(self, "expand"):
+            state = self.expand(state)
         h = state.view(-1, self.cfg.seq_len, self.cfg.d_model)
         return self.head(self.layer(h))
 
@@ -134,28 +161,47 @@ class AtomModel(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
+        self.n_steps = MAX_TOKENS * cfg.micro_steps
+        self.positional_state = (cfg.state_dim
+                                 == cfg.seq_len * cfg.d_model)
         self.encoder = Encoder(cfg)
         self.atoms = Atoms(cfg)
         self.composer = Composer(cfg)
         self.decoder = Decoder(cfg)
-        # Non-affine per-position LayerNorm: idempotent, so pass is a no-op.
-        self.state_norm = nn.LayerNorm(cfg.d_model, elementwise_affine=False)
+        # Non-affine LayerNorm: idempotent, so pass is a no-op. Per-position
+        # for the certified positional state; whole-state for E7's narrow
+        # flat state (no positional structure exists to normalize per slot).
+        if self.positional_state:
+            self.state_norm = nn.LayerNorm(cfg.d_model,
+                                           elementwise_affine=False)
+        else:
+            self.state_norm = nn.LayerNorm(cfg.state_dim,
+                                           elementwise_affine=False)
 
     # -- canonical accessors (D26 lesson: every probe goes through these) -----
     def _norm(self, state: torch.Tensor) -> torch.Tensor:
+        if not self.positional_state:
+            return self.state_norm(state)
         b = state.shape[0]
         h = state.view(b, self.cfg.seq_len, self.cfg.d_model)
         return self.state_norm(h).reshape(b, -1)
 
     def code(self, digits: torch.Tensor) -> torch.Tensor:
-        """The canonical, task-independent state of a digit list: [B,384]."""
+        """The canonical, task-independent state of a digit list:
+        [B, state_dim]."""
         h = self.encoder(digits)
-        return self._norm(h.reshape(h.shape[0], -1))
+        flat = h.reshape(h.shape[0], -1)
+        if not self.positional_state:
+            flat = self.encoder.compress(flat)
+        return self._norm(flat)
 
     def step_once(self, state: torch.Tensor, atom_idx: int) -> torch.Tensor:
-        """One hard application of a single atom (panel probes)."""
-        delta = self.atoms.outputs(state)[:, atom_idx]
-        return self._norm(state + delta)
+        """One hard application of a single atom (panel probes), under the
+        arm's registered update contract."""
+        out = self.atoms.outputs(state)[:, atom_idx]
+        if self.cfg.atom_update == "replacement":
+            return self._norm(out)
+        return self._norm(state + out)
 
     # -- routing --------------------------------------------------------------
     def _route(self, state, active_token, micro_step, mode, tau,
@@ -237,8 +283,8 @@ class AtomModel(nn.Module):
         """
         assert mode in self.ROUTING_MODES
         state = self.code(digits)
-        live_all = (torch.arange(N_STEPS)[None, :]
-                    < (n_tokens * R.MICRO_STEPS)[:, None])       # [B,6]
+        live_all = (torch.arange(self.n_steps)[None, :]
+                    < (n_tokens * self.cfg.micro_steps)[:, None])  # [B,S]
         return self._run_steps(state, tokens, live_all, mode, tau, forced,
                                ablate, atom_mask, generator, start_step=0,
                                noise_sigma=noise_sigma,
@@ -258,7 +304,7 @@ class AtomModel(nn.Module):
         states = [state]
         route_logits, choices, soft_atom_mass = [], [], []
         transmitted = []       # E2: what the next step actually received
-        for k in range(N_STEPS):
+        for k in range(self.n_steps):
             if k < start_step:
                 states.append(state)
                 route_logits.append(torch.zeros(
@@ -269,8 +315,8 @@ class AtomModel(nn.Module):
                                                   dtype=state.dtype))
                 continue
             live = live_all[:, k]
-            token_pos = k // R.MICRO_STEPS
-            micro_step = k % R.MICRO_STEPS
+            token_pos = k // self.cfg.micro_steps
+            micro_step = k % self.cfg.micro_steps
             active_token = tokens[:, token_pos]
             weights, logits, soft = self._route(
                 state, active_token, micro_step, mode, tau,
@@ -279,16 +325,30 @@ class AtomModel(nn.Module):
             atom_w = weights[:, : self.cfg.n_atoms]              # [B,16]
             if ablate is not None:
                 atom_w = atom_w * (~ablate)[None, :].to(atom_w.dtype)
-            delta = torch.einsum("bn,bns->bs", atom_w, self.atoms.outputs(state))
-            new_state = self._norm(state + delta)
-            # In hard/forced modes a step contributing no delta (pass pick,
+            atom_out = torch.einsum("bn,bns->bs", atom_w,
+                                    self.atoms.outputs(state))
+            if self.cfg.atom_update == "replacement":
+                # E7 A20/A21: the selected atom generates the COMPLETE
+                # outgoing state, s_new = LN(F_i(s)); pass carries the
+                # state through by its route weight (exact identity under
+                # hard one-hot via the noop bypass below). An ablated pick
+                # applies no atom and is defined to behave as pass.
+                w_pass = weights[:, self.cfg.n_atoms:].sum(-1, keepdim=True)
+                new_state = self._norm(atom_out + w_pass * state)
+                applied = atom_w.sum(dim=-1)
+            else:
+                new_state = self._norm(state + atom_out)
+            # In hard/forced modes a step applying no atom (pass pick,
             # ablated pick) is an EXACT no-op: bypass the norm so pass ==
-            # identity bitwise and zero-delta ablation is exactly "atom
-            # becomes pass". Gumbel mode keeps the normed path everywhere so
-            # the straight-through gradient of the routing weights survives
-            # (the value-zero soft residual still carries gradient).
+            # identity bitwise and ablation is exactly "atom becomes
+            # pass" in both update modes. Gumbel mode keeps the normed
+            # path everywhere so the straight-through gradient of the
+            # routing weights survives.
             if mode in ("hard", "forced"):
-                noop = (delta.abs().amax(dim=-1) == 0) | ~live
+                if self.cfg.atom_update == "replacement":
+                    noop = (applied == 0) | ~live
+                else:
+                    noop = (atom_out.abs().amax(dim=-1) == 0) | ~live
             else:
                 noop = ~live
             state = torch.where(noop[:, None], state, new_state)
@@ -308,7 +368,7 @@ class AtomModel(nn.Module):
             # the carry - what composer and atom see next - is transmitted.
             # One fixed-shape draw per handoff keeps the dedicated noise
             # stream's consumption independent of batch masks.
-            if noise_sigma > 0 and k + 1 < N_STEPS:
+            if noise_sigma > 0 and k + 1 < self.n_steps:
                 nonterminal = live_all[:, k + 1]
                 eps = noise_sigma * torch.randn(
                     state.shape, generator=noise_generator, dtype=state.dtype)
@@ -347,11 +407,12 @@ class AtomModel(nn.Module):
         assert not self.training, (
             "execute_from_state is a read-only panel probe; the model must be "
             "in eval mode (probes read, never write)")
-        live_all = (torch.arange(N_STEPS)[None, :]
-                    < (n_tokens * R.MICRO_STEPS)[:, None])
+        live_all = (torch.arange(self.n_steps)[None, :]
+                    < (n_tokens * self.cfg.micro_steps)[:, None])
         return self._run_steps(state, tokens, live_all, mode, tau, forced,
                                ablate, atom_mask, generator=None,
-                               start_step=start_token_idx * R.MICRO_STEPS)
+                               start_step=start_token_idx
+                               * self.cfg.micro_steps)
 
 
 def param_counts(model: AtomModel) -> dict:

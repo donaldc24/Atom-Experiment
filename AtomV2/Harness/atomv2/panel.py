@@ -290,10 +290,10 @@ def _collect_probe_material(model, seen_tds, max_examples_per_task=100):
             h0_sub.append(sub0)
             h0_surf.append(surf_index[td.task.surface_ops[0]])
             h0_example.append(eid)
-            for k in range(td.task.n_tokens * R.MICRO_STEPS):
+            for k in range(td.task.n_tokens * model.cfg.micro_steps):
                 if choices[b, k] < 0 or choices[b, k] == R.PASS_INDEX:
                     continue  # pass applies no atom; there is no delta to probe
-                tok_idx = k // R.MICRO_STEPS
+                tok_idx = k // model.cfg.micro_steps
                 subl = np.zeros(len(sub_index))
                 for s in subsets[tok_idx]:
                     subl[sub_index[s]] = 1.0
@@ -489,11 +489,11 @@ def _collect_carrier_material(model, seen_tds, max_examples_per_task=100):
         choices = out["choices"].numpy()
         whole = set().union(*ops.task_subop_sets(td.task.task_id))
         for b in range(m):
-            for k in range(td.task.n_tokens * R.MICRO_STEPS):
+            for k in range(td.task.n_tokens * model.cfg.micro_steps):
                 if choices[b, k] < 0 or choices[b, k] == R.PASS_INDEX:
                     continue  # pass applies no atom: there is no delta
                 deltas.append(st[k + 1][b] - st[k][b])
-                active_p.append(td.task.surface_ops[k // R.MICRO_STEPS])
+                active_p.append(td.task.surface_ops[k // model.cfg.micro_steps])
                 task_ids.append(td.task.task_id)
                 task_subops.append(whole)
                 ex_ids.append(eid)
@@ -661,7 +661,7 @@ def canonical_substitution(model, bundle, cfg) -> dict:
             toks = torch.from_numpy(np.tile(td.task.tokens, (n, 1)))
             ntok = torch.full((n,), 2, dtype=torch.int64)
             base = model(torch.from_numpy(x), toks, ntok, mode="hard", tau=tau)
-            h_pair = base["states"][R.MICRO_STEPS]
+            h_pair = base["states"][model.cfg.micro_steps]
             base_acc = float((base["logits"].argmax(-1).numpy() == td.y).all(1).mean())
 
             x_prime = ops.SURFACE_FNS[pa](x)
@@ -679,9 +679,10 @@ def canonical_substitution(model, bundle, cfg) -> dict:
 
             entry = {"level": td.task.level, "set": set_name,
                      "baseline_acc": base_acc, "n": n}
-            for tag, out, sl in (("", prim, slice(R.MICRO_STEPS, 2 * R.MICRO_STEPS)),
-                                 ("_alt", alt, slice(0, R.MICRO_STEPS))):
-                base_sl = slice(R.MICRO_STEPS, 2 * R.MICRO_STEPS)
+            ms = model.cfg.micro_steps
+            for tag, out, sl in (("", prim, slice(ms, 2 * ms)),
+                                 ("_alt", alt, slice(0, ms))):
+                base_sl = slice(ms, 2 * ms)
                 agree = (base["choices"][:, base_sl] == out["choices"][:, sl])
                 p = F.softmax(base["route_logits"][:, base_sl] / tau, dim=-1)
                 q = F.softmax(out["route_logits"][:, sl] / tau, dim=-1)
@@ -763,7 +764,7 @@ def transfer(model, full_acc: dict, seen_results: dict, split: dict,
     # concatenated and force-run on every pair cell over fresh probe inputs.
     programs = {}
     for p in names:
-        ch = seen_results[p]["choices"][:, : R.MICRO_STEPS]
+        ch = seen_results[p]["choices"][:, : model.cfg.micro_steps]
         modal = Counter(map(tuple, ch.tolist())).most_common(1)[0][0]
         programs[p] = list(modal)
     transplant = np.full((n, n), np.nan)

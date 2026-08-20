@@ -42,6 +42,9 @@ E4_ARMS = R.E4_ARMS                  # ('A14','A15')
 # E5 (H1-Experiment5.md): producer branch on the A14 base; A14 is the
 # reference row, never re-run.
 E5_ARMS = R.E5_ARMS                  # ('A16','A17')
+# E7 (H1-Experiment7.md): one-step / narrow / replacement interface arms on
+# the A6 base; A6 is the historical reference, never re-run.
+E7_ARMS = R.E7_ARMS                  # ('A18','A19','A20','A21')
 
 
 @dataclass
@@ -111,6 +114,13 @@ class Config:
     # MLP parameters ever receive sandbox gradients.
     lambda_sandbox_valid: float = 0.0
     lambda_sandbox_unique: float = 0.0
+
+    # E7 atom-update contract. 'residual' is the certified
+    # s_new = LN(s + F_i(s)); 'replacement' (arms A20/A21) is
+    # s_new = LN(F_i(s)) for atom routes - the selected atom must generate
+    # the complete outgoing state. Pass remains the explicit identity route
+    # in both modes.
+    atom_update: str = "residual"
 
     # E5 producer branch (training-only; the task path is untouched). 0.0
     # means the producer is never constructed and its stream is never
@@ -209,6 +219,21 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
         cfg.protocol_revision = R.E5_PROTOCOL_REVISION
         cfg.lambda_producer = R.E5_LAMBDA_PRODUCER[arm]
         return cfg
+    elif arm in E7_ARMS:
+        # E7 = the registered A6 base + ONLY the registered architectural
+        # deltas (microsteps / state width / atom update). No interface
+        # noise, sandbox, producer, rent, canonicalization, or semantic
+        # supervision. Narrow arms keep the registered 2:1 state:hidden
+        # ratio; everything else is inherited so arms stay paired by seed.
+        cfg = config_for_arm(R.E7_BASE_ARM, seed, smoke=smoke)
+        cfg.arm = arm
+        cfg.experiment = "e7"
+        cfg.protocol_revision = R.E7_PROTOCOL_REVISION
+        cfg.micro_steps = R.E7_MICRO_STEPS[arm]
+        cfg.state_dim = R.E7_STATE_DIM[arm]
+        cfg.atom_hidden = R.E7_ATOM_HIDDEN[arm]
+        cfg.atom_update = R.E7_ATOM_UPDATE[arm]
+        return cfg
     elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
         cfg.experiment = "e1b"
         cfg.protocol_revision = R.E1B_PROTOCOL_REVISION
@@ -233,7 +258,8 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
         raise ValueError(f"unknown arm {arm!r}; E0 arms {E0_ARMS}, E1 arms "
                          f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}, "
                          f"E2 arms {E2_ARMS}, E3 arms {E3_ARMS}, "
-                         f"E4 arms {E4_ARMS}, E5 arms {E5_ARMS}")
+                         f"E4 arms {E4_ARMS}, E5 arms {E5_ARMS}, "
+                         f"E7 arms {E7_ARMS}")
 
     if smoke:
         cfg.examples_per_train_task = 48

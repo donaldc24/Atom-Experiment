@@ -283,3 +283,39 @@ controls added BEFORE reading further:
       and the finished answer is linearly in-slice.
 Note recorded either way: the 1.00 moved-probe already proves a LINEAR
 per-position readout of the finished answer exists at the boundary.
+
+## E7 implementation registration (2026-08-20): decisions the spec left mechanical
+Implemented on branch experiment-7 BEFORE any result-bearing run; smoke
+pipeline and gates verified. Registered here so nothing is chosen after
+seeing results.
+- micro_steps became a per-model quantity (AtomModel.n_steps = 2 *
+  cfg.micro_steps; composer micro-step embedding sized by cfg). The
+  module constant N_STEPS remains for the quarantined oracle. Refactor
+  equivalence gate: the A6 config replayed under the refactored harness is
+  BIT-IDENTICAL to the completed E1b A6 s0 records at steps 1 and 50 -
+  strict form, even cross-machine (results/e7/e7_a6_equivalence.json).
+- Narrow state (A19/A21, width 64): 64 is not divisible by seq_len = 6, so
+  the per-position state interface is necessarily abandoned in the narrow
+  arms. Reading adopted: a flat 64-d state; the encoder gains a single
+  linear compression head (384 -> 64) and the decoder its mirror (64 ->
+  384) feeding the UNCHANGED transformer stacks - mechanical dimension
+  bookkeeping inside encoder/decoder, not a learned canonicalizer (no
+  supervision, no decode-reencode path). The non-affine LayerNorm is
+  whole-state for flat arms. Atom hidden width 32 keeps the registered 2:1
+  state:hidden ratio. Positional arms construct the certified parameter
+  set byte-for-byte (heads exist only when flat).
+- Replacement update (A20/A21): s_new = LN(F_i(s)) for atom routes; in
+  gumbel mode the route-weighted form LN(sum_i w_i F_i(s) + w_pass s) keeps
+  the straight-through gradient; in hard/forced mode pass and ablated picks
+  bypass the norm and are exact identities (ablation semantics preserved:
+  "this atom becomes pass" in both modes). step_once honors the contract,
+  so every panel probe and the E7 audit apply the arm's real update.
+- Staging: run_e7 refuses to launch everything at once; stages mirror the
+  registered tree (screen A18 s1 -> a18-seeds -> stage2 s1 -> replicate
+  --arms <winner>). Health = seen hard >= 0.80, evaluated from metrics.
+- E7 audit (read-only, e7_audit.py): ground-truth-referenced signatures
+  (D2-A1), raw vs canonicalized composition over every ordered pair of
+  discovered atoms, ICR over pairs with canonicalized accuracy >= 0.80,
+  self-bottleneck boundary panel, whole-state ridge recoverability of
+  answer vs original. Called after analyze; analyze re-runs to fold the
+  headline in. Nothing from it touches training.

@@ -89,7 +89,7 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
     # optimizer and never consumes the training Gumbel stream. E2 retains the
     # full E1b telemetry and deafness gate.
     liveness_diag = None
-    if cfg.experiment in ("e1b", "e2", "e3", "e4", "e5"):
+    if cfg.experiment in ("e1b", "e2", "e3", "e4", "e5", "e7"):
         from . import liveness as liveness_mod
         liveness_diag = liveness_mod.diag_batch(arrays, cfg)
         (run_dir / "liveness").mkdir(exist_ok=True)

@@ -77,7 +77,7 @@ def _closed_map_task(model, td, states: np.ndarray) -> dict:
     enc = np.stack(prefix_codes, axis=1)                    # [n, P, 384]
     enc_norm = np.linalg.norm(enc, axis=-1).clip(1e-6)      # [n, P]
 
-    n_live = td.task.n_tokens * R.MICRO_STEPS
+    n_live = td.task.n_tokens * model.cfg.micro_steps
     step_states = states[:, 1: n_live + 1]                  # [n, S, 384]
     dist = np.linalg.norm(step_states[:, :, None, :] - enc[:, None, :, :],
                           axis=-1)                          # [n, S, P]

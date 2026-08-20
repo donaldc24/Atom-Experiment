@@ -201,6 +201,32 @@ def analyze(run_dir: Path) -> dict:
     if cfg.get("experiment") == "e4":
         metrics.update(_e4_metrics(run_dir, metrics))
 
+    # E7 (H1-Experiment7.md): headline scalars from the read-only audit
+    # (written by e7_audit after the first analyze pass; analyze re-runs
+    # cheaply to fold them in).
+    if cfg.get("experiment") == "e7":
+        ap = run_dir / "e7_audit.json"
+        if ap.exists():
+            a = read_json(ap)
+            v, sc = a["verdict"], a["state_content"]
+            bg = a["boundary"]["by_group"]
+            metrics.update({
+                "e7_healthy": a["healthy"],
+                "e7_n_mapped_atoms": v["n_mapped_atoms"],
+                "e7_n_qualified_pairs": v["n_qualified_pairs"],
+                "e7_raw_chain_acc": v["raw_chain_acc"],
+                "e7_canon_chain_acc": v["canon_chain_acc"],
+                "e7_interface_closure_ratio": v["interface_closure_ratio"],
+                "e7_closure_band": v["closure_band"],
+                "e7_answer_recoverability": sc["answer_recoverability"],
+                "e7_orig_recoverability": sc["orig_recoverability"],
+                "e7_boundary_decode_trained": bg.get(
+                    "trained", {}).get("boundary_decode_acc"),
+                "e7_self_bottleneck_L3": bg.get(
+                    "L3", {}).get("self_bottleneck_acc"),
+                "e7_raw_L3": bg.get("L3", {}).get("raw_acc"),
+            })
+
     # E5 (H1-Experiment5.md): identical registered measurements (20k
     # like-for-like block, dax-crack check) under the e5_ prefix, plus the
     # two producer telemetry rows (output variance, branch-READ spread).

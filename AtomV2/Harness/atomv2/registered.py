@@ -478,6 +478,49 @@ E5_TELEMETRY_PRODUCERS = 8
 # every A16/A17 vs A14 comparison: seed pairs are same-seed draws, not
 # bit-paired trajectories.
 
+# ---------------------------------------------------------------------------
+# E7 (H1-Experiment7.md): simplify before translating. Can one-step atoms
+# become directly reusable and composable without an explicit canonicalizer?
+# Base is A6 (mature bounded cosine routing stack, no later interface
+# pressures), inherited unchanged except the registered architectural
+# deltas below. No canonicalization, decoder-reencode path, ground-truth
+# intermediate, or semantic supervision may enter training; D1/D2/D3-style
+# diagnostics stay read-only.
+# ---------------------------------------------------------------------------
+E7_PROTOCOL_REVISION = "e7-one-step-interface"
+E7_BASE_ARM = "A6"                    # historical reference, never re-run
+E7_ARMS = ("A18", "A19", "A20", "A21")
+
+# Stage 1: remove the microstep confound. Stage 2 (2x2): bandwidth
+# starvation x residual erasure.
+#   arm | microsteps | state width | atom update
+E7_MICRO_STEPS = {"A18": 1, "A19": 1, "A20": 1, "A21": 1}
+E7_STATE_DIM = {"A18": STATE_DIM, "A19": 64, "A20": STATE_DIM, "A21": 64}
+E7_ATOM_UPDATE = {"A18": "residual", "A19": "residual",
+                  "A20": "replacement", "A21": "replacement"}
+# The narrow state keeps the registered 2:1 state:hidden ratio (384:192).
+E7_ATOM_HIDDEN = {"A18": ATOM_HIDDEN, "A19": 32,
+                  "A20": ATOM_HIDDEN, "A21": 32}
+
+# Registered screen order and health criterion: seed 1 first (its A6 pair
+# is a healthy reference); a run is task-competent for factorization
+# diagnostics iff seen hard accuracy >= this. Poor optimization is a
+# result, not an implementation failure.
+E7_SCREEN_SEED = 1
+E7_HEALTH_SEEN_MIN = 0.80
+
+# Primary metric: Interface Closure Ratio = raw direct-chain accuracy /
+# canonicalized direct-chain accuracy, over discovered competent atom pairs
+# whose canonicalized chain reaches E7_CANON_CHAIN_MIN. The ratio must
+# never conceal low absolute accuracy (both raw numbers always reported).
+E7_CANON_CHAIN_MIN = 0.80
+E7_ICR_STRONG = 0.80                  # >= : strong direct closure
+E7_ICR_SEVERE = 0.30                  # <  : severe interface failure
+
+# D2-A1 lesson carried forward: atom signatures are ground-truth-referenced
+# (decode(A_i(z0)) == f(x)); the mapping threshold reuses D2's.
+E7_SIG_THRESHOLD = 0.90
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
@@ -487,4 +530,5 @@ EXPERIMENT_REVISIONS = {
     "e3": E3_PROTOCOL_REVISION,
     "e4": E4_PROTOCOL_REVISION,
     "e5": E5_PROTOCOL_REVISION,
+    "e7": E7_PROTOCOL_REVISION,
 }

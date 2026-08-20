@@ -117,6 +117,18 @@ E5_HEADLINE = (
 )
 
 
+# E7-only columns (H1-Experiment7.md): audit headline (registered
+# reporting order: competence, components, raw, canonicalized, ICR, state
+# content - never leads with L3).
+E7_HEADLINE = (
+    "e7_healthy", "e7_n_mapped_atoms", "e7_n_qualified_pairs",
+    "e7_raw_chain_acc", "e7_canon_chain_acc",
+    "e7_interface_closure_ratio",
+    "e7_answer_recoverability", "e7_orig_recoverability",
+    "e7_boundary_decode_trained", "e7_self_bottleneck_L3", "e7_raw_L3",
+)
+
+
 def headline_for(experiment: str) -> tuple:
     if experiment == "e1b":
         return HEADLINE + E1B_HEADLINE
@@ -130,6 +142,8 @@ def headline_for(experiment: str) -> tuple:
     if experiment == "e5":
         return (HEADLINE + E1B_HEADLINE + E2_HEADLINE + E3_HEADLINE
                 + E5_HEADLINE)
+    if experiment == "e7":
+        return HEADLINE + E1B_HEADLINE + E7_HEADLINE
     return HEADLINE
 
 
@@ -475,7 +489,8 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
     ap.add_argument("--experiment", required=True,
-                    choices=["e0", "e1", "e1b", "e2", "e3", "e4", "e5"])
+                    choices=["e0", "e1", "e1b", "e2", "e3", "e4", "e5",
+                             "e7"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)
