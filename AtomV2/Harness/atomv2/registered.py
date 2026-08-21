@@ -521,6 +521,26 @@ E7_ICR_SEVERE = 0.30                  # <  : severe interface failure
 # (decode(A_i(z0)) == f(x)); the mapping threshold reuses D2's.
 E7_SIG_THRESHOLD = 0.90
 
+# ---------------------------------------------------------------------------
+# E8 (H1-Experiment8.md): capacity rescue - one route per token, more
+# computation per atom. Base A18 (E7's one-step A6) byte-for-byte; the ONLY
+# deltas are per-atom internal depth and (A22) the training budget. The atom
+# still pages as one block: one route decision = one atom load regardless of
+# internal depth. Registered predictions (before first run): A22 stays under
+# 20% seen at 40k (the plateau is a ceiling); A23 and/or A24 clear the 80%
+# health gate; conditional on health, E7's ICR question reopens as
+# registered there. If both depth arms pass health, the SHALLOWER is the
+# registered winner (minimal sufficient capacity).
+# ---------------------------------------------------------------------------
+E8_PROTOCOL_REVISION = "e8-atom-capacity"
+E8_BASE_ARM = "A18"                   # E7's one-step arm, the failed screen
+E8_ARMS = ("A22", "A23", "A24")
+E8_ATOM_LAYERS = {"A22": 1, "A23": 2, "A24": 3}
+E8_TOTAL_STEPS = {"A22": 40_000, "A23": TOTAL_STEPS, "A24": TOTAL_STEPS}
+E8_SCREEN_SEED = E7_SCREEN_SEED       # 1, same matched-reference rationale
+E8_HEALTH_SEEN_MIN = E7_HEALTH_SEEN_MIN
+E8_BUDGET_CONTROL_MAX = 0.20          # registered prediction bound for A22
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
@@ -531,4 +551,5 @@ EXPERIMENT_REVISIONS = {
     "e4": E4_PROTOCOL_REVISION,
     "e5": E5_PROTOCOL_REVISION,
     "e7": E7_PROTOCOL_REVISION,
+    "e8": E8_PROTOCOL_REVISION,
 }

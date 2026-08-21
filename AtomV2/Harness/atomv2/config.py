@@ -45,6 +45,9 @@ E5_ARMS = R.E5_ARMS                  # ('A16','A17')
 # E7 (H1-Experiment7.md): one-step / narrow / replacement interface arms on
 # the A6 base; A6 is the historical reference, never re-run.
 E7_ARMS = R.E7_ARMS                  # ('A18','A19','A20','A21')
+# E8 (H1-Experiment8.md): capacity rescue on the A18 base; A18 is the
+# failed-screen reference, never re-run.
+E8_ARMS = R.E8_ARMS                  # ('A22','A23','A24')
 
 
 @dataclass
@@ -63,6 +66,10 @@ class Config:
     d_model: int = R.D_MODEL
     state_dim: int = R.STATE_DIM
     atom_hidden: int = R.ATOM_HIDDEN
+    # E8: internal layers per atom MLP (state->hidden->(hidden->)^{d-1}
+    # ->state, GELU between). 1 = the certified single-hidden-layer atom;
+    # deeper atoms exist only on E8 arms and page as one block.
+    atom_layers: int = 1
     key_dim: int = R.KEY_DIM
     micro_steps: int = R.MICRO_STEPS
     n_heads: int = R.N_HEADS
@@ -234,6 +241,17 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
         cfg.atom_hidden = R.E7_ATOM_HIDDEN[arm]
         cfg.atom_update = R.E7_ATOM_UPDATE[arm]
         return cfg
+    elif arm in E8_ARMS:
+        # E8 = the registered A18 base byte-for-byte + per-atom depth
+        # (A23/A24) or the 40k budget control (A22). Nothing else moves.
+        cfg = config_for_arm(R.E8_BASE_ARM, seed, smoke=smoke)
+        cfg.arm = arm
+        cfg.experiment = "e8"
+        cfg.protocol_revision = R.E8_PROTOCOL_REVISION
+        cfg.atom_layers = R.E8_ATOM_LAYERS[arm]
+        if not smoke:
+            cfg.total_steps = R.E8_TOTAL_STEPS[arm]
+        return cfg
     elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
         cfg.experiment = "e1b"
         cfg.protocol_revision = R.E1B_PROTOCOL_REVISION
@@ -259,7 +277,7 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
                          f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}, "
                          f"E2 arms {E2_ARMS}, E3 arms {E3_ARMS}, "
                          f"E4 arms {E4_ARMS}, E5 arms {E5_ARMS}, "
-                         f"E7 arms {E7_ARMS}")
+                         f"E7 arms {E7_ARMS}, E8 arms {E8_ARMS}")
 
     if smoke:
         cfg.examples_per_train_task = 48

@@ -94,11 +94,28 @@ class Atoms(nn.Module):
         nn.init.uniform_(self.b2, -bound2, bound2)
         self.keys = nn.Parameter(torch.randn(n, cfg.key_dim) * 0.02)
         self.pass_key = nn.Parameter(torch.randn(cfg.key_dim) * 0.02)
+        # E8 (H1-Experiment8.md): extra INTERNAL hidden layers per atom
+        # (hidden -> hidden, GELU between). Constructed only when
+        # atom_layers > 1, AFTER every certified parameter, so the depth-1
+        # path is byte-identical to the registered atom (zero-depth gate).
+        # The atom still pages as one block regardless of depth.
+        self.n_layers = getattr(cfg, "atom_layers", 1)
+        if self.n_layers > 1:
+            self.wm = nn.Parameter(torch.empty(self.n_layers - 1, n, h, h))
+            self.bm = nn.Parameter(torch.zeros(self.n_layers - 1, n, h))
+            for li in range(self.n_layers - 1):
+                for i in range(n):
+                    nn.init.kaiming_uniform_(self.wm[li, i].T, a=math.sqrt(5))
+            nn.init.uniform_(self.bm, -bound2, bound2)
 
     def outputs(self, state: torch.Tensor) -> torch.Tensor:
-        """Residual deltas of ALL atoms on the state: [B, n_atoms, 384]."""
+        """Residual deltas of ALL atoms on the state: [B, n_atoms, state]."""
         h = torch.einsum("bs,nsh->bnh", state, self.w1) + self.b1
         h = F.gelu(h)
+        if self.n_layers > 1:
+            for li in range(self.n_layers - 1):
+                h = torch.einsum("bnh,nhk->bnk", h, self.wm[li]) + self.bm[li]
+                h = F.gelu(h)
         return torch.einsum("bnh,nhs->bns", h, self.w2) + self.b2
 
     def all_keys(self) -> torch.Tensor:

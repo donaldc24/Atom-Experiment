@@ -144,6 +144,9 @@ def headline_for(experiment: str) -> tuple:
                 + E5_HEADLINE)
     if experiment == "e7":
         return HEADLINE + E1B_HEADLINE + E7_HEADLINE
+    if experiment == "e8":
+        # E8 reuses E7's measurement columns (same audit, same keys).
+        return HEADLINE + E1B_HEADLINE + E7_HEADLINE
     return HEADLINE
 
 
@@ -490,7 +493,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
     ap.add_argument("--experiment", required=True,
                     choices=["e0", "e1", "e1b", "e2", "e3", "e4", "e5",
-                             "e7"])
+                             "e7", "e8"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

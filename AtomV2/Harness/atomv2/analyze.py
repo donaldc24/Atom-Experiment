@@ -204,7 +204,10 @@ def analyze(run_dir: Path) -> dict:
     # E7 (H1-Experiment7.md): headline scalars from the read-only audit
     # (written by e7_audit after the first analyze pass; analyze re-runs
     # cheaply to fold them in).
-    if cfg.get("experiment") == "e7":
+    if cfg.get("experiment") in ("e7", "e8"):
+        # E8 reuses E7's audit and metric definitions unchanged (same
+        # e7_audit.json artifact, same e7_* keys) so ICR numbers compare
+        # directly across the two experiments.
         ap = run_dir / "e7_audit.json"
         if ap.exists():
             a = read_json(ap)
