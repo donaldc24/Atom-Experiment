@@ -347,3 +347,5 @@ convention), not merely a co-adaptation surface. The empirically supported
 pageable unit is the token-program with canonical translation at
 boundaries (D1 addendum); reducing it to one load is a training-dynamics
 problem (distill/anneal 3->1), not an architecture-search problem.
+
+demo/ added, read-only inference tooling, no experimental surface.

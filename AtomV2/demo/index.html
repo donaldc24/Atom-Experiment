@@ -1,0 +1,1581 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atom Playground</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f0efe7;
+      --muted: #969d9b;
+      --faint: #626a69;
+      --panel: #121817;
+      --panel-2: #171e1d;
+      --line: #2a3331;
+      --line-hot: #46514e;
+      --accent: #d9ff68;
+      --accent-ink: #10150b;
+      --green: #61d69d;
+      --red: #ff6b66;
+      --amber: #ffbd5b;
+      --shadow: 0 24px 80px rgb(0 0 0 / 34%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(rgb(217 255 104 / 3%) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(217 255 104 / 3%) 1px, transparent 1px),
+        radial-gradient(circle at 76% -12%, #293328 0, #0b100f 34rem);
+      background-size: 32px 32px, 32px 32px, auto;
+    }
+
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+
+    .shell {
+      width: min(1220px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 94px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      letter-spacing: -.03em;
+      font-size: 18px;
+      font-weight: 720;
+    }
+
+    .mark {
+      position: relative;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+    }
+
+    .mark::before, .mark::after {
+      content: "";
+      position: absolute;
+      inset: 7px -5px;
+      border: 1px solid rgb(217 255 104 / 52%);
+      border-radius: 50%;
+      transform: rotate(55deg);
+    }
+
+    .mark::after { transform: rotate(-55deg); }
+
+    .brand span:last-child {
+      color: var(--muted);
+      font-weight: 430;
+    }
+
+    .read-only {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font: 650 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .read-only::before {
+      width: 7px;
+      height: 7px;
+      content: "";
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 14px var(--green);
+    }
+
+    main { padding: 48px 0 80px; }
+
+    .intro {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 30px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin: 0;
+      font-size: clamp(40px, 6vw, 74px);
+      font-weight: 540;
+      line-height: .98;
+      letter-spacing: -.065em;
+    }
+
+    h1 em { color: var(--accent); font-style: normal; }
+
+    .intro p {
+      width: min(320px, 100%);
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .page-tabs {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 16px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #0d1312;
+    }
+
+    .page-tab {
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font: 680 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .055em;
+      text-transform: uppercase;
+    }
+
+    .page-tab[aria-selected="true"] { color: var(--accent-ink); background: var(--accent); }
+    .tab-panel[hidden] { display: none; }
+
+    .workbench, .results {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgb(18 24 23 / 92%);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .op-guide {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgb(18 24 23 / 92%);
+      box-shadow: var(--shadow);
+    }
+
+    .atlas-panel {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgb(18 24 23 / 92%);
+      box-shadow: var(--shadow);
+    }
+    .atlas-setup { display: grid; grid-template-columns: 1.2fr .8fr auto; align-items: end; gap: 16px; margin: 25px 0 12px; padding: 20px; border: 1px solid var(--line); border-radius: 11px; background: #0d1312; }
+    .atlas-field label { display: block; margin-bottom: 9px; color: var(--muted); font: 650 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .atlas-field .digits { gap: 6px; }
+    .atlas-field .digit { height: 48px; aspect-ratio: auto; font-size: 20px; }
+    .atlas-run { min-width: 165px; }
+    .atlas-note { min-height: 20px; margin: 0 2px 18px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .atlas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .atlas-card { padding: 17px; border: 1px solid var(--line); border-radius: 10px; background: #0d1312; }
+    .atlas-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+    .atlas-card-head strong { color: var(--accent); font: 760 18px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .atlas-route-seq { display: flex; align-items: stretch; gap: 7px; }
+    .atlas-route-arrow { align-self: center; color: var(--faint); }
+    .atlas-atom { flex: 1; min-width: 0; padding: 10px 7px; border: 1px solid color-mix(in srgb, var(--atom-color) 48%, var(--line)); border-radius: 6px; color: inherit; background: color-mix(in srgb, var(--atom-color) 8%, #111716); cursor: pointer; text-align: center; }
+    .atlas-atom:disabled { cursor: default; opacity: 1; }
+    .atlas-atom small, .atlas-atom span { display: block; color: var(--faint); font: 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .atlas-atom b { display: block; margin: 7px 0; color: var(--atom-color); font: 730 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .atlas-output { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; padding-top: 11px; border-top: 1px solid var(--line); color: var(--faint); font: 600 9px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .atlas-output strong { color: var(--ink); font-weight: 650; }
+    .outcome-route-line { margin-bottom: 12px; color: var(--faint); font: 600 9px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .outcome-route-line strong { color: var(--ink); font-weight: 650; }
+    .atom-trials { display: grid; gap: 8px; }
+    .atom-trial { padding: 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel-2); }
+    .atom-trial-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+    .atom-trial-label { padding: 0; border: 0; color: var(--atom-color); background: transparent; cursor: pointer; font: 740 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .atom-trial-label:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .atom-trial-head small { color: var(--faint); font: 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .atom-trial-body { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+    .atom-trial-body .pipe-digit { width: 25px; height: 30px; font-size: 13px; }
+    .outcome-empty { padding: 13px; border: 1px dashed var(--line-hot); border-radius: 7px; color: var(--faint); font-size: 11px; }
+
+    .survey-setup { display: grid; grid-template-columns: .7fr .8fr 1fr auto; align-items: end; gap: 16px; margin: 25px 0 12px; padding: 20px; border: 1px solid var(--line); border-radius: 11px; background: #0d1312; }
+    .survey-input { width: 100%; height: 48px; padding: 0 14px; color: var(--ink); border: 1px solid var(--line-hot); border-radius: 9px; outline: none; background: #0a0f0e; }
+    .survey-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(217 255 104 / 8%); }
+    .survey-scope { display: flex; min-height: 48px; align-items: center; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: var(--panel-2); font-size: 11px; line-height: 1.4; }
+    .survey-scope strong { margin-right: 5px; color: var(--accent); font: 750 16px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .survey-results { margin-top: 20px; }
+    .survey-results[hidden] { display: none; }
+    .survey-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 17px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 10px; background: #0d1312; }
+    .survey-summary { display: flex; flex-wrap: wrap; gap: 9px; }
+    .survey-downloads { display: flex; gap: 8px; }
+    .secondary-button { min-height: 36px; padding: 0 13px; border: 1px solid var(--line-hot); border-radius: 7px; color: var(--ink); background: var(--panel-2); cursor: pointer; font: 650 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .secondary-button:hover { border-color: var(--accent); color: var(--accent); }
+    .survey-models { display: grid; gap: 15px; }
+    .survey-model { overflow: hidden; border: 1px solid var(--line); border-radius: 11px; background: #0d1312; }
+    .survey-model-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 17px; border-bottom: 1px solid var(--line); }
+    .survey-model-head strong { font-size: 13px; }
+    .survey-model-head span { color: var(--muted); font: 10px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .survey-table-wrap { overflow-x: auto; }
+    .survey-table { width: 100%; border-collapse: collapse; font: 10px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .survey-table th { padding: 10px 11px; color: var(--faint); background: #101615; text-align: left; white-space: nowrap; font-weight: 650; }
+    .survey-table td { padding: 10px 11px; border-top: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+    .survey-table td:first-child { color: var(--accent); font-weight: 750; }
+    .survey-table .atom-cell { color: var(--atom-color); font-weight: 750; }
+    .survey-table .accuracy-cell { color: var(--ink); font-weight: 700; }
+    .survey-step-profile { color: var(--faint); }
+
+    .guide-intro { display: flex; justify-content: space-between; gap: 30px; margin-bottom: 26px; }
+    .guide-intro h2 { margin: 7px 0 0; font-size: 26px; letter-spacing: -.04em; }
+    .guide-intro p { max-width: 510px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .op-guide-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .op-guide-card { padding: 20px; border: 1px solid var(--line); border-radius: 11px; background: #0d1312; }
+    .op-guide-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .op-guide-name { color: var(--accent); font: 760 21px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .recipe { display: flex; align-items: center; gap: 7px; }
+    .recipe-step { padding: 6px 8px; border: 1px solid var(--line-hot); border-radius: 5px; color: var(--ink); font: 650 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .recipe-arrow { color: var(--faint); }
+    .op-guide-card p { min-height: 42px; margin: 15px 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .op-example { display: flex; align-items: center; gap: 9px; color: var(--faint); font: 600 10px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .op-example strong { color: var(--ink); font-weight: 650; }
+
+    .workbench { display: grid; grid-template-columns: 1.05fr .95fr; }
+    .control { padding: 27px 30px 29px; border-bottom: 1px solid var(--line); }
+    .control:nth-child(odd) { border-right: 1px solid var(--line); }
+    .control.full { grid-column: 1 / -1; border-right: 0; }
+
+    .control-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 17px;
+    }
+
+    .eyebrow, .section-label {
+      color: var(--muted);
+      font: 650 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .step-no { color: var(--accent); margin-right: 9px; }
+    .hint { color: var(--faint); font-size: 12px; }
+
+    select {
+      width: 100%;
+      height: 48px;
+      padding: 0 42px 0 14px;
+      color: var(--ink);
+      border: 1px solid var(--line-hot);
+      border-radius: 9px;
+      outline: none;
+      background: #0d1312;
+    }
+
+    select:focus, .digit:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(217 255 104 / 10%); }
+
+    .model-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      min-height: 25px;
+    }
+
+    .metric, .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: var(--muted);
+      background: #0d1312;
+      font: 600 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .metric strong { margin-left: 5px; color: var(--ink); }
+    .badge.good { border-color: rgb(97 214 157 / 35%); color: var(--green); }
+    .badge.warning { border-color: rgb(255 189 91 / 45%); color: var(--amber); }
+    .badge.bad { border-color: rgb(255 107 102 / 40%); color: var(--red); }
+
+    .digits { display: grid; grid-template-columns: repeat(6, minmax(38px, 1fr)); gap: 9px; }
+    .digit {
+      width: 100%;
+      min-width: 0;
+      aspect-ratio: 1;
+      color: var(--ink);
+      border: 1px solid var(--line-hot);
+      border-radius: 10px;
+      outline: none;
+      background: #0d1312;
+      text-align: center;
+      font: 600 clamp(22px, 3vw, 30px)/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      caret-color: var(--accent);
+    }
+
+    .op-bank { display: flex; flex-wrap: wrap; gap: 8px; }
+    .op-chip {
+      min-width: 51px;
+      padding: 9px 12px;
+      border: 1px solid var(--line-hot);
+      border-radius: 999px;
+      background: transparent;
+      cursor: pointer;
+      font: 680 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      transition: border-color .15s, color .15s, transform .15s;
+    }
+    .op-chip:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
+
+    .chain {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+      min-height: 58px;
+      margin-top: 18px;
+      padding: 10px;
+      border: 1px dashed var(--line-hot);
+      border-radius: 10px;
+      background: #0d1312;
+    }
+
+    .chain-empty { padding-left: 5px; color: var(--faint); font-size: 13px; }
+    .chain-arrow { color: var(--faint); font-size: 14px; }
+    .chain-token {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 9px 9px 12px;
+      border: 1px solid #53605c;
+      border-radius: 7px;
+      background: var(--panel-2);
+      cursor: grab;
+      font: 700 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .chain-token.dragging { opacity: .35; }
+    .remove-op {
+      width: 19px;
+      height: 19px;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      color: var(--muted);
+      background: rgb(255 255 255 / 6%);
+      cursor: pointer;
+      line-height: 17px;
+    }
+    .remove-op:hover { color: var(--red); }
+
+    .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .budget-modes { grid-template-columns: repeat(2, 1fr); }
+    .mode-option { position: relative; }
+    .mode-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .mode-option label {
+      display: block;
+      height: 100%;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--muted);
+      background: #0d1312;
+      cursor: pointer;
+    }
+    .mode-option strong { display: block; margin-bottom: 7px; color: var(--ink); font-size: 13px; }
+    .mode-option small { display: block; font-size: 11px; line-height: 1.45; }
+    .mode-option input:checked + label { border-color: var(--accent); background: rgb(217 255 104 / 6%); }
+    .mode-option input:checked + label strong { color: var(--accent); }
+
+    .launch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 22px 30px;
+      background: #0e1413;
+    }
+    .launch-copy { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .launch-copy strong { color: var(--ink); font-weight: 600; }
+    .run-button {
+      position: relative;
+      min-width: 174px;
+      height: 50px;
+      padding: 0 24px;
+      border: 0;
+      border-radius: 8px;
+      color: var(--accent-ink);
+      background: var(--accent);
+      cursor: pointer;
+      font-weight: 760;
+      letter-spacing: -.01em;
+      transition: filter .15s, transform .15s;
+    }
+    .run-button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .run-button:disabled { cursor: wait; filter: grayscale(.5); opacity: .65; transform: none; }
+
+    .message { min-height: 22px; margin: 14px 2px 0; color: var(--red); font-size: 13px; }
+    .message:empty { display: none; }
+
+    .results { margin-top: 30px; }
+    .results[hidden] { display: none; }
+    .results-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 25px 30px;
+      border-bottom: 1px solid var(--line);
+    }
+    .results-title { display: flex; align-items: center; gap: 13px; }
+    .results-title h2 { margin: 0; font-size: 20px; letter-spacing: -.03em; }
+    .verdict { font: 700 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .verdict.good { color: var(--green); }
+    .verdict.bad { color: var(--red); }
+
+    .result-section { padding: 28px 30px 32px; border-bottom: 1px solid var(--line); }
+    .result-section .section-label { display: block; margin-bottom: 20px; }
+
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      overflow-x: auto;
+      padding: 3px 2px 13px;
+      scrollbar-color: var(--line-hot) transparent;
+    }
+
+    .pipe-node { flex: 0 0 auto; }
+    .pipe-node-label { margin-bottom: 8px; color: var(--faint); font: 600 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace; text-transform: uppercase; }
+    .pipe-digits { display: flex; gap: 4px; }
+    .pipe-digit {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 35px;
+      border: 1px solid var(--line-hot);
+      border-radius: 5px;
+      background: #0d1312;
+      font: 700 15px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    .pipe-digit.match { color: var(--green); border-color: rgb(97 214 157 / 45%); background: rgb(97 214 157 / 6%); }
+    .pipe-digit.mismatch { color: var(--red); border-color: rgb(255 107 102 / 52%); background: rgb(255 107 102 / 7%); }
+    .truth-row { margin-top: 6px; color: var(--faint); font: 10px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .truth-row strong { color: var(--muted); font-weight: 600; }
+    .pipe-op { flex: 0 0 auto; display: grid; place-items: center; gap: 7px; margin-top: 2px; color: var(--faint); }
+    .pipe-op strong { min-width: 42px; padding: 7px 9px; border: 1px solid var(--line-hot); border-radius: 999px; color: var(--ink); text-align: center; font: 700 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .pipe-op span { font-size: 16px; }
+
+    .routing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 12px; }
+    .route-card { padding: 15px; border: 1px solid var(--line); border-radius: 10px; background: #0d1312; }
+    .route-card-head { display: flex; justify-content: space-between; margin-bottom: 12px; color: var(--muted); font: 600 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .collapse-callout { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 11px; padding: 9px 10px; border: 1px solid color-mix(in srgb, var(--atom-color) 45%, var(--line)); border-radius: 6px; background: color-mix(in srgb, var(--atom-color) 7%, transparent); font: 650 10px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .collapse-callout strong { color: var(--atom-color); }
+    .shadow-label { margin: 1px 0 8px; color: var(--faint); font: 600 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .route-strip { display: flex; gap: 7px; }
+    .route-box {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      padding: 11px 6px 9px;
+      border: 1px solid color-mix(in srgb, var(--atom-color) 48%, #29312f);
+      border-radius: 7px;
+      background: color-mix(in srgb, var(--atom-color) 9%, #111716);
+      text-align: center;
+      color: inherit;
+      font: inherit;
+    }
+    button.route-box[data-atom-id] { cursor: pointer; }
+    button.route-box[data-atom-id]:hover { filter: brightness(1.2); }
+    button.route-box:disabled { opacity: 1; }
+    .route-box b { display: block; color: var(--atom-color); font: 720 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .route-box small { display: block; margin-top: 6px; color: var(--faint); font: 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .soft-list { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line); }
+    .soft-row { display: grid; grid-template-columns: 29px 1fr 39px; align-items: center; gap: 5px; margin-top: 5px; color: var(--faint); font: 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .soft-track { height: 3px; overflow: hidden; border-radius: 3px; background: #252c2a; }
+    .soft-fill { height: 100%; background: var(--atom-color); }
+
+    .usage { display: grid; gap: 10px; }
+    .usage-row { display: grid; grid-template-columns: 50px minmax(120px, 1fr) 28px; align-items: center; gap: 11px; }
+    .usage-label { font: 700 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    button.usage-label { padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+    button.usage-label:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .usage-track { display: flex; height: 13px; overflow: hidden; border-radius: 3px; background: #252c2a; }
+    .usage-segment { height: 100%; background: var(--atom-color); border-right: 1px solid rgb(10 15 14 / 62%); }
+    .usage-total { color: var(--muted); font: 600 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; text-align: right; }
+
+    .result-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px 24px;
+      padding: 18px 30px;
+      color: var(--muted);
+      background: #0d1312;
+      font: 600 10px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+    .result-footer strong { color: var(--ink); font-weight: 600; }
+
+    .page-footer { padding: 25px 0 5px; color: var(--faint); font: 10px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; text-align: center; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgb(2 6 5 / 76%);
+      backdrop-filter: blur(8px);
+    }
+    .modal[hidden] { display: none; }
+    .modal-card { width: min(590px, 100%); max-height: min(760px, calc(100vh - 40px)); overflow-y: auto; border: 1px solid var(--line-hot); border-radius: 15px; background: var(--panel); box-shadow: 0 30px 100px #000; }
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 23px 24px 18px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 5px 0 0; font-size: 25px; letter-spacing: -.04em; }
+    .modal-close { width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); background: #0d1312; cursor: pointer; }
+    .modal-body { padding: 21px 24px 25px; }
+    .score-note { margin: 0 0 20px; padding: 11px 12px; border-left: 2px solid var(--amber); color: var(--muted); background: rgb(255 189 91 / 5%); font-size: 11px; line-height: 1.55; }
+    .score-list { display: grid; gap: 10px; }
+    .score-row { display: grid; grid-template-columns: 35px 1fr 47px; align-items: center; gap: 10px; font: 650 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .score-track { height: 8px; overflow: hidden; border-radius: 4px; background: #252c2a; }
+    .score-fill { height: 100%; border-radius: inherit; background: var(--atom-color); }
+    .score-value { color: var(--muted); text-align: right; }
+    .profile-best { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 19px; padding-top: 17px; border-top: 1px solid var(--line); }
+
+    @media (max-width: 780px) {
+      .shell { width: min(100% - 22px, 1220px); }
+      header { min-height: 74px; }
+      .intro { grid-template-columns: 1fr; margin-top: 8px; }
+      .intro p { width: auto; }
+      .workbench { grid-template-columns: 1fr; }
+      .control:nth-child(odd) { border-right: 0; }
+      .control { padding: 23px 20px; }
+      .launch { align-items: stretch; flex-direction: column; padding: 20px; }
+      .run-button { width: 100%; }
+      .results-head, .result-section { padding-left: 20px; padding-right: 20px; }
+      .modes { grid-template-columns: 1fr; }
+      .budget-modes { grid-template-columns: 1fr; }
+      .op-guide { padding: 21px 20px; }
+      .guide-intro { flex-direction: column; }
+      .op-guide-grid { grid-template-columns: 1fr; }
+      .atlas-panel { padding: 21px 20px; }
+      .atlas-setup { grid-template-columns: 1fr; }
+      .atlas-grid { grid-template-columns: 1fr; }
+      .survey-setup { grid-template-columns: 1fr; }
+      .survey-toolbar { align-items: stretch; flex-direction: column; }
+      .survey-downloads { flex-wrap: wrap; }
+      .read-only span { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><span class="mark" aria-hidden="true"></span><div>ATOM <span>/ PLAYGROUND</span></div></div>
+      <div class="read-only"><span>read-only inference</span></div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <h1>Compose the<br><em>latent machine.</em></h1>
+        <p>Inspect learned token-programs, boundary predictions, and atom routing—one micro-step at a time.</p>
+      </section>
+
+      <nav class="page-tabs" aria-label="Playground sections">
+        <button class="page-tab" type="button" data-tab="playground" aria-selected="true">Playground</button>
+        <button class="page-tab" type="button" data-tab="guide" aria-selected="false">P1–P8 surface ops</button>
+        <button class="page-tab" type="button" data-tab="atlas" aria-selected="false">P routing atlas</button>
+        <button class="page-tab" type="button" data-tab="outcomes" aria-selected="false">Unique atom outcomes</button>
+        <button class="page-tab" type="button" data-tab="survey" aria-selected="false">Atlas survey</button>
+      </nav>
+
+      <section class="tab-panel" id="playgroundTab">
+
+      <section class="workbench" aria-label="Inference controls">
+        <div class="control full">
+          <div class="control-head">
+            <span class="eyebrow"><span class="step-no">01</span>Checkpoint</span>
+            <span class="hint">final checkpoints only · CPU</span>
+          </div>
+          <select id="modelPicker" aria-label="Model checkpoint"><option>Scanning runs…</option></select>
+          <div class="model-meta" id="modelMeta"></div>
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <span class="eyebrow"><span class="step-no">02</span>Input digits</span>
+            <span class="hint">exactly six</span>
+          </div>
+          <div class="digits" id="digitInputs">
+            <input class="digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="3" aria-label="Digit 1">
+            <input class="digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="1" aria-label="Digit 2">
+            <input class="digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="4" aria-label="Digit 3">
+            <input class="digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="1" aria-label="Digit 4">
+            <input class="digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="5" aria-label="Digit 5">
+            <input class="digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="9" aria-label="Digit 6">
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <span class="eyebrow"><span class="step-no">03</span>Op chain</span>
+            <span class="hint"><span id="chainCount">2</span>/6 · drag to reorder</span>
+          </div>
+          <div class="op-bank" id="opBank" aria-label="Append operation"></div>
+          <div class="chain" id="chain" aria-label="Operation chain"></div>
+        </div>
+
+        <div class="control full">
+          <div class="control-head">
+            <span class="eyebrow"><span class="step-no">04</span>Boundary channel</span>
+            <span class="hint">hard routing</span>
+          </div>
+          <div class="modes">
+            <div class="mode-option">
+              <input type="radio" name="mode" id="bottleneck" value="bottleneck" checked>
+              <label for="bottleneck"><strong>Canonical channel</strong><small>Decode the model’s prediction, then re-encode it before the next program.</small></label>
+            </div>
+            <div class="mode-option">
+              <input type="radio" name="mode" id="raw" value="raw">
+              <label for="raw"><strong>Raw latent handoff</strong><small>Carry the hidden state directly. Boundary decodes are observational only.</small></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="control full">
+          <div class="control-head">
+            <span class="eyebrow"><span class="step-no">05</span>Execution budget</span>
+            <span class="hint">how many atoms may be applied per surface op</span>
+          </div>
+          <div class="modes budget-modes">
+            <div class="mode-option">
+              <input type="radio" name="atomBudget" id="programBudget" value="program" checked>
+              <label for="programBudget"><strong>Learned token-program</strong><small>Apply one hard-selected atom or PASS at every configured micro-step.</small></label>
+            </div>
+            <div class="mode-option">
+              <input type="radio" name="atomBudget" id="singleBudget" value="single">
+              <label for="singleBudget"><strong>One atom per surface op</strong><small>Shadow-route all steps; use a strict majority (2/3 on standard checkpoints), otherwise the most confident selected route, exactly once.</small></label>
+            </div>
+            <div class="mode-option">
+              <input type="radio" name="atomBudget" id="confidenceBudget" value="single_confidence">
+              <label for="confidenceBudget"><strong>One atom · confidence only</strong><small>Ignore vote counts; apply once whichever hard-selected route has the highest soft confidence at any micro-step.</small></label>
+            </div>
+            <div class="mode-option">
+              <input type="radio" name="atomBudget" id="repeatMajorityBudget" value="repeat_majority">
+              <label for="repeatMajorityBudget"><strong>Repeated winner · confidence fallback</strong><small>If a route repeats, keep all applications of that winner and drop the others; otherwise apply the most confident selected route once.</small></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="launch control full">
+          <div class="launch-copy"><strong id="modeSummary">Canonical handoff · learned token-program.</strong><br>Ground truth is computed independently and never enters the model.</div>
+          <button class="run-button" id="runButton" type="button">Run pipeline →</button>
+        </div>
+      </section>
+
+      <div class="message" id="message" role="alert" aria-live="polite"></div>
+
+      <section class="results" id="results" hidden aria-live="polite">
+        <div class="results-head">
+          <div class="results-title"><span class="eyebrow">Trace</span><h2>Pipeline result</h2></div>
+          <div id="resultBadges"></div>
+        </div>
+
+        <div class="result-section">
+          <span class="section-label">Decoded boundaries · prediction vs ground truth</span>
+          <div class="pipeline" id="pipeline"></div>
+        </div>
+
+        <div class="result-section">
+          <span class="section-label">Routing strip · hard choices + top-3 soft weights</span>
+          <div class="routing-grid" id="routing"></div>
+        </div>
+
+        <div class="result-section">
+          <span class="section-label">Atom usage · segmented by token stage</span>
+          <div class="usage" id="usage"></div>
+        </div>
+
+        <div class="result-footer">
+          <span>Run <strong id="footerRun"></strong></span>
+          <span>Checkpoint <strong id="footerStep"></strong></span>
+          <span>Mode <strong id="footerMode"></strong></span>
+          <span>Budget <strong id="footerBudget"></strong></span>
+        </div>
+      </section>
+      </section>
+
+      <section class="tab-panel op-guide" id="guideTab" hidden>
+        <div class="guide-intro">
+          <div><span class="eyebrow">Canonical world</span><h2>What each surface op does</h2></div>
+          <p>Every P operation is a fixed composition of two hidden sub-operations. The first recipe step runs first; all arithmetic is modulo 10.</p>
+        </div>
+        <div class="op-guide-grid" id="opGuideGrid"><span class="hint">Loading operation definitions…</span></div>
+      </section>
+
+      <section class="tab-panel atlas-panel" id="atlasTab" hidden>
+        <div class="guide-intro">
+          <div><span class="eyebrow">All singleton programs</span><h2>P1–P8 routing atlas</h2></div>
+          <p>Runs every surface operation independently from the same six input digits. Routing is state-dependent, so changing the digits may change an operation’s selected atoms.</p>
+        </div>
+        <div class="atlas-setup">
+          <div class="atlas-field">
+            <label for="atlasModelPicker">Checkpoint</label>
+            <select id="atlasModelPicker" aria-label="Atlas model checkpoint"><option>Scanning runs…</option></select>
+          </div>
+          <div class="atlas-field">
+            <label>Shared input digits</label>
+            <div class="digits" id="atlasDigitInputs">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="3" aria-label="Atlas digit 1">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="1" aria-label="Atlas digit 2">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="4" aria-label="Atlas digit 3">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="1" aria-label="Atlas digit 4">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="5" aria-label="Atlas digit 5">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="9" aria-label="Atlas digit 6">
+            </div>
+          </div>
+          <button class="run-button atlas-run" id="atlasRunButton" type="button">Trace all P ops →</button>
+        </div>
+        <div class="atlas-note" id="atlasMessage">Choose a checkpoint and trace all eight operations—no chain required.</div>
+        <div class="atlas-grid" id="atlasGrid"></div>
+      </section>
+
+      <section class="tab-panel atlas-panel" id="outcomesTab" hidden>
+        <div class="guide-intro">
+          <div><span class="eyebrow">Deduplicated atom trials</span><h2>Unique selected-atom outcomes</h2></div>
+          <p>For each P operation, shadow-route its normal program, deduplicate the selected atom IDs, then apply every unique atom independently once to the same canonical input. Repeated selections appear as one trial.</p>
+        </div>
+        <div class="atlas-setup">
+          <div class="atlas-field">
+            <label for="outcomeModelPicker">Checkpoint</label>
+            <select id="outcomeModelPicker" aria-label="Outcome model checkpoint"><option>Scanning runs…</option></select>
+          </div>
+          <div class="atlas-field">
+            <label>Shared input digits</label>
+            <div class="digits" id="outcomeDigitInputs">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="3" aria-label="Outcome digit 1">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="1" aria-label="Outcome digit 2">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="4" aria-label="Outcome digit 3">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="1" aria-label="Outcome digit 4">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="5" aria-label="Outcome digit 5">
+              <input class="digit atlas-digit" inputmode="numeric" pattern="[0-9]" maxlength="1" value="9" aria-label="Outcome digit 6">
+            </div>
+          </div>
+          <button class="run-button atlas-run" id="outcomeRunButton" type="button">Test unique atoms →</button>
+        </div>
+        <div class="atlas-note" id="outcomeMessage">Each selected atom is tested once per P operation, even when the router selected it repeatedly.</div>
+        <div class="atlas-grid" id="outcomeGrid"></div>
+      </section>
+
+      <section class="tab-panel atlas-panel" id="surveyTab" hidden>
+        <div class="guide-intro">
+          <div><span class="eyebrow">Population view</span><h2>Atlas survey</h2></div>
+          <p>Runs all P1–P8 singleton routes over shared random inputs and every healthy seed. Each selected atom is deduplicated per input and applied once from the original canonical state.</p>
+        </div>
+        <div class="survey-setup">
+          <div class="atlas-field">
+            <label for="surveySampleCount">Random inputs / checkpoint</label>
+            <input class="survey-input" id="surveySampleCount" type="number" min="1" max="1000" step="1" value="300">
+          </div>
+          <div class="atlas-field">
+            <label for="surveyRandomSeed">Random seed</label>
+            <input class="survey-input" id="surveyRandomSeed" type="number" min="0" max="4294967295" step="1" value="20250308">
+          </div>
+          <div class="atlas-field">
+            <label>Checkpoint scope</label>
+            <div class="survey-scope"><strong id="surveyHealthyCount">—</strong> healthy A14/A16 seeds · seen ≥90% · non-smoke</div>
+          </div>
+          <button class="run-button atlas-run" id="surveyRunButton" type="button">Run survey →</button>
+        </div>
+        <div class="atlas-note" id="surveyMessage">The same generated inputs are used for every checkpoint. No report is written to runs/; downloads are created in your browser.</div>
+        <section class="survey-results" id="surveyResults" hidden aria-live="polite">
+          <div class="survey-toolbar">
+            <div class="survey-summary" id="surveySummary"></div>
+            <div class="survey-downloads">
+              <button class="secondary-button" id="surveyJsonButton" type="button">Download JSON</button>
+              <button class="secondary-button" id="surveyCsvButton" type="button">Download CSV</button>
+            </div>
+          </div>
+          <div class="survey-models" id="surveyModels"></div>
+        </section>
+      </section>
+
+      <div class="page-footer">NO TRAINING · NO GRADIENTS · NO WRITES TO RUNS/</div>
+    </main>
+  </div>
+
+  <div class="modal" id="atomModal" hidden role="dialog" aria-modal="true" aria-labelledby="atomModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div><span class="eyebrow">Standalone semantics</span><h3 id="atomModalTitle">Atom profile</h3></div>
+        <button class="modal-close" id="atomModalClose" type="button" aria-label="Close atom profile">×</button>
+      </div>
+      <div class="modal-body" id="atomModalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const OPS = ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"];
+    const ATOM_COLORS = [
+      "#7ee787", "#58a6ff", "#ffa657", "#d2a8ff",
+      "#ff7b72", "#79c0ff", "#f2cc60", "#a5d6ff",
+      "#ff9bce", "#56d4dd", "#c9d1d9", "#b1e88a",
+      "#e3b341", "#bc8cff", "#f0883e", "#39d353", "#77817e"
+    ];
+
+    const state = { models: [], operations: [], chain: ["P1", "P3"], dragging: null, latestResult: null, latestSurvey: null };
+    const $ = (selector) => document.querySelector(selector);
+    const picker = $("#modelPicker");
+    const atlasPicker = $("#atlasModelPicker");
+    const outcomePicker = $("#outcomeModelPicker");
+    const message = $("#message");
+    const runButton = $("#runButton");
+    const atlasRunButton = $("#atlasRunButton");
+    const outcomeRunButton = $("#outcomeRunButton");
+    const surveyRunButton = $("#surveyRunButton");
+
+    function percent(value) {
+      return value == null ? "—" : `${(value * 100).toFixed(1)}%`;
+    }
+
+    function atomColor(atomId) {
+      return ATOM_COLORS[atomId] || ATOM_COLORS[16];
+    }
+
+    function selectedModel() {
+      return state.models.find(model => model.model_id === picker.value);
+    }
+
+    function renderModelMeta() {
+      const model = selectedModel();
+      const meta = $("#modelMeta");
+      meta.replaceChildren();
+      if (!model) return;
+      const entries = [
+        ["SEEN", percent(model.seen_acc)],
+        ["L3", percent(model.l3_acc)],
+        ["MICRO-STEPS", model.micro_steps]
+      ];
+      entries.forEach(([label, value]) => {
+        const chip = document.createElement("span");
+        chip.className = "metric";
+        chip.append(document.createTextNode(label));
+        const strong = document.createElement("strong");
+        strong.textContent = value;
+        chip.append(strong);
+        meta.append(chip);
+      });
+      if (model.recommended) {
+        const badge = document.createElement("span");
+        badge.className = "badge good";
+        badge.textContent = "HEALTHY DEMO SEED";
+        meta.append(badge);
+      }
+      if (model.smoke) {
+        const badge = document.createElement("span");
+        badge.className = "badge warning";
+        badge.textContent = "SMOKE RUN";
+        meta.append(badge);
+      }
+    }
+
+    async function loadModels() {
+      try {
+        const response = await fetch("/models");
+        if (!response.ok) throw new Error(`Model scan failed (${response.status})`);
+        state.models = await response.json();
+        const healthyCount = state.models.filter(model => model.recommended).length;
+        $("#surveyHealthyCount").textContent = healthyCount;
+        surveyRunButton.disabled = healthyCount === 0;
+        picker.replaceChildren();
+        atlasPicker.replaceChildren();
+        outcomePicker.replaceChildren();
+        if (!state.models.length) {
+          const option = document.createElement("option");
+          option.textContent = "No completed checkpoints found";
+          picker.append(option);
+          atlasPicker.append(option.cloneNode(true));
+          outcomePicker.append(option.cloneNode(true));
+          picker.disabled = true;
+          atlasPicker.disabled = true;
+          outcomePicker.disabled = true;
+          runButton.disabled = true;
+          atlasRunButton.disabled = true;
+          outcomeRunButton.disabled = true;
+          surveyRunButton.disabled = true;
+          return;
+        }
+        state.models.forEach(model => {
+          const option = document.createElement("option");
+          option.value = model.model_id;
+          option.textContent = `${model.run_label}  ·  seen ${percent(model.seen_acc)}  ·  L3 ${percent(model.l3_acc)}${model.smoke ? "  ·  smoke" : ""}`;
+          picker.append(option);
+          atlasPicker.append(option.cloneNode(true));
+          outcomePicker.append(option.cloneNode(true));
+        });
+        atlasPicker.value = picker.value;
+        outcomePicker.value = picker.value;
+        renderModelMeta();
+        if (!$("#atlasTab").hidden && !$("#atlasGrid").childElementCount) runAtlas();
+        if (!$("#outcomesTab").hidden && !$("#outcomeGrid").childElementCount) runOutcomes();
+      } catch (error) {
+        message.textContent = error.message;
+        picker.innerHTML = "<option>Backend unavailable</option>";
+        picker.disabled = true;
+        atlasPicker.disabled = true;
+        outcomePicker.disabled = true;
+        runButton.disabled = true;
+        atlasRunButton.disabled = true;
+        outcomeRunButton.disabled = true;
+        surveyRunButton.disabled = true;
+      }
+    }
+
+    function renderOperationGuide() {
+      const grid = $("#opGuideGrid");
+      if (!state.operations.length) return;
+      grid.innerHTML = state.operations.map(item => `
+        <article class="op-guide-card">
+          <div class="op-guide-head">
+            <span class="op-guide-name">${item.op}</span>
+            <div class="recipe">
+              <span class="recipe-step" title="${item.recipe[0].description}">${item.recipe[0].sub_op} · ${item.recipe[0].name}</span>
+              <span class="recipe-arrow">→</span>
+              <span class="recipe-step" title="${item.recipe[1].description}">${item.recipe[1].sub_op} · ${item.recipe[1].name}</span>
+              ${item.is_dax ? '<span class="badge warning">DAX</span>' : ""}
+            </div>
+          </div>
+          <p>${item.description}</p>
+          <div class="op-example"><span>EXAMPLE</span><strong>${item.example_input.join(" ")}</strong><span>→</span><strong>${item.example_output.join(" ")}</strong></div>
+        </article>`).join("");
+    }
+
+    async function loadOperations() {
+      try {
+        const response = await fetch("/ops");
+        if (!response.ok) throw new Error(`Operation guide failed (${response.status})`);
+        state.operations = await response.json();
+        renderOperationGuide();
+      } catch (error) {
+        $("#opGuideGrid").innerHTML = `<span class="message">${error.message}</span>`;
+      }
+    }
+
+    function renderOpBank() {
+      const bank = $("#opBank");
+      OPS.forEach(op => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "op-chip";
+        button.textContent = `+ ${op}`;
+        button.addEventListener("click", () => {
+          if (state.chain.length >= 6) {
+            message.textContent = "A chain can contain at most 6 operations.";
+            return;
+          }
+          message.textContent = "";
+          state.chain.push(op);
+          renderChain();
+        });
+        bank.append(button);
+      });
+    }
+
+    function renderChain() {
+      const chain = $("#chain");
+      chain.replaceChildren();
+      $("#chainCount").textContent = state.chain.length;
+      if (!state.chain.length) {
+        const empty = document.createElement("span");
+        empty.className = "chain-empty";
+        empty.textContent = "Click an operation to begin";
+        chain.append(empty);
+        return;
+      }
+      state.chain.forEach((op, index) => {
+        if (index) {
+          const arrow = document.createElement("span");
+          arrow.className = "chain-arrow";
+          arrow.textContent = "→";
+          chain.append(arrow);
+        }
+        const token = document.createElement("div");
+        token.className = "chain-token";
+        token.draggable = true;
+        token.dataset.index = index;
+        token.setAttribute("aria-label", `${op}, position ${index + 1}`);
+        token.append(document.createTextNode(`⋮⋮ ${op}`));
+        const remove = document.createElement("button");
+        remove.className = "remove-op";
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", `Remove ${op}`);
+        remove.addEventListener("click", () => {
+          state.chain.splice(index, 1);
+          renderChain();
+        });
+        token.append(remove);
+        token.addEventListener("dragstart", event => {
+          state.dragging = index;
+          token.classList.add("dragging");
+          event.dataTransfer.effectAllowed = "move";
+        });
+        token.addEventListener("dragend", () => {
+          state.dragging = null;
+          token.classList.remove("dragging");
+        });
+        token.addEventListener("dragover", event => event.preventDefault());
+        token.addEventListener("drop", event => {
+          event.preventDefault();
+          if (state.dragging == null || state.dragging === index) return;
+          const [moved] = state.chain.splice(state.dragging, 1);
+          state.chain.splice(index, 0, moved);
+          state.dragging = null;
+          renderChain();
+        });
+        chain.append(token);
+      });
+    }
+
+    function configureDigits() {
+      document.querySelectorAll(".digits").forEach(group => {
+        const inputs = [...group.querySelectorAll(".digit")];
+        inputs.forEach((input, index) => {
+          input.addEventListener("input", () => {
+            input.value = input.value.replace(/\D/g, "").slice(-1);
+            if (input.value && inputs[index + 1]) inputs[index + 1].focus();
+          });
+          input.addEventListener("keydown", event => {
+            if (event.key === "Backspace" && !input.value && inputs[index - 1]) inputs[index - 1].focus();
+            if (event.key === "ArrowLeft" && inputs[index - 1]) inputs[index - 1].focus();
+            if (event.key === "ArrowRight" && inputs[index + 1]) inputs[index + 1].focus();
+          });
+          input.addEventListener("focus", () => input.select());
+        });
+      });
+    }
+
+    function synchronizeDigitGroups() {
+      const groups = ["#digitInputs", "#atlasDigitInputs", "#outcomeDigitInputs"]
+        .map(selector => [...document.querySelectorAll(`${selector} .digit`)]);
+      groups.forEach((group, groupIndex) => {
+        group.forEach((input, index) => input.addEventListener("input", () => {
+          groups.forEach((other, otherIndex) => {
+            if (otherIndex !== groupIndex) other[index].value = input.value;
+          });
+        }));
+      });
+    }
+
+    function selectedMode() {
+      return document.querySelector('input[name="mode"]:checked').value;
+    }
+
+    function selectedAtomBudget() {
+      return document.querySelector('input[name="atomBudget"]:checked').value;
+    }
+
+    function updateModeSummary() {
+      const channel = selectedMode() === "bottleneck" ? "Canonical handoff" : "Raw latent handoff";
+      const budget = selectedAtomBudget() === "program"
+        ? "learned token-program"
+        : (selectedAtomBudget() === "single_confidence"
+            ? "one atom by confidence only"
+            : (selectedAtomBudget() === "repeat_majority"
+                ? "repeated winner / confidence fallback"
+                : "one atom by majority / confidence"));
+      $("#modeSummary").textContent = `${channel} · ${budget}.`;
+    }
+
+    function digitRow(digits, matches, input = false) {
+      return `<div class="pipe-digits">${digits.map((digit, index) => {
+        const quality = input ? "" : (matches[index] ? "match" : "mismatch");
+        return `<span class="pipe-digit ${quality}">${digit}</span>`;
+      }).join("")}</div>`;
+    }
+
+    function renderPipeline(data) {
+      const pipeline = $("#pipeline");
+      pipeline.innerHTML = `<div class="pipe-node"><div class="pipe-node-label">Input</div>${digitRow(data.input_digits, [], true)}</div>`;
+      data.trace.forEach(stage => {
+        pipeline.insertAdjacentHTML("beforeend", `
+          <div class="pipe-op"><span>→</span><strong>${stage.op}</strong></div>
+          <div class="pipe-node">
+            <div class="pipe-node-label">Boundary ${stage.stage} · ${stage.exact_match ? "match" : "mismatch"}</div>
+            ${digitRow(stage.decoded_digits, stage.matches)}
+            <div class="truth-row">truth&nbsp; <strong>${stage.ground_truth_digits.join(" ")}</strong></div>
+          </div>`);
+      });
+    }
+
+    function softRows(route) {
+      return route.top_three.map(item => `
+        <div class="soft-row" style="--atom-color:${atomColor(item.atom_id)}">
+          <span>${item.label}</span>
+          <span class="soft-track"><span class="soft-fill" style="width:${Math.max(item.weight * 100, 1)}%"></span></span>
+          <span>${(item.weight * 100).toFixed(1)}%</span>
+        </div>`).join("");
+    }
+
+    function renderRouting(data) {
+      $("#routing").innerHTML = data.trace.map(stage => {
+        const collapse = stage.collapsed_selection;
+        const collapseRule = collapse
+          ? (collapse.strategy === "majority"
+              ? `MAJORITY ${collapse.votes}/${collapse.votes_possible}`
+              : `HIGHEST CONFIDENCE · μ${collapse.selected_at_micro_step}`)
+          : "";
+        return `<article class="route-card">
+          <div class="route-card-head"><span>STAGE ${stage.stage}</span><span>${stage.op}</span></div>
+          ${collapse ? `<div class="collapse-callout" style="--atom-color:${atomColor(collapse.atom_id)}"><span>APPLIED ×${collapse.applications || 1} · <strong>${collapse.label}</strong></span><span>${collapseRule} · ${(collapse.peak_soft_weight * 100).toFixed(1)}%</span></div><div class="shadow-label">Shadow router · used only to select the winner</div>` : ""}
+          <div class="route-strip">
+            ${stage.routing.map(route => `
+              <button type="button" class="route-box" ${route.is_pass ? "disabled" : `data-atom-id="${route.chosen_atom_id}"`} style="--atom-color:${atomColor(route.chosen_atom_id)}" title="micro-step ${route.micro_step}; chose ${route.chosen}${route.is_pass ? "" : "; click for standalone scores"}">
+                <b>${route.chosen}</b><small>μ${route.micro_step}</small>
+                <div class="soft-list">${softRows(route)}</div>
+              </button>`).join("")}
+          </div>
+        </article>`;
+      }).join("");
+      attachAtomClicks();
+    }
+
+    function renderUsage(data) {
+      const maxTotal = Math.max(...data.atom_usage.map(item => item.total), 1);
+      $("#usage").innerHTML = data.atom_usage.map(item => {
+        const fillWidth = (item.total / maxTotal) * 100;
+        const segments = item.segments.map((segment, index) => {
+          const segmentWidth = (segment.count / item.total) * 100;
+          const opacity = 1 - ((index % 4) * .16);
+          return `<span class="usage-segment" title="stage ${segment.stage} · ${segment.op} · ${segment.count}" style="width:${segmentWidth}%;opacity:${opacity}"></span>`;
+        }).join("");
+        const label = item.is_pass
+          ? `<span class="usage-label" style="color:var(--atom-color)">${item.label}</span>`
+          : `<button type="button" class="usage-label" data-atom-id="${item.atom_id}" style="color:var(--atom-color)" title="View ${item.label} standalone surface-op scores">${item.label}</button>`;
+        return `<div class="usage-row" style="--atom-color:${atomColor(item.atom_id)}">
+          ${label}
+          <span class="usage-track"><span style="display:flex;width:${fillWidth}%">${segments}</span></span>
+          <span class="usage-total">${item.total}</span>
+        </div>`;
+      }).join("");
+      attachAtomClicks();
+    }
+
+    function renderAtlas(data) {
+      state.latestResult = data;
+      $("#atlasMessage").textContent = `${data.routing_note} Showing ${data.micro_steps} micro-step${data.micro_steps === 1 ? "" : "s"} per operation.`;
+      $("#atlasGrid").innerHTML = data.operations.map(item => `
+        <article class="atlas-card">
+          <div class="atlas-card-head">
+            <strong>${item.op}</strong>
+            <span class="badge ${item.exact_match ? "good" : "bad"}">${item.exact_match ? "OUTPUT MATCH" : "OUTPUT MISMATCH"}</span>
+          </div>
+          <div class="atlas-route-seq">
+            ${item.routing.map((route, index) => {
+              const chosenWeight = route.top_three.find(candidate => candidate.atom_id === route.chosen_atom_id)?.weight ?? 0;
+              return `${index ? '<span class="atlas-route-arrow">→</span>' : ""}<button type="button" class="atlas-atom" ${route.is_pass ? "disabled" : `data-atom-id="${route.chosen_atom_id}"`} style="--atom-color:${atomColor(route.chosen_atom_id)}" title="${route.is_pass ? "PASS" : `Click for ${route.chosen} standalone scores`}"><small>μ${route.micro_step}</small><b>${route.chosen}</b><span>${percent(chosenWeight)}</span></button>`;
+            }).join("")}
+          </div>
+          <div class="atlas-output"><span>DECODED <strong>${item.decoded_digits.join(" ")}</strong></span><span>TRUTH <strong>${item.ground_truth_digits.join(" ")}</strong></span></div>
+        </article>`).join("");
+      attachAtomClicks();
+    }
+
+    async function runAtlas() {
+      const inputs = [...document.querySelectorAll("#atlasDigitInputs .digit")];
+      const digits = inputs.map(input => Number(input.value));
+      if (inputs.some(input => input.value === "") || digits.some(digit => !Number.isInteger(digit))) {
+        $("#atlasMessage").textContent = "Enter all six digits (0–9).";
+        return;
+      }
+      if (!state.models.some(model => model.model_id === atlasPicker.value)) {
+        $("#atlasMessage").textContent = "Choose an available checkpoint.";
+        return;
+      }
+      atlasRunButton.disabled = true;
+      const oldLabel = atlasRunButton.textContent;
+      atlasRunButton.textContent = "Tracing on CPU…";
+      try {
+        const response = await fetch("/route-atlas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model_id: atlasPicker.value, digits })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || `Routing atlas failed (${response.status})`);
+        renderAtlas(data);
+      } catch (error) {
+        $("#atlasMessage").textContent = error.message;
+      } finally {
+        atlasRunButton.disabled = false;
+        atlasRunButton.textContent = oldLabel;
+      }
+    }
+
+    function renderOutcomes(data) {
+      state.latestResult = data;
+      $("#outcomeMessage").textContent = `Unique atom trials from ${data.model.run_label}. Each result starts from the same canonical encoding of ${data.input_digits.join(" ")}. Confidence is the router’s soft weight at the shadow micro-step, not the standalone surface score.`;
+      $("#outcomeGrid").innerHTML = data.operations.map(item => {
+        const routeLabels = item.routing.map(route => route.chosen).join(" → ");
+        const trials = item.unique_atom_results.length
+          ? item.unique_atom_results.map(result => `
+              <div class="atom-trial" style="--atom-color:${atomColor(result.atom_id)}">
+                <div class="atom-trial-head">
+                  <button type="button" class="atom-trial-label" data-atom-id="${result.atom_id}">${result.label}</button>
+                  <small>${result.selected_micro_steps.map((step, index) => `μ${step} ${percent(result.selected_confidences[index])}`).join(" · ")}${result.selected_confidences.length > 1 ? ` · mean ${percent(result.mean_selected_confidence)}` : ""} · applied once</small>
+                </div>
+                <div class="atom-trial-body">
+                  ${digitRow(result.decoded_digits, result.matches)}
+                  <span class="badge ${result.exact_match ? "good" : "bad"}">${result.exact_match ? "MATCH" : "MISMATCH"}</span>
+                </div>
+              </div>`).join("")
+          : '<div class="outcome-empty">No atom trial: this program selected PASS only.</div>';
+        return `<article class="atlas-card">
+          <div class="atlas-card-head"><strong>${item.op}</strong><span class="metric">TRUTH<strong>${item.ground_truth_digits.join(" ")}</strong></span></div>
+          <div class="outcome-route-line">PROGRAM ROUTE&nbsp; <strong>${routeLabels}</strong>${item.pass_selected ? " · PASS is not an atom and is omitted below" : ""}</div>
+          <div class="atom-trials">${trials}</div>
+        </article>`;
+      }).join("");
+      attachAtomClicks();
+    }
+
+    async function runOutcomes() {
+      const inputs = [...document.querySelectorAll("#outcomeDigitInputs .digit")];
+      const digits = inputs.map(input => Number(input.value));
+      if (inputs.some(input => input.value === "") || digits.some(digit => !Number.isInteger(digit))) {
+        $("#outcomeMessage").textContent = "Enter all six digits (0–9).";
+        return;
+      }
+      if (!state.models.some(model => model.model_id === outcomePicker.value)) {
+        $("#outcomeMessage").textContent = "Choose an available checkpoint.";
+        return;
+      }
+      outcomeRunButton.disabled = true;
+      const oldLabel = outcomeRunButton.textContent;
+      outcomeRunButton.textContent = "Testing on CPU…";
+      try {
+        const response = await fetch("/route-atlas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model_id: outcomePicker.value, digits })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || `Atom outcomes failed (${response.status})`);
+        renderOutcomes(data);
+      } catch (error) {
+        $("#outcomeMessage").textContent = error.message;
+      } finally {
+        outcomeRunButton.disabled = false;
+        outcomeRunButton.textContent = oldLabel;
+      }
+    }
+
+    function renderSurvey(data, elapsedSeconds) {
+      state.latestSurvey = data;
+      $("#surveyMessage").textContent = `Completed ${data.sample_count_per_model} shared random inputs across ${data.healthy_model_count} healthy checkpoints in ${elapsedSeconds.toFixed(1)}s. Accuracy is six-digit exact match; confidence is measured only where the atom was the hard route.`;
+      $("#surveySummary").innerHTML = `
+        <span class="metric">CHECKPOINTS<strong>${data.healthy_model_count}</strong></span>
+        <span class="metric">INPUTS / CHECKPOINT<strong>${data.sample_count_per_model}</strong></span>
+        <span class="metric">MODEL-INPUT CASES<strong>${data.total_model_input_cases}</strong></span>
+        <span class="metric">RNG SEED<strong>${data.random_seed}</strong></span>`;
+      $("#surveyModels").innerHTML = data.models.map(entry => {
+        const rows = entry.operations.flatMap(operation => operation.atoms.map(atom => {
+          const confidence = atom.confidence;
+          const steps = atom.by_micro_step
+            .filter(step => step.selection_count)
+            .map(step => `μ${step.micro_step}: n=${step.selection_count}, ${percent(step.confidence.mean)}`)
+            .join(" · ");
+          return `<tr style="--atom-color:${atomColor(atom.atom_id)}">
+            <td>${operation.op}</td>
+            <td>${percent(operation.program_accuracy)}</td>
+            <td class="atom-cell">${atom.label}</td>
+            <td class="accuracy-cell">${percent(atom.single_atom_accuracy)}</td>
+            <td>${atom.exact_matches} / ${atom.selected_inputs}</td>
+            <td>${percent(atom.selection_rate)}</td>
+            <td>${atom.hard_selection_count}</td>
+            <td>${percent(confidence.mean)}</td>
+            <td>${percent(confidence.p10)} / ${percent(confidence.median)} / ${percent(confidence.p90)}</td>
+            <td class="survey-step-profile">${steps}</td>
+          </tr>`;
+        }));
+        return `<article class="survey-model">
+          <div class="survey-model-head">
+            <strong>${entry.model.run_label}</strong>
+            <span>seen ${percent(entry.model.seen_acc)} · L3 ${percent(entry.model.l3_acc)} · checkpoint ${entry.model.checkpoint_step}</span>
+          </div>
+          <div class="survey-table-wrap"><table class="survey-table">
+            <thead><tr><th>Op</th><th>Full program</th><th>Atom</th><th>One-atom exact</th><th>Matches / trials</th><th>Input select rate</th><th>Route picks</th><th>Mean conf.</th><th>P10 / median / P90</th><th>By micro-step</th></tr></thead>
+            <tbody>${rows.join("")}</tbody>
+          </table></div>
+        </article>`;
+      }).join("");
+      $("#surveyResults").hidden = false;
+    }
+
+    async function runSurvey() {
+      const sampleCount = Number($("#surveySampleCount").value);
+      const randomSeed = Number($("#surveyRandomSeed").value);
+      if (!Number.isInteger(sampleCount) || sampleCount < 1 || sampleCount > 1000) {
+        $("#surveyMessage").textContent = "Random inputs must be an integer from 1 to 1000.";
+        return;
+      }
+      if (!Number.isInteger(randomSeed) || randomSeed < 0 || randomSeed > 4294967295) {
+        $("#surveyMessage").textContent = "Random seed must be an integer from 0 to 4294967295.";
+        return;
+      }
+      const healthyCount = state.models.filter(model => model.recommended).length;
+      if (!healthyCount) {
+        $("#surveyMessage").textContent = "No healthy checkpoints are available.";
+        return;
+      }
+
+      surveyRunButton.disabled = true;
+      const oldLabel = surveyRunButton.textContent;
+      surveyRunButton.textContent = "Surveying on CPU…";
+      $("#surveyMessage").textContent = `Running 8 operations × ${sampleCount} inputs × ${healthyCount} healthy checkpoints…`;
+      const started = performance.now();
+      try {
+        const response = await fetch("/atlas-survey", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sample_count: sampleCount, random_seed: randomSeed })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || `Atlas survey failed (${response.status})`);
+        renderSurvey(data, (performance.now() - started) / 1000);
+      } catch (error) {
+        $("#surveyMessage").textContent = error.message;
+      } finally {
+        surveyRunButton.disabled = false;
+        surveyRunButton.textContent = oldLabel;
+      }
+    }
+
+    function downloadBlob(contents, mediaType, filename) {
+      const url = URL.createObjectURL(new Blob([contents], { type: mediaType }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function surveyFilename(extension) {
+      const report = state.latestSurvey;
+      return `atomv2-atlas-survey-n${report.sample_count_per_model}-seed${report.random_seed}.${extension}`;
+    }
+
+    function downloadSurveyJson() {
+      if (!state.latestSurvey) return;
+      downloadBlob(
+        JSON.stringify(state.latestSurvey, null, 2),
+        "application/json;charset=utf-8",
+        surveyFilename("json")
+      );
+    }
+
+    function downloadSurveyCsv() {
+      if (!state.latestSurvey) return;
+      const report = state.latestSurvey;
+      const headers = [
+        "model_id", "run_label", "checkpoint_step", "seen_acc", "l3_acc",
+        "op", "program_accuracy", "atom_id", "atom_label", "selected_inputs",
+        "sample_count", "selection_rate", "hard_selection_count", "exact_matches",
+        "single_atom_accuracy", "digit_accuracy", "confidence_count", "confidence_mean",
+        "confidence_std", "confidence_min", "confidence_p10", "confidence_median",
+        "confidence_p90", "confidence_max", "micro_step_profile"
+      ];
+      const rows = [headers];
+      report.models.forEach(entry => entry.operations.forEach(operation => {
+        operation.atoms.forEach(atom => rows.push([
+          entry.model.model_id, entry.model.run_label, entry.model.checkpoint_step,
+          entry.model.seen_acc, entry.model.l3_acc, operation.op,
+          operation.program_accuracy, atom.atom_id, atom.label, atom.selected_inputs,
+          report.sample_count_per_model, atom.selection_rate, atom.hard_selection_count,
+          atom.exact_matches, atom.single_atom_accuracy, atom.digit_accuracy,
+          atom.confidence.count, atom.confidence.mean, atom.confidence.std,
+          atom.confidence.min, atom.confidence.p10, atom.confidence.median,
+          atom.confidence.p90, atom.confidence.max,
+          atom.by_micro_step.map(step => `mu${step.micro_step}:n=${step.selection_count};mean=${step.confidence.mean ?? ""}`).join("|")
+        ]));
+      }));
+      const csv = rows.map(row => row.map(value => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
+      downloadBlob(csv, "text/csv;charset=utf-8", surveyFilename("csv"));
+    }
+
+    function openAtomProfile(atomId) {
+      const profile = state.latestResult?.atom_profiles?.[String(atomId)];
+      $("#atomModalTitle").textContent = `Atom A${atomId}`;
+      const body = $("#atomModalBody");
+      if (!profile) {
+        body.innerHTML = '<p class="score-note">This checkpoint has no final standalone-score artifact. The inference trace is available, but there is no saved semantic panel to display.</p>';
+      } else {
+        body.innerHTML = `
+          <p class="score-note"><strong>These are independent standalone exact-match accuracies, not mixture proportions.</strong> Each row asks: if this atom alone is applied once to a canonical input code, how often does the frozen decoder produce that surface operation’s exact output? The rows do not need to sum to 100%.</p>
+          <div class="score-list" style="--atom-color:${atomColor(atomId)}">
+            ${profile.surface_scores.map(score => `<div class="score-row">
+              <span>${score.op}</span>
+              <span class="score-track"><span class="score-fill" style="width:${score.accuracy * 100}%"></span></span>
+              <span class="score-value">${percent(score.accuracy)}</span>
+            </div>`).join("")}
+          </div>
+          <div class="profile-best">
+            <span class="metric">BEST SURFACE<strong>${profile.best_surface_op} · ${percent(profile.best_surface_accuracy)}</strong></span>
+            ${profile.best_candidate_overall ? `<span class="metric">BEST OVERALL<strong>${profile.best_candidate_overall} · ${percent(profile.best_candidate_accuracy)}</strong></span>` : ""}
+          </div>`;
+      }
+      $("#atomModal").hidden = false;
+      $("#atomModalClose").focus();
+    }
+
+    function closeAtomProfile() {
+      $("#atomModal").hidden = true;
+    }
+
+    function attachAtomClicks() {
+      document.querySelectorAll("[data-atom-id]").forEach(element => {
+        element.onclick = () => openAtomProfile(Number(element.dataset.atomId));
+      });
+    }
+
+    function renderResults(data) {
+      state.latestResult = data;
+      const exact = data.ground_truth.final_exact_match;
+      const badges = $("#resultBadges");
+      const budgetBadge = data.atom_budget === "program" ? "" : (
+        data.atom_budget === "single_confidence" ? "ONE ATOM · CONFIDENCE" :
+        data.atom_budget === "repeat_majority" ? "REPEATED WINNER" : "ONE ATOM · MAJORITY");
+      badges.innerHTML = `<span class="verdict ${exact ? "good" : "bad"}">${exact ? "✓ EXACT MATCH" : "× MISMATCH"}</span>${data.beyond_training_distribution ? ' <span class="badge warning">BEYOND TRAINING DISTRIBUTION</span>' : ""}${budgetBadge ? ` <span class="badge warning">${budgetBadge}</span>` : ""}`;
+      renderPipeline(data);
+      renderRouting(data);
+      renderUsage(data);
+      $("#footerRun").textContent = data.model.run_label;
+      $("#footerStep").textContent = `step ${String(data.model.checkpoint_step).padStart(6, "0")}`;
+      $("#footerMode").textContent = data.mode === "bottleneck" ? "canonical channel" : "raw latent handoff";
+      $("#footerBudget").textContent = data.atom_budget === "program"
+        ? `${data.micro_steps} micro-steps / op`
+        : (data.atom_budget === "single_confidence" ? "one atom / confidence"
+          : (data.atom_budget === "repeat_majority" ? "repeat winner / confidence"
+            : "one atom / majority"));
+      const results = $("#results");
+      results.hidden = false;
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function runPipeline() {
+      message.textContent = "";
+      const digitInputs = [...document.querySelectorAll("#digitInputs .digit")];
+      const digits = digitInputs.map(input => Number(input.value));
+      if (digits.some((digit, index) => !Number.isInteger(digit) || !digitInputs[index].value)) {
+        message.textContent = "Enter all six digits (0–9).";
+        return;
+      }
+      if (!state.chain.length) {
+        message.textContent = "Add at least one operation.";
+        return;
+      }
+      if (!selectedModel()) {
+        message.textContent = "Choose an available checkpoint.";
+        return;
+      }
+
+      runButton.disabled = true;
+      const oldLabel = runButton.textContent;
+      runButton.textContent = "Running on CPU…";
+      try {
+        const response = await fetch("/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model_id: picker.value,
+            digits,
+            ops: state.chain,
+            mode: selectedMode(),
+            atom_budget: selectedAtomBudget()
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || `Inference failed (${response.status})`);
+        renderResults(data);
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        runButton.disabled = false;
+        runButton.textContent = oldLabel;
+      }
+    }
+
+    picker.addEventListener("change", renderModelMeta);
+    picker.addEventListener("change", () => { atlasPicker.value = picker.value; outcomePicker.value = picker.value; });
+    atlasPicker.addEventListener("change", () => { picker.value = atlasPicker.value; outcomePicker.value = atlasPicker.value; renderModelMeta(); });
+    outcomePicker.addEventListener("change", () => { picker.value = outcomePicker.value; atlasPicker.value = outcomePicker.value; renderModelMeta(); });
+    runButton.addEventListener("click", runPipeline);
+    atlasRunButton.addEventListener("click", runAtlas);
+    outcomeRunButton.addEventListener("click", runOutcomes);
+    surveyRunButton.addEventListener("click", runSurvey);
+    $("#surveyJsonButton").addEventListener("click", downloadSurveyJson);
+    $("#surveyCsvButton").addEventListener("click", downloadSurveyCsv);
+    document.querySelectorAll('input[name="mode"], input[name="atomBudget"]').forEach(input => {
+      input.addEventListener("change", updateModeSummary);
+    });
+    function selectPageTab(name, updateHash = true) {
+      document.querySelectorAll(".page-tab").forEach(item => {
+        item.setAttribute("aria-selected", String(item.dataset.tab === name));
+      });
+      $("#playgroundTab").hidden = name !== "playground";
+      $("#guideTab").hidden = name !== "guide";
+      $("#atlasTab").hidden = name !== "atlas";
+      $("#outcomesTab").hidden = name !== "outcomes";
+      $("#surveyTab").hidden = name !== "survey";
+      if (name === "atlas" && state.models.length && !$("#atlasGrid").childElementCount) runAtlas();
+      if (name === "outcomes" && state.models.length && !$("#outcomeGrid").childElementCount) runOutcomes();
+      if (updateHash) history.replaceState(null, "", name === "playground" ? location.pathname + location.search : `#${name}`);
+    }
+    document.querySelectorAll(".page-tab").forEach(tab => {
+      tab.addEventListener("click", () => selectPageTab(tab.dataset.tab));
+    });
+    $("#atomModalClose").addEventListener("click", closeAtomProfile);
+    $("#atomModal").addEventListener("click", event => {
+      if (event.target === $("#atomModal")) closeAtomProfile();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeAtomProfile();
+    });
+
+    renderOpBank();
+    renderChain();
+    configureDigits();
+    synchronizeDigitGroups();
+    const initialTab = ["guide", "atlas", "outcomes", "survey"].includes(location.hash.slice(1))
+      ? location.hash.slice(1)
+      : "playground";
+    selectPageTab(initialTab, false);
+    loadModels();
+    loadOperations();
+  </script>
+</body>
+</html>
