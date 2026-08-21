@@ -153,6 +153,26 @@ def test_selected_route_confidence_is_always_present_in_top_three():
         assert len(selected) == 1
 
 
+def test_one_step_pass_is_replaced_by_best_real_atom():
+    output = {
+        "choices": torch.tensor([[16, -1]]),
+        "live": torch.tensor([[True, False]]),
+        "route_logits": torch.zeros(1, 2, 17),
+    }
+    output["route_logits"][0, 0, 5] = 4.0
+    output["route_logits"][0, 0, 16] = 8.0
+
+    forced, suppressed = demo_app._one_step_no_pass_routes(output, 16, 1)
+
+    assert forced.tolist() == [[5, 16]]
+    assert suppressed.tolist() == [[True, False]]
+    assert demo_app._one_step_no_pass_routes(output, 16, 3) is None
+    output["pass_excluded"] = True
+    probabilities = demo_app._routing_probabilities(output, 1, 1.0)
+    assert probabilities[0, 0, 16].item() == 0
+    assert probabilities[0, 0].argmax().item() == 5
+
+
 def test_confidence_profile_reports_distribution_quantiles():
     profile = demo_app._confidence_profile(torch.tensor([.1, .2, .8, .9]))
     assert profile["count"] == 4

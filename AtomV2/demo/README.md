@@ -40,6 +40,12 @@ The repeated-winner variant preserves the winning route's multiplicity while
 dropping the other selections: a shadow route A1, A1, A2 applies A1 twice. If
 no route repeats, it applies the highest-confidence hard selection once.
 
+For checkpoints configured with exactly one micro-step, PASS is excluded from
+demo inference. If the checkpoint's unmasked router ranks PASS first, the demo
+reruns that surface operation with the highest-scoring real atom forced and
+reports that applied atom. Its displayed top-three weights are normalized over
+the 16 legal atoms, so PASS is not presented as an inference choice.
+
 Clicking a routed or used atom opens its existing final-panel standalone
 surface scores. Each score is the exact-match accuracy of one application of
 that atom from the canonical code against one P-operation target; the scores

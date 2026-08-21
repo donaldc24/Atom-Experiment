@@ -1152,7 +1152,7 @@
           ${collapse ? `<div class="collapse-callout" style="--atom-color:${atomColor(collapse.atom_id)}"><span>APPLIED ×${collapse.applications || 1} · <strong>${collapse.label}</strong></span><span>${collapseRule} · ${(collapse.peak_soft_weight * 100).toFixed(1)}%</span></div><div class="shadow-label">Shadow router · used only to select the winner</div>` : ""}
           <div class="route-strip">
             ${stage.routing.map(route => `
-              <button type="button" class="route-box" ${route.is_pass ? "disabled" : `data-atom-id="${route.chosen_atom_id}"`} style="--atom-color:${atomColor(route.chosen_atom_id)}" title="micro-step ${route.micro_step}; chose ${route.chosen}${route.is_pass ? "" : "; click for standalone scores"}">
+              <button type="button" class="route-box" ${route.is_pass ? "disabled" : `data-atom-id="${route.chosen_atom_id}"`} style="--atom-color:${atomColor(route.chosen_atom_id)}" title="micro-step ${route.micro_step}; chose ${route.chosen}${route.pass_suppressed ? "; PASS excluded for one-step inference, so the best real atom was applied" : ""}${route.is_pass ? "" : "; click for standalone scores"}">
                 <b>${route.chosen}</b><small>μ${route.micro_step}</small>
                 <div class="soft-list">${softRows(route)}</div>
               </button>`).join("")}
@@ -1195,7 +1195,7 @@
           <div class="atlas-route-seq">
             ${item.routing.map((route, index) => {
               const chosenWeight = route.top_three.find(candidate => candidate.atom_id === route.chosen_atom_id)?.weight ?? 0;
-              return `${index ? '<span class="atlas-route-arrow">→</span>' : ""}<button type="button" class="atlas-atom" ${route.is_pass ? "disabled" : `data-atom-id="${route.chosen_atom_id}"`} style="--atom-color:${atomColor(route.chosen_atom_id)}" title="${route.is_pass ? "PASS" : `Click for ${route.chosen} standalone scores`}"><small>μ${route.micro_step}</small><b>${route.chosen}</b><span>${percent(chosenWeight)}</span></button>`;
+              return `${index ? '<span class="atlas-route-arrow">→</span>' : ""}<button type="button" class="atlas-atom" ${route.is_pass ? "disabled" : `data-atom-id="${route.chosen_atom_id}"`} style="--atom-color:${atomColor(route.chosen_atom_id)}" title="${route.pass_suppressed ? `PASS excluded; ${route.chosen} is the highest-scoring real atom` : (route.is_pass ? "PASS" : `Click for ${route.chosen} standalone scores`)}"><small>μ${route.micro_step}${route.pass_suppressed ? " · no-PASS" : ""}</small><b>${route.chosen}</b><span>${percent(chosenWeight)}</span></button>`;
             }).join("")}
           </div>
           <div class="atlas-output"><span>DECODED <strong>${item.decoded_digits.join(" ")}</strong></span><span>TRUTH <strong>${item.ground_truth_digits.join(" ")}</strong></span></div>
@@ -1236,7 +1236,7 @@
 
     function renderOutcomes(data) {
       state.latestResult = data;
-      $("#outcomeMessage").textContent = `Unique atom trials from ${data.model.run_label}. Each result starts from the same canonical encoding of ${data.input_digits.join(" ")}. Confidence is the router’s soft weight at the shadow micro-step, not the standalone surface score.`;
+      $("#outcomeMessage").textContent = `Unique atom trials from ${data.model.run_label}. Each result starts from the same canonical encoding of ${data.input_digits.join(" ")}. Confidence is the router’s soft weight at the shadow micro-step, not the standalone surface score.${data.inference_policy === "best_real_atom_if_pass" ? " PASS is excluded for this one-step checkpoint." : ""}`;
       $("#outcomeGrid").innerHTML = data.operations.map(item => {
         const routeLabels = item.routing.map(route => route.chosen).join(" → ");
         const trials = item.unique_atom_results.length
@@ -1469,7 +1469,7 @@
       const budgetBadge = data.atom_budget === "program" ? "" : (
         data.atom_budget === "single_confidence" ? "ONE ATOM · CONFIDENCE" :
         data.atom_budget === "repeat_majority" ? "REPEATED WINNER" : "ONE ATOM · MAJORITY");
-      badges.innerHTML = `<span class="verdict ${exact ? "good" : "bad"}">${exact ? "✓ EXACT MATCH" : "× MISMATCH"}</span>${data.beyond_training_distribution ? ' <span class="badge warning">BEYOND TRAINING DISTRIBUTION</span>' : ""}${budgetBadge ? ` <span class="badge warning">${budgetBadge}</span>` : ""}`;
+      badges.innerHTML = `<span class="verdict ${exact ? "good" : "bad"}">${exact ? "✓ EXACT MATCH" : "× MISMATCH"}</span>${data.beyond_training_distribution ? ' <span class="badge warning">BEYOND TRAINING DISTRIBUTION</span>' : ""}${data.inference_policy === "best_real_atom_if_pass" ? ' <span class="badge good">NO-PASS 1-STEP</span>' : ""}${budgetBadge ? ` <span class="badge warning">${budgetBadge}</span>` : ""}`;
       renderPipeline(data);
       renderRouting(data);
       renderUsage(data);

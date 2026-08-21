@@ -207,10 +207,75 @@ def _token_tensors(op: str) -> tuple[torch.Tensor, torch.Tensor]:
     return tokens, n_tokens
 
 
+def _one_step_no_pass_routes(output: dict, n_atoms: int,
+                             micro_steps: int):
+    """Build forced routes when a live one-step program selected PASS."""
+    if micro_steps != 1:
+        return None
+    live = output["live"]
+    pass_mask = live & output["choices"].eq(n_atoms)
+    if not bool(pass_mask.any().item()):
+        return None
+
+    # Forced mode still visits padded steps, so give every dead position a
+    # valid PASS index. Live PASS selections fall back to the best real atom.
+    forced = torch.where(
+        live,
+        output["choices"],
+        torch.full_like(output["choices"], n_atoms),
+    )
+    real_atom_fallback = output["route_logits"][..., :n_atoms].argmax(dim=-1)
+    forced = torch.where(pass_mask, real_atom_fallback, forced)
+    return forced, pass_mask
+
+
+@torch.inference_mode()
+def _run_surface_hard(model, cfg, tokens: torch.Tensor,
+                      n_tokens: torch.Tensor, digits: torch.Tensor | None = None,
+                      start_state: torch.Tensor | None = None) -> dict:
+    """Run one P token, suppressing PASS only for one-micro-step models."""
+    if (digits is None) == (start_state is None):
+        raise ValueError("provide exactly one of digits or start_state")
+
+    def execute(mode: str, forced: torch.Tensor | None = None):
+        if start_state is None:
+            return model(
+                digits, tokens, n_tokens, mode=mode, tau=cfg.tau_end,
+                forced=forced)
+        return model.execute_from_state(
+            start_state, tokens, n_tokens, start_token_idx=0,
+            mode=mode, tau=cfg.tau_end, forced=forced)
+
+    output = execute("hard")
+    replacement = _one_step_no_pass_routes(
+        output, cfg.n_atoms, cfg.micro_steps)
+    if replacement is None:
+        output["pass_suppressed"] = torch.zeros_like(
+            output["live"], dtype=torch.bool)
+        output["pass_excluded"] = cfg.micro_steps == 1
+        return output
+
+    forced, pass_mask = replacement
+    output = execute("forced", forced)
+    output["pass_suppressed"] = pass_mask
+    output["pass_excluded"] = True
+    return output
+
+
+def _routing_probabilities(output: dict, micro_steps: int,
+                           tau: float) -> torch.Tensor:
+    logits = output["route_logits"][:, :micro_steps]
+    if output.get("pass_excluded", False):
+        logits = logits.clone()
+        logits[..., -1] = torch.finfo(logits.dtype).min
+    return F.softmax(logits / max(float(tau), 1e-6), dim=-1)
+
+
 def _route_trace(output: dict, micro_steps: int, tau: float) -> list[dict]:
-    logits = output["route_logits"][0, :micro_steps]
-    probabilities = F.softmax(logits / max(float(tau), 1e-6), dim=-1)
+    probabilities = _routing_probabilities(
+        output, micro_steps, tau)[0]
     choices = output["choices"][0, :micro_steps]
+    pass_suppressed = output.get("pass_suppressed")
     trace = []
     for micro_step in range(micro_steps):
         choice = int(choices[micro_step].item())
@@ -227,6 +292,9 @@ def _route_trace(output: dict, micro_steps: int, tau: float) -> list[dict]:
             "chosen_atom_id": choice,
             "chosen": "PASS" if choice == 16 else f"A{choice}",
             "is_pass": choice == 16,
+            "pass_suppressed": bool(
+                pass_suppressed is not None
+                and pass_suppressed[0, micro_step].item()),
             "top_three": top_three,
         })
     return trace
@@ -241,8 +309,8 @@ def _collapse_route(output: dict, micro_steps: int, tau: float,
     the latter rule. The confidence winner is necessarily a route the hard
     program actually selected, not an unobserved fourth option.
     """
-    logits = output["route_logits"][0, :micro_steps]
-    probabilities = F.softmax(logits / max(float(tau), 1e-6), dim=-1)
+    probabilities = _routing_probabilities(
+        output, micro_steps, tau)[0]
     choices = output["choices"][0, :micro_steps].to(torch.int64)
     counts = torch.bincount(choices, minlength=17)
     majority_threshold = micro_steps // 2 + 1
@@ -406,13 +474,12 @@ def run_inference(request: RunRequest) -> dict:
     for stage_index, op in enumerate(request.ops, start=1):
         tokens, n_tokens = _token_tensors(op)
         if request.mode == "bottleneck":
-            output = model(model_digits, tokens, n_tokens, mode="hard", tau=cfg.tau_end)
+            output = _run_surface_hard(
+                model, cfg, tokens, n_tokens, digits=model_digits)
             boundary_state = output["states"][cfg.micro_steps]
         else:
-            output = model.execute_from_state(
-                raw_state, tokens, n_tokens, start_token_idx=0,
-                mode="hard", tau=cfg.tau_end,
-            )
+            output = _run_surface_hard(
+                model, cfg, tokens, n_tokens, start_state=raw_state)
             boundary_state = output["states"][cfg.micro_steps]
             raw_state = boundary_state
 
@@ -473,6 +540,10 @@ def run_inference(request: RunRequest) -> dict:
         "input_digits": request.digits,
         "ops": list(request.ops),
         "micro_steps": cfg.micro_steps,
+        "inference_policy": (
+            "best_real_atom_if_pass" if cfg.micro_steps == 1
+            else "checkpoint_default"
+        ),
         "soft_weight_temperature": float(cfg.tau_end),
         "beyond_training_distribution": len(request.ops) > 2,
         "trace": stages,
@@ -504,7 +575,8 @@ def build_route_atlas(request: AtlasRequest) -> dict:
     operations = []
     for op in world_ops.SURFACE_NAMES:
         tokens, n_tokens = _token_tensors(op)
-        output = model(digits, tokens, n_tokens, mode="hard", tau=cfg.tau_end)
+        output = _run_surface_hard(
+            model, cfg, tokens, n_tokens, digits=digits)
         routing = _route_trace(output, cfg.micro_steps, cfg.tau_end)
         decoded = output["logits"].argmax(dim=-1)[0].tolist()
         truth = world_ops.apply_triple(world_ops.SURFACE_TRIPLES[op], source)[0].tolist()
@@ -560,11 +632,20 @@ def build_route_atlas(request: AtlasRequest) -> dict:
         "model": model_meta,
         "input_digits": request.digits,
         "micro_steps": cfg.micro_steps,
+        "inference_policy": (
+            "best_real_atom_if_pass" if cfg.micro_steps == 1
+            else "checkpoint_default"
+        ),
         "operations": operations,
         "atom_profiles": _atom_profiles(request.model_id),
         "routing_note": (
             "Each P operation is hard-routed independently as a singleton from "
             "the same canonical encoding; routes may change with the input digits."
+            + (
+                " This one-step checkpoint excludes PASS at inference and uses "
+                "the highest-scoring real atom instead."
+                if cfg.micro_steps == 1 else ""
+            )
         ),
     }
 
@@ -612,13 +693,11 @@ def _survey_checkpoint(record: dict, digits: torch.Tensor,
             (batch_size, 2), PAD_TOKEN, dtype=torch.int64)
         tokens[:, 0] = SURFACE_INDEX[op]
         n_tokens = torch.ones(batch_size, dtype=torch.int64)
-        output = model(digits, tokens, n_tokens, mode="hard", tau=cfg.tau_end)
+        output = _run_surface_hard(
+            model, cfg, tokens, n_tokens, digits=digits)
         choices = output["choices"][:, :cfg.micro_steps]
-        probabilities = F.softmax(
-            output["route_logits"][:, :cfg.micro_steps]
-            / max(float(cfg.tau_end), 1e-6),
-            dim=-1,
-        )
+        probabilities = _routing_probabilities(
+            output, cfg.micro_steps, cfg.tau_end)
         truth_array = world_ops.apply_triple(
             world_ops.SURFACE_TRIPLES[op], source)
         truth = torch.from_numpy(truth_array).to(dtype=torch.int64)
@@ -682,6 +761,10 @@ def _survey_checkpoint(record: dict, digits: torch.Tensor,
     model_meta["checkpoint_step"] = checkpoint_step
     return {
         "model": model_meta,
+        "inference_policy": (
+            "best_real_atom_if_pass" if cfg.micro_steps == 1
+            else "checkpoint_default"
+        ),
         "operations": operations,
     }
 
