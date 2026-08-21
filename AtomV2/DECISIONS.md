@@ -319,3 +319,31 @@ seeing results.
   self-bottleneck boundary panel, whole-state ridge recoverability of
   answer vs original. Called after analyze; analyze re-runs to fold the
   headline in. Nothing from it touches training.
+
+## E8 close-out (2026-08-20): STILL CAPACITY-LIMITED; two predictions scored
+Screen results (seed 1): A23 (2-layer atoms) 15.7%, A24 (3-layer) 10.9%,
+vs A18's 14.7% and the 80% health gate. Depth prediction REFUTED decisively:
+per-atom capacity is not the binding constraint of one-route-per-token
+architectures (A24 < A23 < gate; deeper = harder one-shot credit
+assignment, not more competence). No replicate stage; E8 stops per the
+registered bins.
+
+Budget-control prediction REFUTED as registered, by 0.56 points: A22
+(1-layer, 40k) finished at 20.56% vs the registered < 20% bound. Dated
+amendment to the E7 language this obliges: the A18 curve is not a hard
+CEILING but a decelerating CRAWL (+5.9 points from 20k to 40k, +1.2 points
+over the final 10k). The E7 screen VERDICT stands unchanged - at the
+observed decelerating rate the 80% health gate is unreachable at any sane
+budget - but "plateau/ceiling" overstated what 20k steps could establish,
+and the record now says crawl.
+
+Combined mechanism reading (with D1/D2/D3): every diagnostic locates
+competence at the token-level routed PROGRAM (3 state-conditioned,
+LN-punctuated applications), never the single atom; standalone semantics
+was a best-match projection D2 had already demoted. E8 closes the last
+escape hatch: the 3-step pipeline is load-bearing for LEARNING (iterative
+refinement, credit assignment across routing decisions, co-evolved decoder
+convention), not merely a co-adaptation surface. The empirically supported
+pageable unit is the token-program with canonical translation at
+boundaries (D1 addendum); reducing it to one load is a training-dynamics
+problem (distill/anneal 3->1), not an architecture-search problem.
