@@ -146,6 +146,9 @@ atomv2/run_e9.py       staged E9 scratch/warm/forced batch driver
 atomv2/flow_model.py   E10 Reynolds Transport Network field update
 atomv2/e10.py          E10 data, training, extrapolation, and flow audits
 atomv2/run_e10.py      staged E10 screen/replication driver and verdict
+atomv2/exchange_model.py E11 exact conservative categorical exchange model
+atomv2/e11.py          E11 curriculum, long-rollout, robustness, and audits
+atomv2/run_e11.py      staged E11 screen/viscosity/replication driver
 tests/                 54 tests incl. the SplitMath.md diff duty
 splits/split_v2.json   the frozen, derived, hash-pinned split
 ```

@@ -609,6 +609,60 @@ E10_MATCHED_LONG_HORIZON_TOL = 0.03
 E10_VISCOSITY_NOISE_MARGIN = 0.05
 E10_VISCOSITY_CLEAN_TOL = 0.03
 
+# ---------------------------------------------------------------------------
+# E11 (H1-Experiment11.md): Canonical Conservative Exchange Network. E10's
+# approximate Sinkhorn projection is replaced by exact two-cell conservative
+# exchanges. The state itself is a categorical digit distribution, and every
+# nonterminal token boundary is straight-through projected to the canonical
+# one-hot digit interface. A fixed singleton-first curriculum prevents pair
+# co-adaptation. A34 is run only if the inviscid Reynolds arm passes.
+# ---------------------------------------------------------------------------
+E11_PROTOCOL_REVISION = "e11-canonical-conservative-exchange"
+E11_ARMS = ("A32", "A33", "A34")
+E11_SCREEN_ARMS = ("A32", "A33")
+E11_TRANSPORT = {"A32": "direct", "A33": "reynolds", "A34": "reynolds"}
+E11_VISCOSITY = {"A32": 0.0, "A33": 0.0, "A34": 0.04}
+E11_EXCHANGE_STAGES = 8
+E11_GATE_BIAS = -2.0
+E11_STRESS_SCALE = 4.0
+E11_PULSE_INIT = 0.25
+E11_REACTION_IDENTITY_BIAS = 2.0
+E11_REACTION_INIT = 0.02
+E11_LR = 1e-2
+E11_BETAS = (0.9, 0.99)
+E11_WEIGHT_DECAY = 0.0
+E11_WARMUP_STEPS = 200
+E11_BATCH_SIZE = 128
+E11_PHASE1_STEPS = 4_000
+E11_PHASE2_STEPS = 4_000
+E11_EVAL_EVERY = 1_000
+E11_LOG_EVERY = 100
+E11_GRAD_CLIP = 5.0
+E11_PHASE1_SINGLETON_MIN = 0.99
+E11_SCREEN_SEED = 1
+E11_REPLICATE_SEEDS = (0, 2)
+E11_EXTRAP_SELECTION_SEED = 20260912
+E11_EXTRAP_LENGTHS = (3, 4, 8, 16)
+E11_EXTRAP_TASKS_PER_LENGTH = 64
+E11_EXTRAP_EXAMPLES_PER_TASK = 100
+E11_NOISE_SIGMA = 0.15
+E11_QUANT_BITS = (8, 4)
+E11_BASE_GATES = {
+    "singleton_min": 0.99,
+    "seen_pair": 0.95,
+    "L1": 0.90,
+    "L2": 0.90,
+    "L3": 0.90,
+    "len3": 0.85,
+    "len4": 0.80,
+    "len8": 0.65,
+    "len16": 0.45,
+}
+E11_CONSERVATION_MAX = 1e-6
+E11_REYNOLDS_MATCH_TOL = 0.03
+E11_VISCOSITY_CLEAN_TOL = 0.03
+E11_VISCOSITY_ROBUST_MARGIN = 0.03
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
@@ -622,4 +676,5 @@ EXPERIMENT_REVISIONS = {
     "e8": E8_PROTOCOL_REVISION,
     "e9": E9_PROTOCOL_REVISION,
     "e10": E10_PROTOCOL_REVISION,
+    "e11": E11_PROTOCOL_REVISION,
 }

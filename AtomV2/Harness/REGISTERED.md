@@ -317,6 +317,56 @@ The pre-smoke invariant test fixed Sinkhorn normalization at 32 iterations
 after 12 failed the already-frozen `1e-5` column-conservation gate; no gate or
 result was inspected or changed.
 
+## E11 registration - Canonical Conservative Exchange Network (2026-09-12)
+
+Registered before any E11 smoke or result-bearing run. E11 responds to two
+specific E10 failures: approximate Sinkhorn transport lost conservation as it
+sharpened, and trained pairs displaced the singleton meaning of tokens. Each
+token now transports a six-cell categorical digit field through eight fixed
+alternating ring matchings. Every two-cell update is the doubly stochastic
+block `[[1-g,g],[g,1-g]]`, so conservation is algebraic for every gate value.
+A32 learns the 24 gates per token directly. A33/A34 derive each gate from a
+quadratic interaction of centered signed pulse profiles. No Sinkhorn loop is
+used.
+
+The state is six 10-way digit distributions. A learned token- and
+position-conditioned row-stochastic 10x10 reaction kernel maps distributions
+to distributions. Every nonterminal boundary is normalized and projected to
+the argmax one-hot digit in the forward pass, with a straight-through soft
+gradient. Thus a downstream token consumes exactly the same canonical
+representation used for a fresh digit input; no intermediate target, recipe,
+sub-operation label, teacher, or held-out identity is used in training.
+
+Training is task-balanced. Phase 1 is exactly 4,000 singleton-only AdamW steps.
+Phase 2 is forbidden unless every held-out singleton task reaches 0.99 exact-
+list accuracy at that fixed checkpoint. Passing arms receive exactly 4,000
+more steps, with every batch split 64 singleton and 64 trained-pair examples.
+There is no P3 oversampling in E11. The learning rate is 0.01, warmup 200,
+betas `(0.9,0.99)`, zero weight decay, and gradient clip 5.0.
+
+The result-bearing screen uses seed 1 for A32/A33. Primary success jointly
+requires singleton minimum 0.99, trained-pair mean 0.95, L1/L2/L3 each 0.90,
+and clean length-3/4/8/16 means of 0.85/0.80/0.65/0.45. It also requires exact-
+exchange relative mass residual at most 1e-6 and complete agreement between
+ordinary sequential execution and explicit decode/restart execution. A33's
+four-length mean may trail A32 by at most 0.03.
+
+A34, fixed periodic viscosity 0.04, is trained only if A33 passes. Robustness
+is audited with sigma-0.15 handoff noise, symmetric INT8/INT4 weight
+quantization, one dropped boundary cell, and one corrupted boundary cell.
+Viscosity succeeds only if A34 passes the primary gates, loses at most 0.03 on
+the four-length clean mean, and improves the preregistered six-panel robustness
+mean (noise, INT4, dropped, corrupted, length 8, length 16) by at least 0.03.
+INT8 is reported but omitted from that mean to avoid double-counting the two
+closely related quantization panels.
+
+The outcome order is VISCOUS_CANONICAL_REYNOLDS, INVISCID_CANONICAL_REYNOLDS,
+DIRECT_CANONICAL_EXCHANGE_ONLY, SINGLETON_CRYSTALLIZATION_FAILED, then
+NO_REUSABLE_EXCHANGE. A structured winner is replicated at seeds 0 and 2; the
+claim holds with primary success in at least two of three seeds, conservation
+in all three, and exact interface agreement in all three. This remains a
+discrete neural analogy, not a Navier-Stokes solver or theorem transfer.
+
 ## Errata found while building (doc bugs, not code bugs)
 
 - **SplitMath.md G6 table, row P2_P5**: says `train`, but the doc's own Split

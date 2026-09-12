@@ -416,3 +416,97 @@ frozen in H1-Experiment10.md before smoke.
 Pre-smoke invariant testing found that 12 Sinkhorn iterations missed the
 already-frozen `1e-5` conservation tolerance (`6.5e-5` worst column error).
 The iteration count was fixed at 32 before any smoke; the gate was not relaxed.
+
+## E10 close-out (2026-09-12): NO FLOW SUCCESS; stop
+The registered seed-1/6k screen completed for A28-A31 under one harness-source
+fingerprint; every run's SHA-256 manifest verifies. Final seen hard accuracy
+was 0.1440/0.3893/0.4072/0.3727 and L1 was
+0.0013/0.0709/0.0812/0.0834. L2 was 0.0000/0.0754/0.0008/0.0004; every arm
+was at zero on L3 and on the untrained three- and four-token panels. All six
+BASE_PASS checks were false for every arm. The mechanical outcome is therefore
+NO_FLOW_SUCCESS, which stops E10 without replication.
+
+Prediction 1 was supported and predictions 2-5 were refuted. Transport was
+necessary but not sufficient: the local-only A28 control failed, yet the
+conventional and Reynolds transports did not learn reusable token operators.
+The strongest symptom is inversion of the intended hierarchy. A29/A30/A31
+trained-pair means were 0.4796/0.4616/0.4191 while singleton means were only
+0.0056/0.1759/0.1753. A second token learned to exploit the state left by the
+first on trained pairs instead of each token becoming a self-contained map.
+
+The fixed numerical incompressibility contract also failed at the trained
+endpoint. Row errors remained near 1e-7, but A30/A31 column errors grew to
+0.0212/0.0158 as transport sharpened, producing registered relative mass
+residuals 0.0124/0.00969 rather than <=1e-5. This is a treatment-integrity
+failure caught by the frozen gate, not evidence against an exactly projected
+conservative model. Fixed viscosity did physically perform its narrow
+mechanical role: A31's high-frequency energy ratio was 0.7756 versus 1.0 for
+A30, its hidden-noise drop shrank from 0.1110 to 0.0771, and its absolute noisy
+pair accuracy exceeded A30 by 0.0112. That missed the registered 0.05 gain and
+did not repair clean composition.
+
+A labelled post-hoc diagnostic compared final transport row argmaxes with the
+known surface permutation. Match was 0.083 for A29 and 0.250 for A30/A31;
+ideal-permutation probability mass was 0.157 versus 0.215/0.229. The pulse
+parameterization moved further toward the intended geometry than conventional
+transport, but far too weakly to support the registered claim. No gate, budget,
+viscosity, projection iteration, or model width was changed after the screen.
+
+## E11 registration (2026-09-12): exact exchange and a canonical interface
+E10 left two actionable failures: its iterative Sinkhorn approximation lost
+the registered conservation tolerance when the transport logits sharpened,
+and its pair-trained hidden states allowed token meanings to co-adapt. E11
+therefore removes both degrees of freedom. Its transport is a product of exact
+two-cell conservative exchange blocks, and its state is a categorical digit
+field that is hard-canonicalized between tokens with a straight-through
+gradient. A fixed singleton-only phase must put every token above 99% before a
+fixed 50/50 singleton-pair phase is allowed. The direct-gate A32 control tests
+the exchange scaffold; centered-pulse quadratic gates are the A33 treatment.
+The fixed-viscosity A34 arm is conditionally run only after A33 establishes
+reusable operators. Full constants, data streams, long-horizon panels,
+robustness perturbations, gates, outcome order, and replication rule are
+frozen in H1-Experiment11.md and `atomv2.registered` before smoke.
+
+## E11 close-out (2026-09-12): SINGLETON CRYSTALLIZATION FAILED; stop
+The registered seed-1 screen completed for A32/A33 under the same harness
+source fingerprint. Both arms failed the fixed Phase-1 prerequisite and were
+therefore stopped at 4,000 singleton-only steps, with no pair phase. A34 and
+seed-0/2 replication were not run. All 32 result-bearing files listed by the
+two run manifests verify byte-for-byte.
+
+A32's held-out singleton mean/minimum were 0.6463/0.0450; A33's were
+0.7628/0.0450, against the registered per-token minimum of 0.99. A32 learned
+P4-P8 perfectly but missed P1-P3. A33 learned P2 and P4-P8 perfectly but missed
+P1/P3. Those two tokens share the same reverse position permutation. A labelled
+post-hoc audit found that A33's exchange argmax matched 44 of 48 target position
+mappings (0.9167); P1/P3 converged to the same incorrect partial reversal.
+A32 matched 42 of 48 (0.8750), additionally missing the P2 rotation.
+
+The mechanical interventions themselves worked. Maximum stagewise relative
+mass residual was `5.60e-7` for A32 and `7.45e-8` for A33, below `1e-6` without
+an iterative projection. Ordinary execution and explicit decode/restart had
+prediction agreement 1.0 and maximum probability discrepancy 0 in both arms.
+Learned gates were essentially binary: mean distance to a binary endpoint was
+`1.32e-7`/`2.20e-10`. Thus the failure was not conservation leakage, an
+ambiguous interface, or diffuse routing. The eight-stage schedule was verified
+before training to express all 720 permutations, so the observed shared wrong
+reversal is consistent with a saturated optimization basin rather than an
+expressivity proof.
+
+A descriptive post-hoc partition strengthens that localization. On selected
+long sequences containing only the operators an arm had learned perfectly,
+both arms achieved 1.0 exact-list accuracy at every represented length: A33 on
+25/24/6 sequences at lengths 3/4/8, respectively. Sequences containing a
+failed token collapsed, and the fixed length-16 selection happened to contain
+no all-good A33 sequence. The registered aggregate A33 accuracies were therefore
+0.4195/0.3995/0.1098/0.0034 at lengths 3/4/8/16. This is evidence that the
+canonical operators which did crystallize were genuinely reusable, but it
+cannot override the preregistered all-eight-token gate.
+
+Predictions 1-4 were only partially supported and prediction 5 was not reached.
+The correct registered outcome is `SINGLETON_CRYSTALLIZATION_FAILED`. The next
+experiment, if undertaken, should target differentiable routing through the
+multi-swap reversal (for example an annealed gate or permutation-level routing
+objective) while retaining exact pairwise conservation and the categorical
+boundary. No E11 budget, threshold, initialization, or optimizer was changed
+after observing these results.

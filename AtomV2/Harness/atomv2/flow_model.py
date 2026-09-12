@@ -26,7 +26,7 @@ def log_sinkhorn(logits: torch.Tensor, n_iters: int) -> torch.Tensor:
     Alternating row/column log normalizations preserve differentiability and
     avoid the overflow of exponentiating unrestricted learned logits first.
     The final row normalization makes the forward convex-combination contract
-    especially tight; the registered 12 iterations make column error tiny at
+    especially tight; the registered 32 iterations make column error tiny at
     the six-cell scale.
     """
     z = logits
@@ -170,4 +170,3 @@ class ReynoldsFlowModel(nn.Module):
             "transport_matrices": matrices,
             "forces": forces,
         }
-
