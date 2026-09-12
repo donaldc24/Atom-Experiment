@@ -1,0 +1,2815 @@
+{
+  "dissociation_gap_hard": 0.41200000000000003,
+  "routing": {
+    "atom_selection_share": [
+      0.13157894736842105,
+      0.0,
+      0.0,
+      0.0,
+      0.14473684210526316,
+      0.013157894736842105,
+      0.13157894736842105,
+      0.0,
+      0.0,
+      0.17105263157894737,
+      0.0,
+      0.2894736842105263,
+      0.0,
+      0.11842105263157894,
+      0.0,
+      0.0
+    ],
+    "atoms_in_use": 6,
+    "census_denominator": "hard atom-selections on seen_heldout, pass excluded",
+    "census_eps": 0.02,
+    "in_use_mask": [
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false
+    ],
+    "n_atom_picks": 30400,
+    "pass_rate": 0.0,
+    "per_step_choice_hist": [
+      [
+        2000,
+        0,
+        0,
+        0,
+        2400,
+        400,
+        2400,
+        0,
+        0,
+        2400,
+        0,
+        5200,
+        0,
+        2000,
+        0,
+        0,
+        0
+      ],
+      [
+        2000,
+        0,
+        0,
+        0,
+        2000,
+        0,
+        1600,
+        0,
+        0,
+        2800,
+        0,
+        3600,
+        0,
+        1600,
+        0,
+        0,
+        0
+      ]
+    ],
+    "steps_per_token": 1.0
+  },
+  "sets": {
+    "seen_heldout": {
+      "mean_acc_hard": 0.7641071428571431,
+      "mean_acc_soft": 0.7641071428571431,
+      "mean_closed_map_error": 1.2009337601207553,
+      "mean_closed_map_final_dist_to_target": 1.2792890128635226,
+      "soft_hard_gap": 0.0,
+      "tasks": {
+        "P1": {
+          "acc_hard": 0.96,
+          "acc_per_pos_hard": [
+            0.9975,
+            0.9975,
+            0.99,
+            0.9925,
+            0.9925,
+            0.99
+          ],
+          "acc_soft": 0.96,
+          "closed_map": {
+            "error": 1.148227334022522,
+            "error_per_step": [
+              1.148227334022522
+            ],
+            "final_dist_to_target": 1.1517843008041382,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                51,
+                0,
+                349
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P1_P1": {
+          "acc_hard": 0.9925,
+          "acc_per_pos_hard": [
+            0.9975,
+            0.9975,
+            1.0,
+            0.9975,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 0.9925,
+          "closed_map": {
+            "error": 1.2031015157699585,
+            "error_per_step": [
+              1.1451283693313599,
+              1.2610740661621094
+            ],
+            "final_dist_to_target": 1.2613635063171387,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                31,
+                0,
+                369,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                10,
+                0,
+                390
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P1_P5": {
+          "acc_hard": 0.98,
+          "acc_per_pos_hard": [
+            0.9975,
+            1.0,
+            1.0,
+            0.9975,
+            0.9975,
+            0.9875
+          ],
+          "acc_soft": 0.98,
+          "closed_map": {
+            "error": 1.2078055143356323,
+            "error_per_step": [
+              1.1480447053909302,
+              1.2675656080245972
+            ],
+            "final_dist_to_target": 1.2686651945114136,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                36,
+                0,
+                363,
+                0,
+                1
+              ],
+              [
+                14,
+                1,
+                8,
+                2,
+                375
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P1_P6": {
+          "acc_hard": 0.99,
+          "acc_per_pos_hard": [
+            1.0,
+            0.995,
+            1.0,
+            1.0,
+            1.0,
+            0.995
+          ],
+          "acc_soft": 0.99,
+          "closed_map": {
+            "error": 1.2021727561950684,
+            "error_per_step": [
+              1.1457798480987549,
+              1.2585663795471191
+            ],
+            "final_dist_to_target": 1.2602877616882324,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                41,
+                0,
+                359,
+                0,
+                0
+              ],
+              [
+                4,
+                0,
+                31,
+                2,
+                363
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P1_P7": {
+          "acc_hard": 0.99,
+          "acc_per_pos_hard": [
+            1.0,
+            0.9975,
+            1.0,
+            0.9975,
+            1.0,
+            0.995
+          ],
+          "acc_soft": 0.99,
+          "closed_map": {
+            "error": 1.2013672590255737,
+            "error_per_step": [
+              1.1466515064239502,
+              1.2560832500457764
+            ],
+            "final_dist_to_target": 1.2563066482543945,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                33,
+                0,
+                367,
+                0,
+                0
+              ],
+              [
+                8,
+                0,
+                0,
+                0,
+                392
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P1_P8": {
+          "acc_hard": 0.98,
+          "acc_per_pos_hard": [
+            1.0,
+            1.0,
+            0.9925,
+            0.9975,
+            0.9975,
+            0.9925
+          ],
+          "acc_soft": 0.98,
+          "closed_map": {
+            "error": 1.2271300554275513,
+            "error_per_step": [
+              1.1481695175170898,
+              1.3060907125473022
+            ],
+            "final_dist_to_target": 1.3288497924804688,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                25,
+                0,
+                375,
+                0,
+                0
+              ],
+              [
+                100,
+                3,
+                135,
+                4,
+                158
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P2": {
+          "acc_hard": 0.99,
+          "acc_per_pos_hard": [
+            1.0,
+            0.9975,
+            1.0,
+            1.0,
+            1.0,
+            0.9925
+          ],
+          "acc_soft": 0.99,
+          "closed_map": {
+            "error": 1.1488569974899292,
+            "error_per_step": [
+              1.1488569974899292
+            ],
+            "final_dist_to_target": 1.1505125761032104,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                34,
+                0,
+                366
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P2_P2": {
+          "acc_hard": 1.0,
+          "acc_per_pos_hard": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 1.0,
+          "closed_map": {
+            "error": 1.2011957168579102,
+            "error_per_step": [
+              1.1516101360321045,
+              1.2507808208465576
+            ],
+            "final_dist_to_target": 1.250849962234497,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                35,
+                0,
+                365,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                2,
+                1,
+                396
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P2_P4": {
+          "acc_hard": 0.98,
+          "acc_per_pos_hard": [
+            1.0,
+            0.995,
+            0.9975,
+            0.995,
+            0.9975,
+            0.995
+          ],
+          "acc_soft": 0.98,
+          "closed_map": {
+            "error": 1.2252198457717896,
+            "error_per_step": [
+              1.1545963287353516,
+              1.2958428859710693
+            ],
+            "final_dist_to_target": 1.3001669645309448,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                38,
+                0,
+                362,
+                0,
+                0
+              ],
+              [
+                24,
+                1,
+                46,
+                1,
+                328
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P2_P6": {
+          "acc_hard": 0.9825,
+          "acc_per_pos_hard": [
+            1.0,
+            0.99,
+            0.995,
+            1.0,
+            1.0,
+            0.9975
+          ],
+          "acc_soft": 0.9825,
+          "closed_map": {
+            "error": 1.2072944641113281,
+            "error_per_step": [
+              1.1505497694015503,
+              1.2640390396118164
+            ],
+            "final_dist_to_target": 1.2648009061813354,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                33,
+                0,
+                367,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                24,
+                0,
+                375
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P2_P7": {
+          "acc_hard": 0.965,
+          "acc_per_pos_hard": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.9975,
+            0.9675
+          ],
+          "acc_soft": 0.965,
+          "closed_map": {
+            "error": 1.2073462009429932,
+            "error_per_step": [
+              1.1514909267425537,
+              1.26320219039917
+            ],
+            "final_dist_to_target": 1.2635732889175415,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                33,
+                0,
+                367,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                5,
+                3,
+                391
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P2_P8": {
+          "acc_hard": 0.995,
+          "acc_per_pos_hard": [
+            1.0,
+            0.995,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 0.995,
+          "closed_map": {
+            "error": 1.2272659540176392,
+            "error_per_step": [
+              1.1526660919189453,
+              1.3018661737442017
+            ],
+            "final_dist_to_target": 1.309270977973938,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                36,
+                0,
+                364,
+                0,
+                0
+              ],
+              [
+                59,
+                0,
+                50,
+                1,
+                290
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P3": {
+          "acc_hard": 0.9875,
+          "acc_per_pos_hard": [
+            1.0,
+            0.99,
+            0.9975,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 0.9875,
+          "closed_map": {
+            "error": 1.2214263677597046,
+            "error_per_step": [
+              1.2214263677597046
+            ],
+            "final_dist_to_target": 1.3381752967834473,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                393,
+                0,
+                7
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P4": {
+          "acc_hard": 0.1475,
+          "acc_per_pos_hard": [
+            0.605,
+            0.63,
+            0.61,
+            0.63,
+            0.65,
+            0.585
+          ],
+          "acc_soft": 0.1475,
+          "closed_map": {
+            "error": 1.1205593347549438,
+            "error_per_step": [
+              1.1205593347549438
+            ],
+            "final_dist_to_target": 1.2612063884735107,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                397,
+                0,
+                3
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P4_P1": {
+          "acc_hard": 0.1,
+          "acc_per_pos_hard": [
+            0.62,
+            0.595,
+            0.5725,
+            0.5675,
+            0.57,
+            0.5775
+          ],
+          "acc_soft": 0.1,
+          "closed_map": {
+            "error": 1.205718994140625,
+            "error_per_step": [
+              1.1206505298614502,
+              1.290787935256958
+            ],
+            "final_dist_to_target": 1.3254175186157227,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                399,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                255,
+                2,
+                12,
+                1,
+                130
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P4_P4": {
+          "acc_hard": 0.02,
+          "acc_per_pos_hard": [
+            0.3725,
+            0.3725,
+            0.43,
+            0.395,
+            0.3925,
+            0.375
+          ],
+          "acc_soft": 0.02,
+          "closed_map": {
+            "error": 1.2227119207382202,
+            "error_per_step": [
+              1.1247243881225586,
+              1.3206993341445923
+            ],
+            "final_dist_to_target": 1.3829385042190552,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                397,
+                0,
+                2,
+                1,
+                0
+              ],
+              [
+                192,
+                2,
+                131,
+                48,
+                27
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P4_P5": {
+          "acc_hard": 0.84,
+          "acc_per_pos_hard": [
+            0.9775,
+            0.94,
+            0.9725,
+            0.9725,
+            0.98,
+            0.9575
+          ],
+          "acc_soft": 0.84,
+          "closed_map": {
+            "error": 1.204102635383606,
+            "error_per_step": [
+              1.1184862852096558,
+              1.289718747138977
+            ],
+            "final_dist_to_target": 1.2985284328460693,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                400,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                106,
+                5,
+                1,
+                3,
+                285
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P4_P7": {
+          "acc_hard": 0.0575,
+          "acc_per_pos_hard": [
+            0.5525,
+            0.6,
+            0.5625,
+            0.5975,
+            0.6,
+            0.5825
+          ],
+          "acc_soft": 0.0575,
+          "closed_map": {
+            "error": 1.2027366161346436,
+            "error_per_step": [
+              1.1306583881378174,
+              1.2748147249221802
+            ],
+            "final_dist_to_target": 1.323951005935669,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                397,
+                0,
+                3,
+                0,
+                0
+              ],
+              [
+                300,
+                2,
+                4,
+                5,
+                89
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P4_P8": {
+          "acc_hard": 0.1425,
+          "acc_per_pos_hard": [
+            0.62,
+            0.655,
+            0.5875,
+            0.62,
+            0.6175,
+            0.605
+          ],
+          "acc_soft": 0.1425,
+          "closed_map": {
+            "error": 1.2193266153335571,
+            "error_per_step": [
+              1.122369647026062,
+              1.3162835836410522
+            ],
+            "final_dist_to_target": 1.3399784564971924,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                399,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                142,
+                2,
+                110,
+                0,
+                146
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P5": {
+          "acc_hard": 0.955,
+          "acc_per_pos_hard": [
+            0.9975,
+            0.985,
+            1.0,
+            0.9875,
+            0.9975,
+            0.9875
+          ],
+          "acc_soft": 0.955,
+          "closed_map": {
+            "error": 1.1639678478240967,
+            "error_per_step": [
+              1.1639678478240967
+            ],
+            "final_dist_to_target": 1.1969386339187622,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                285,
+                1,
+                114
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P5_P1": {
+          "acc_hard": 0.9875,
+          "acc_per_pos_hard": [
+            1.0,
+            0.9975,
+            0.9925,
+            1.0,
+            1.0,
+            0.9975
+          ],
+          "acc_soft": 0.9875,
+          "closed_map": {
+            "error": 1.205093502998352,
+            "error_per_step": [
+              1.1608296632766724,
+              1.2493579387664795
+            ],
+            "final_dist_to_target": 1.2496283054351807,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                265,
+                3,
+                131,
+                1,
+                0
+              ],
+              [
+                9,
+                1,
+                2,
+                0,
+                388
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P5_P4": {
+          "acc_hard": 0.95,
+          "acc_per_pos_hard": [
+            0.9925,
+            0.9925,
+            0.99,
+            0.99,
+            0.9875,
+            0.995
+          ],
+          "acc_soft": 0.95,
+          "closed_map": {
+            "error": 1.2316410541534424,
+            "error_per_step": [
+              1.1596318483352661,
+              1.3036506175994873
+            ],
+            "final_dist_to_target": 1.3083834648132324,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                256,
+                1,
+                143,
+                0,
+                0
+              ],
+              [
+                53,
+                3,
+                41,
+                2,
+                301
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P5_P7": {
+          "acc_hard": 0.9725,
+          "acc_per_pos_hard": [
+            0.9975,
+            0.9975,
+            1.0,
+            0.9975,
+            0.995,
+            0.985
+          ],
+          "acc_soft": 0.9725,
+          "closed_map": {
+            "error": 1.218367099761963,
+            "error_per_step": [
+              1.1666264533996582,
+              1.2701078653335571
+            ],
+            "final_dist_to_target": 1.2711399793624878,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                276,
+                2,
+                122,
+                0,
+                0
+              ],
+              [
+                25,
+                0,
+                0,
+                0,
+                375
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P5_P8": {
+          "acc_hard": 0.9575,
+          "acc_per_pos_hard": [
+            0.9775,
+            0.9975,
+            0.9925,
+            0.9925,
+            1.0,
+            0.9975
+          ],
+          "acc_soft": 0.9575,
+          "closed_map": {
+            "error": 1.22129487991333,
+            "error_per_step": [
+              1.1627804040908813,
+              1.2798092365264893
+            ],
+            "final_dist_to_target": 1.2992557287216187,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                276,
+                1,
+                122,
+                1,
+                0
+              ],
+              [
+                263,
+                2,
+                22,
+                0,
+                113
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P6": {
+          "acc_hard": 0.9825,
+          "acc_per_pos_hard": [
+            0.9925,
+            0.9975,
+            0.995,
+            1.0,
+            0.9975,
+            1.0
+          ],
+          "acc_soft": 0.9825,
+          "closed_map": {
+            "error": 1.155784010887146,
+            "error_per_step": [
+              1.155784010887146
+            ],
+            "final_dist_to_target": 1.1618132591247559,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                81,
+                0,
+                319
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P6_P2": {
+          "acc_hard": 0.9975,
+          "acc_per_pos_hard": [
+            1.0,
+            1.0,
+            1.0,
+            0.9975,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 0.9975,
+          "closed_map": {
+            "error": 1.2028738260269165,
+            "error_per_step": [
+              1.1561086177825928,
+              1.2496392726898193
+            ],
+            "final_dist_to_target": 1.249758243560791,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                61,
+                0,
+                339,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                1,
+                0,
+                398
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P6_P4": {
+          "acc_hard": 0.9925,
+          "acc_per_pos_hard": [
+            0.995,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.9975
+          ],
+          "acc_soft": 0.9925,
+          "closed_map": {
+            "error": 1.2260887622833252,
+            "error_per_step": [
+              1.1572531461715698,
+              1.2949247360229492
+            ],
+            "final_dist_to_target": 1.2974467277526855,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                69,
+                0,
+                331,
+                0,
+                0
+              ],
+              [
+                7,
+                8,
+                34,
+                4,
+                347
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P6_P6": {
+          "acc_hard": 0.9975,
+          "acc_per_pos_hard": [
+            1.0,
+            1.0,
+            1.0,
+            0.9975,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 0.9975,
+          "closed_map": {
+            "error": 1.2184844017028809,
+            "error_per_step": [
+              1.157867193222046,
+              1.279101848602295
+            ],
+            "final_dist_to_target": 1.2825961112976074,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                76,
+                0,
+                324,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                68,
+                0,
+                329
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P6_P7": {
+          "acc_hard": 0.9975,
+          "acc_per_pos_hard": [
+            1.0,
+            0.9975,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 0.9975,
+          "closed_map": {
+            "error": 1.2057671546936035,
+            "error_per_step": [
+              1.1557708978652954,
+              1.255763292312622
+            ],
+            "final_dist_to_target": 1.2557960748672485,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                75,
+                0,
+                325,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                3,
+                0,
+                397
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P7": {
+          "acc_hard": 0.965,
+          "acc_per_pos_hard": [
+            0.9925,
+            0.995,
+            0.995,
+            0.995,
+            0.995,
+            0.9925
+          ],
+          "acc_soft": 0.965,
+          "closed_map": {
+            "error": 1.1577622890472412,
+            "error_per_step": [
+              1.1577622890472412
+            ],
+            "final_dist_to_target": 1.165349006652832,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                99,
+                0,
+                301
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P7_P1": {
+          "acc_hard": 0.9825,
+          "acc_per_pos_hard": [
+            0.9925,
+            0.9975,
+            1.0,
+            0.9975,
+            0.995,
+            1.0
+          ],
+          "acc_soft": 0.9825,
+          "closed_map": {
+            "error": 1.1996008157730103,
+            "error_per_step": [
+              1.1565719842910767,
+              1.242630124092102
+            ],
+            "final_dist_to_target": 1.242629885673523,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                77,
+                0,
+                323,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                400
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P7_P2": {
+          "acc_hard": 1.0,
+          "acc_per_pos_hard": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 1.0,
+          "closed_map": {
+            "error": 1.1970194578170776,
+            "error_per_step": [
+              1.1553711891174316,
+              1.2386679649353027
+            ],
+            "final_dist_to_target": 1.2386680841445923,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                82,
+                0,
+                318,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                400
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P7_P5": {
+          "acc_hard": 0.965,
+          "acc_per_pos_hard": [
+            0.995,
+            0.99,
+            0.9975,
+            0.9975,
+            1.0,
+            0.9825
+          ],
+          "acc_soft": 0.965,
+          "closed_map": {
+            "error": 1.215256690979004,
+            "error_per_step": [
+              1.158217430114746,
+              1.2722965478897095
+            ],
+            "final_dist_to_target": 1.273184061050415,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                82,
+                1,
+                317,
+                0,
+                0
+              ],
+              [
+                11,
+                2,
+                6,
+                1,
+                380
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P7_P7": {
+          "acc_hard": 0.995,
+          "acc_per_pos_hard": [
+            1.0,
+            0.995,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "acc_soft": 0.995,
+          "closed_map": {
+            "error": 1.2156741619110107,
+            "error_per_step": [
+              1.1559184789657593,
+              1.2754303216934204
+            ],
+            "final_dist_to_target": 1.2760019302368164,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                88,
+                0,
+                312,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                19,
+                0,
+                380
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P7_P8": {
+          "acc_hard": 0.9725,
+          "acc_per_pos_hard": [
+            0.99,
+            0.995,
+            1.0,
+            0.995,
+            0.9975,
+            0.995
+          ],
+          "acc_soft": 0.9725,
+          "closed_map": {
+            "error": 1.2345738410949707,
+            "error_per_step": [
+              1.1585638523101807,
+              1.310584545135498
+            ],
+            "final_dist_to_target": 1.3367581367492676,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                83,
+                0,
+                317,
+                0,
+                0
+              ],
+              [
+                139,
+                6,
+                107,
+                2,
+                146
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P8": {
+          "acc_hard": 0.0975,
+          "acc_per_pos_hard": [
+            0.5825,
+            0.57,
+            0.55,
+            0.54,
+            0.585,
+            0.565
+          ],
+          "acc_soft": 0.0975,
+          "closed_map": {
+            "error": 1.1250492334365845,
+            "error_per_step": [
+              1.1250492334365845
+            ],
+            "final_dist_to_target": 1.296319842338562,
+            "n_prefixes": 3,
+            "prefix_visit_hist": [
+              [
+                400,
+                0,
+                0
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P8_P1": {
+          "acc_hard": 0.0825,
+          "acc_per_pos_hard": [
+            0.5925,
+            0.6375,
+            0.61,
+            0.6075,
+            0.5875,
+            0.5825
+          ],
+          "acc_soft": 0.0825,
+          "closed_map": {
+            "error": 1.2061370611190796,
+            "error_per_step": [
+              1.1222807168960571,
+              1.2899928092956543
+            ],
+            "final_dist_to_target": 1.3216545581817627,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                400,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                242,
+                1,
+                16,
+                0,
+                141
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P8_P2": {
+          "acc_hard": 0.945,
+          "acc_per_pos_hard": [
+            0.995,
+            0.99,
+            0.9925,
+            0.99,
+            0.985,
+            0.9875
+          ],
+          "acc_soft": 0.945,
+          "closed_map": {
+            "error": 1.1852906942367554,
+            "error_per_step": [
+              1.1194617748260498,
+              1.2511193752288818
+            ],
+            "final_dist_to_target": 1.25908625125885,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                399,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                89,
+                1,
+                1,
+                1,
+                308
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P8_P4": {
+          "acc_hard": 0.135,
+          "acc_per_pos_hard": [
+            0.6075,
+            0.6425,
+            0.5975,
+            0.635,
+            0.6,
+            0.6325
+          ],
+          "acc_soft": 0.135,
+          "closed_map": {
+            "error": 1.2201933860778809,
+            "error_per_step": [
+              1.122327208518982,
+              1.3180595636367798
+            ],
+            "final_dist_to_target": 1.340985894203186,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                400,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                177,
+                5,
+                48,
+                0,
+                170
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P8_P6": {
+          "acc_hard": 0.9525,
+          "acc_per_pos_hard": [
+            0.995,
+            0.99,
+            0.9875,
+            0.99,
+            0.995,
+            0.9925
+          ],
+          "acc_soft": 0.9525,
+          "closed_map": {
+            "error": 1.2021080255508423,
+            "error_per_step": [
+              1.118406891822815,
+              1.2858097553253174
+            ],
+            "final_dist_to_target": 1.2933478355407715,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                399,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                57,
+                3,
+                44,
+                0,
+                296
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P8_P7": {
+          "acc_hard": 0.09,
+          "acc_per_pos_hard": [
+            0.6375,
+            0.5325,
+            0.5925,
+            0.605,
+            0.625,
+            0.615
+          ],
+          "acc_soft": 0.09,
+          "closed_map": {
+            "error": 1.2015759944915771,
+            "error_per_step": [
+              1.1223489046096802,
+              1.2808036804199219
+            ],
+            "final_dist_to_target": 1.3437637090682983,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                400,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                344,
+                3,
+                5,
+                4,
+                44
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        },
+        "P8_P8": {
+          "acc_hard": 0.02,
+          "acc_per_pos_hard": [
+            0.3875,
+            0.34,
+            0.36,
+            0.33,
+            0.365,
+            0.385
+          ],
+          "acc_soft": 0.02,
+          "closed_map": {
+            "error": 1.2260476350784302,
+            "error_per_step": [
+              1.1235393285751343,
+              1.3285555839538574
+            ],
+            "final_dist_to_target": 1.4330053329467773,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                400,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                252,
+                16,
+                71,
+                57,
+                4
+              ]
+            ]
+          },
+          "level": "train",
+          "n": 400
+        }
+      }
+    },
+    "unseen_L1": {
+      "mean_acc_hard": 0.41500000000000004,
+      "mean_acc_soft": 0.415625,
+      "mean_closed_map_error": 1.2150646299123764,
+      "mean_closed_map_final_dist_to_target": 1.2915467470884323,
+      "soft_hard_gap": 0.0006249999999999867,
+      "tasks": {
+        "P1_P2": {
+          "acc_hard": 0.835,
+          "acc_per_pos_hard": [
+            0.9975,
+            0.965,
+            0.9825,
+            0.95,
+            0.9875,
+            0.9475
+          ],
+          "acc_soft": 0.835,
+          "closed_map": {
+            "error": 1.193310022354126,
+            "error_per_step": [
+              1.147424578666687,
+              1.2391952276229858
+            ],
+            "final_dist_to_target": 1.2395639419555664,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                46,
+                0,
+                354,
+                0,
+                0
+              ],
+              [
+                5,
+                0,
+                2,
+                1,
+                392
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        },
+        "P2_P1": {
+          "acc_hard": 0.89,
+          "acc_per_pos_hard": [
+            0.97,
+            0.9825,
+            0.9875,
+            0.9575,
+            0.9975,
+            0.9925
+          ],
+          "acc_soft": 0.89,
+          "closed_map": {
+            "error": 1.197300672531128,
+            "error_per_step": [
+              1.152392029762268,
+              1.242209553718567
+            ],
+            "final_dist_to_target": 1.2425731420516968,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                25,
+                0,
+                375,
+                0,
+                0
+              ],
+              [
+                7,
+                0,
+                1,
+                0,
+                392
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        },
+        "P2_P5": {
+          "acc_hard": 0.0075,
+          "acc_per_pos_hard": [
+            0.995,
+            0.0725,
+            1.0,
+            0.1225,
+            0.9975,
+            0.0975
+          ],
+          "acc_soft": 0.0075,
+          "closed_map": {
+            "error": 1.2291516065597534,
+            "error_per_step": [
+              1.1532164812088013,
+              1.3050864934921265
+            ],
+            "final_dist_to_target": 1.3151724338531494,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                30,
+                0,
+                369,
+                0,
+                1
+              ],
+              [
+                70,
+                6,
+                61,
+                4,
+                259
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        },
+        "P4_P2": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.215,
+            0.2225,
+            0.175,
+            0.205,
+            0.2,
+            0.2075
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2044248580932617,
+            "error_per_step": [
+              1.1191127300262451,
+              1.2897371053695679
+            ],
+            "final_dist_to_target": 1.3374395370483398,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                398,
+                0,
+                2,
+                0,
+                0
+              ],
+              [
+                290,
+                6,
+                34,
+                13,
+                57
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        },
+        "P5_P2": {
+          "acc_hard": 0.5925,
+          "acc_per_pos_hard": [
+            0.8075,
+            0.9975,
+            0.8425,
+            0.9675,
+            0.8875,
+            0.9975
+          ],
+          "acc_soft": 0.5925,
+          "closed_map": {
+            "error": 1.2163413763046265,
+            "error_per_step": [
+              1.1603503227233887,
+              1.2723321914672852
+            ],
+            "final_dist_to_target": 1.2731589078903198,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                258,
+                2,
+                140,
+                0,
+                0
+              ],
+              [
+                16,
+                3,
+                1,
+                1,
+                379
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        },
+        "P6_P8": {
+          "acc_hard": 0.075,
+          "acc_per_pos_hard": [
+            0.8625,
+            0.4025,
+            0.8925,
+            0.4325,
+            0.8925,
+            0.3875
+          ],
+          "acc_soft": 0.08,
+          "closed_map": {
+            "error": 1.237982988357544,
+            "error_per_step": [
+              1.1568683385849,
+              1.3190982341766357
+            ],
+            "final_dist_to_target": 1.334652066230774,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                62,
+                0,
+                338,
+                0,
+                0
+              ],
+              [
+                39,
+                5,
+                132,
+                8,
+                216
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        },
+        "P7_P4": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.21,
+            0.21,
+            0.2125,
+            0.1675,
+            0.1875,
+            0.21
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.227795958518982,
+            "error_per_step": [
+              1.155701756477356,
+              1.2998900413513184
+            ],
+            "final_dist_to_target": 1.316840410232544,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                92,
+                0,
+                308,
+                0,
+                0
+              ],
+              [
+                94,
+                3,
+                90,
+                4,
+                209
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        },
+        "P7_P6": {
+          "acc_hard": 0.92,
+          "acc_per_pos_hard": [
+            0.9975,
+            0.9825,
+            0.98,
+            0.9875,
+            0.9925,
+            0.975
+          ],
+          "acc_soft": 0.92,
+          "closed_map": {
+            "error": 1.2142095565795898,
+            "error_per_step": [
+              1.157820701599121,
+              1.2705984115600586
+            ],
+            "final_dist_to_target": 1.2729735374450684,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                75,
+                0,
+                325,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                46,
+                2,
+                351
+              ]
+            ]
+          },
+          "level": "L1",
+          "n": 400
+        }
+      }
+    },
+    "unseen_L2": {
+      "mean_acc_hard": 0.23416666666666666,
+      "mean_acc_soft": 0.23416666666666666,
+      "mean_closed_map_error": 1.2193379799524944,
+      "mean_closed_map_final_dist_to_target": 1.313137670358022,
+      "soft_hard_gap": 0.0,
+      "tasks": {
+        "P1_P4": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.185,
+            0.1825,
+            0.1875,
+            0.23,
+            0.19,
+            0.2025
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2220455408096313,
+            "error_per_step": [
+              1.1452834606170654,
+              1.2988080978393555
+            ],
+            "final_dist_to_target": 1.3148281574249268,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                33,
+                0,
+                366,
+                1,
+                0
+              ],
+              [
+                70,
+                4,
+                105,
+                7,
+                214
+              ]
+            ]
+          },
+          "level": "L2",
+          "n": 400
+        },
+        "P4_P6": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.1875,
+            0.1875,
+            0.2075,
+            0.18,
+            0.2275,
+            0.18
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.217657446861267,
+            "error_per_step": [
+              1.1172268390655518,
+              1.318088412284851
+            ],
+            "final_dist_to_target": 1.369131326675415,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                400,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                211,
+                2,
+                82,
+                50,
+                55
+              ]
+            ]
+          },
+          "level": "L2",
+          "n": 400
+        },
+        "P5_P6": {
+          "acc_hard": 0.4625,
+          "acc_per_pos_hard": [
+            0.995,
+            0.735,
+            1.0,
+            0.7625,
+            0.9975,
+            0.7725
+          ],
+          "acc_soft": 0.4625,
+          "closed_map": {
+            "error": 1.225683331489563,
+            "error_per_step": [
+              1.16351318359375,
+              1.2878538370132446
+            ],
+            "final_dist_to_target": 1.289614200592041,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                267,
+                3,
+                130,
+                0,
+                0
+              ],
+              [
+                17,
+                0,
+                32,
+                1,
+                350
+              ]
+            ]
+          },
+          "level": "L2",
+          "n": 400
+        },
+        "P6_P1": {
+          "acc_hard": 0.8075,
+          "acc_per_pos_hard": [
+            0.935,
+            0.9825,
+            0.9425,
+            0.9725,
+            0.98,
+            0.9825
+          ],
+          "acc_soft": 0.8075,
+          "closed_map": {
+            "error": 1.20850670337677,
+            "error_per_step": [
+              1.160316824913025,
+              1.256696343421936
+            ],
+            "final_dist_to_target": 1.2567957639694214,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                72,
+                0,
+                328,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                2,
+                0,
+                397
+              ]
+            ]
+          },
+          "level": "L2",
+          "n": 400
+        },
+        "P6_P5": {
+          "acc_hard": 0.135,
+          "acc_per_pos_hard": [
+            0.97,
+            0.49,
+            0.98,
+            0.5875,
+            0.985,
+            0.505
+          ],
+          "acc_soft": 0.135,
+          "closed_map": {
+            "error": 1.2298130989074707,
+            "error_per_step": [
+              1.1561046838760376,
+              1.3035218715667725
+            ],
+            "final_dist_to_target": 1.308184027671814,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                61,
+                0,
+                337,
+                0,
+                2
+              ],
+              [
+                23,
+                2,
+                51,
+                2,
+                322
+              ]
+            ]
+          },
+          "level": "L2",
+          "n": 400
+        },
+        "P8_P5": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.1775,
+            0.2225,
+            0.2075,
+            0.21,
+            0.2425,
+            0.2275
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2123217582702637,
+            "error_per_step": [
+              1.1218020915985107,
+              1.302841305732727
+            ],
+            "final_dist_to_target": 1.3402725458145142,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                396,
+                0,
+                0,
+                0,
+                4
+              ],
+              [
+                130,
+                0,
+                205,
+                0,
+                65
+              ]
+            ]
+          },
+          "level": "L2",
+          "n": 400
+        }
+      }
+    },
+    "unseen_L3": {
+      "mean_acc_hard": 0.0030000000000000005,
+      "mean_acc_soft": 0.002833333333333334,
+      "mean_closed_map_error": 1.251138695081075,
+      "mean_closed_map_final_dist_to_target": 1.3974114497502645,
+      "soft_hard_gap": -0.00016666666666666653,
+      "tasks": {
+        "P1_P3": {
+          "acc_hard": 0.005,
+          "acc_per_pos_hard": [
+            0.46,
+            0.32,
+            0.41,
+            0.535,
+            0.3125,
+            0.4275
+          ],
+          "acc_soft": 0.005,
+          "closed_map": {
+            "error": 1.2148370742797852,
+            "error_per_step": [
+              1.1470328569412231,
+              1.2826409339904785
+            ],
+            "final_dist_to_target": 1.378393292427063,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                41,
+                0,
+                359,
+                0,
+                0
+              ],
+              [
+                94,
+                1,
+                299,
+                3,
+                3
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P2_P3": {
+          "acc_hard": 0.015,
+          "acc_per_pos_hard": [
+            0.465,
+            0.45,
+            0.51,
+            0.44,
+            0.505,
+            0.545
+          ],
+          "acc_soft": 0.015,
+          "closed_map": {
+            "error": 1.2445640563964844,
+            "error_per_step": [
+              1.1551405191421509,
+              1.3339874744415283
+            ],
+            "final_dist_to_target": 1.3775547742843628,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                26,
+                0,
+                374,
+                0,
+                0
+              ],
+              [
+                140,
+                7,
+                181,
+                5,
+                67
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P1": {
+          "acc_hard": 0.0025,
+          "acc_per_pos_hard": [
+            0.3275,
+            0.4125,
+            0.455,
+            0.29,
+            0.3,
+            0.4525
+          ],
+          "acc_soft": 0.0025,
+          "closed_map": {
+            "error": 1.2739942073822021,
+            "error_per_step": [
+              1.2251012325286865,
+              1.3228881359100342
+            ],
+            "final_dist_to_target": 1.3818124532699585,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                395,
+                0,
+                5,
+                0,
+                0
+              ],
+              [
+                290,
+                10,
+                40,
+                0,
+                60
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P2": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.1075,
+            0.115,
+            0.0875,
+            0.145,
+            0.1,
+            0.13
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2625081539154053,
+            "error_per_step": [
+              1.2213444709777832,
+              1.3036712408065796
+            ],
+            "final_dist_to_target": 1.4072726964950562,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                396,
+                0,
+                4,
+                0,
+                0
+              ],
+              [
+                297,
+                4,
+                82,
+                2,
+                15
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P3": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.11,
+            0.1125,
+            0.1225,
+            0.085,
+            0.105,
+            0.1175
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2816283702850342,
+            "error_per_step": [
+              1.2249157428741455,
+              1.338341474533081
+            ],
+            "final_dist_to_target": 1.444860577583313,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                393,
+                0,
+                7,
+                0,
+                0
+              ],
+              [
+                241,
+                3,
+                146,
+                6,
+                4
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P4": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.2075,
+            0.3075,
+            0.37,
+            0.34,
+            0.2475,
+            0.4375
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2677078247070312,
+            "error_per_step": [
+              1.2206320762634277,
+              1.314782977104187
+            ],
+            "final_dist_to_target": 1.3839999437332153,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                392,
+                0,
+                8,
+                0,
+                0
+              ],
+              [
+                311,
+                10,
+                37,
+                3,
+                39
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P5": {
+          "acc_hard": 0.0025,
+          "acc_per_pos_hard": [
+            0.315,
+            0.2125,
+            0.4675,
+            0.2075,
+            0.23,
+            0.1975
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2676429748535156,
+            "error_per_step": [
+              1.2189809083938599,
+              1.3163056373596191
+            ],
+            "final_dist_to_target": 1.3892940282821655,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                394,
+                0,
+                6,
+                0,
+                0
+              ],
+              [
+                296,
+                6,
+                74,
+                1,
+                23
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P6": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.05,
+            0.105,
+            0.085,
+            0.0875,
+            0.07,
+            0.0925
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.270992398262024,
+            "error_per_step": [
+              1.217704176902771,
+              1.324280858039856
+            ],
+            "final_dist_to_target": 1.4331068992614746,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                396,
+                0,
+                4,
+                0,
+                0
+              ],
+              [
+                317,
+                11,
+                57,
+                8,
+                7
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P7": {
+          "acc_hard": 0.0125,
+          "acc_per_pos_hard": [
+            0.255,
+            0.465,
+            0.5325,
+            0.3875,
+            0.33,
+            0.4325
+          ],
+          "acc_soft": 0.0125,
+          "closed_map": {
+            "error": 1.2679522037506104,
+            "error_per_step": [
+              1.2218043804168701,
+              1.3140995502471924
+            ],
+            "final_dist_to_target": 1.3651106357574463,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                398,
+                0,
+                2,
+                0,
+                0
+              ],
+              [
+                287,
+                5,
+                20,
+                5,
+                83
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P3_P8": {
+          "acc_hard": 0.0025,
+          "acc_per_pos_hard": [
+            0.1925,
+            0.2025,
+            0.2375,
+            0.17,
+            0.25,
+            0.3225
+          ],
+          "acc_soft": 0.0025,
+          "closed_map": {
+            "error": 1.2716130018234253,
+            "error_per_step": [
+              1.2261474132537842,
+              1.3170779943466187
+            ],
+            "final_dist_to_target": 1.395409345626831,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                397,
+                0,
+                3,
+                0,
+                0
+              ],
+              [
+                306,
+                15,
+                56,
+                4,
+                19
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P4_P3": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.205,
+            0.1975,
+            0.16,
+            0.15,
+            0.215,
+            0.215
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.2171798944473267,
+            "error_per_step": [
+              1.1179028749465942,
+              1.3164572715759277
+            ],
+            "final_dist_to_target": 1.4298423528671265,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                398,
+                0,
+                2,
+                0,
+                0
+              ],
+              [
+                355,
+                4,
+                35,
+                3,
+                3
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P5_P3": {
+          "acc_hard": 0.0025,
+          "acc_per_pos_hard": [
+            0.4,
+            0.31,
+            0.315,
+            0.48,
+            0.355,
+            0.5525
+          ],
+          "acc_soft": 0.0025,
+          "closed_map": {
+            "error": 1.2447646856307983,
+            "error_per_step": [
+              1.1605277061462402,
+              1.3290014266967773
+            ],
+            "final_dist_to_target": 1.3914657831192017,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                255,
+                0,
+                145,
+                0,
+                0
+              ],
+              [
+                219,
+                10,
+                143,
+                4,
+                24
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P6_P3": {
+          "acc_hard": 0.0025,
+          "acc_per_pos_hard": [
+            0.415,
+            0.3625,
+            0.285,
+            0.415,
+            0.32,
+            0.45
+          ],
+          "acc_soft": 0.0025,
+          "closed_map": {
+            "error": 1.2400966882705688,
+            "error_per_step": [
+              1.1574292182922363,
+              1.3227630853652954
+            ],
+            "final_dist_to_target": 1.378068208694458,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                83,
+                0,
+                317,
+                0,
+                0
+              ],
+              [
+                105,
+                6,
+                245,
+                6,
+                38
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P7_P3": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.4025,
+            0.3025,
+            0.3375,
+            0.4875,
+            0.3875,
+            0.3875
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.221460223197937,
+            "error_per_step": [
+              1.1584755182266235,
+              1.2844446897506714
+            ],
+            "final_dist_to_target": 1.374770164489746,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                78,
+                0,
+                322,
+                0,
+                0
+              ],
+              [
+                134,
+                0,
+                253,
+                0,
+                13
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        },
+        "P8_P3": {
+          "acc_hard": 0.0,
+          "acc_per_pos_hard": [
+            0.165,
+            0.205,
+            0.15,
+            0.1975,
+            0.2275,
+            0.3175
+          ],
+          "acc_soft": 0.0,
+          "closed_map": {
+            "error": 1.220138669013977,
+            "error_per_step": [
+              1.1207290887832642,
+              1.3195494413375854
+            ],
+            "final_dist_to_target": 1.4302105903625488,
+            "n_prefixes": 5,
+            "prefix_visit_hist": [
+              [
+                399,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                373,
+                0,
+                20,
+                3,
+                4
+              ]
+            ]
+          },
+          "level": "L3",
+          "n": 400
+        }
+      }
+    }
+  },
+  "step": 18000
+}

@@ -204,7 +204,7 @@ def analyze(run_dir: Path) -> dict:
     # E7 (H1-Experiment7.md): headline scalars from the read-only audit
     # (written by e7_audit after the first analyze pass; analyze re-runs
     # cheaply to fold them in).
-    if cfg.get("experiment") in ("e7", "e8"):
+    if cfg.get("experiment") in ("e7", "e8", "e9"):
         # E8 reuses E7's audit and metric definitions unchanged (same
         # e7_audit.json artifact, same e7_* keys) so ICR numbers compare
         # directly across the two experiments.
@@ -229,6 +229,12 @@ def analyze(run_dir: Path) -> dict:
                     "L3", {}).get("self_bottleneck_acc"),
                 "e7_raw_L3": bg.get("L3", {}).get("raw_acc"),
             })
+
+    # E9 (H1-Experiment9.md): program-crystallization provenance, the
+    # L2/L-infinity/effective-support trajectory, and pre-clip gradient
+    # concentration. Every number is re-derived from saved JSON/JSONL.
+    if cfg.get("experiment") == "e9":
+        metrics.update(_e9_metrics(run_dir, metrics))
 
     # E5 (H1-Experiment5.md): identical registered measurements (20k
     # like-for-like block, dax-crack check) under the e5_ prefix, plus the
@@ -347,6 +353,81 @@ def _producer_metrics(pt_dir: Path) -> dict:
             {"step": r["step"], "min": r["output_variance"]["min"]}
             for r in records],
     }
+
+
+def _e9_metrics(run_dir: Path, metrics: dict) -> dict:
+    receipt = read_json(run_dir / "crystallization.json")
+    records = [read_json(p) for p in sorted(
+        (run_dir / "concentration").glob("step*.json"))]
+    if not records:
+        return {}
+    final = records[-1]
+    energies = [r["state"]["energy_l2_sq_mean"] for r in records]
+    peaks = [r["state"]["peak_energy_fraction_mean"] for r in records]
+    supports = [r["state"]["effective_coordinates_mean"] for r in records]
+    updates = [r["token_update"] for r in records]
+    out = {
+        "e9_mode": receipt["mode"],
+        "e9_warm_started": receipt["warm_started"],
+        "e9_lambda_state": receipt["lambda_crystal_state"],
+        "e9_lambda_logits": receipt["lambda_crystal_logits"],
+        "e9_one_route_per_token": final["routing"]["one_route_per_token"],
+        "e9_state_energy_final": energies[-1],
+        "e9_state_energy_span_ratio": (
+            max(energies) / min(energies) if min(energies) > 0 else None),
+        "e9_state_peak_fraction_final": peaks[-1],
+        "e9_state_peak_fraction_change": peaks[-1] - peaks[0],
+        "e9_state_effective_coordinates_final": supports[-1],
+        "e9_state_effective_coordinates_change": supports[-1] - supports[0],
+        "e9_update_peak_fraction_final": updates[-1][
+            "peak_energy_fraction_mean"],
+        "e9_update_effective_coordinates_final": updates[-1][
+            "effective_coordinates_mean"],
+        "e9_effective_atoms_final": final["routing"][
+            "effective_atoms_excluding_pass"],
+        "e9_concentration_curve": records,
+    }
+    teacher = receipt.get("teacher_metrics")
+    if teacher:
+        out.update({
+            "e9_teacher_seen": teacher["acc_seen_hard"],
+            "e9_teacher_L1": teacher["acc_unseen_L1_hard"],
+            "e9_seen_retention": (metrics["acc_seen_hard"]
+                                  / teacher["acc_seen_hard"]),
+            "e9_L1_retention": (metrics["acc_unseen_L1_hard"]
+                                / teacher["acc_unseen_L1_hard"]
+                                if teacher["acc_unseen_L1_hard"] > 0
+                                else None),
+        })
+
+    step_records = []
+    with open(run_dir / "train_log.jsonl", encoding="utf-8") as f:
+        for line in f:
+            rec = json.loads(line)
+            if (rec.get("event") == "step"
+                    and "grad_atom_effective_support" in rec):
+                step_records.append(rec)
+    if step_records:
+        last = step_records[-1]
+        for key in (
+                "grad_global_norm_preclip", "grad_global_norm_postclip",
+                "grad_atom_peak_fraction_within_atoms",
+                "grad_atom_peak_fraction_global",
+                "grad_atom_effective_support", "grad_atom_peak_rms",
+                "loss_crystal_state", "loss_crystal_logits",
+                "loss_crystal_weighted", "crystal_force_scale",
+                "crystal_teacher_agreement"):
+            if key in last:
+                out[f"e9_{key}_final"] = last[key]
+        out["e9_gradient_concentration_curve"] = [
+            {k: rec[k] for k in (
+                "step", "grad_global_norm_preclip",
+                "grad_global_norm_postclip",
+                "grad_atom_peak_fraction_within_atoms",
+                "grad_atom_peak_fraction_global",
+                "grad_atom_effective_support", "grad_atom_peak_rms")}
+            for rec in step_records]
+    return out
 
 
 def _liveness_metrics(lv_dir: Path) -> dict:

@@ -129,6 +129,27 @@ E7_HEADLINE = (
 )
 
 
+# E9-only columns (H1-Experiment9.md): causal contraction result first, then
+# the bounded-global/local-concentration measurements. E9 also reuses the E7
+# one-step atom audit columns because the deployed interface is identical.
+E9_HEADLINE = (
+    "e9_warm_started", "e9_lambda_state", "e9_lambda_logits",
+    "e9_one_route_per_token", "e9_seen_retention", "e9_L1_retention",
+    "e9_state_energy_final", "e9_state_energy_span_ratio",
+    "e9_state_peak_fraction_final", "e9_state_peak_fraction_change",
+    "e9_state_effective_coordinates_final",
+    "e9_state_effective_coordinates_change",
+    "e9_update_peak_fraction_final",
+    "e9_update_effective_coordinates_final", "e9_effective_atoms_final",
+    "e9_grad_global_norm_preclip_final",
+    "e9_grad_global_norm_postclip_final",
+    "e9_grad_atom_peak_fraction_within_atoms_final",
+    "e9_grad_atom_peak_fraction_global_final",
+    "e9_grad_atom_effective_support_final",
+    "e9_crystal_teacher_agreement_final",
+)
+
+
 def headline_for(experiment: str) -> tuple:
     if experiment == "e1b":
         return HEADLINE + E1B_HEADLINE
@@ -147,6 +168,8 @@ def headline_for(experiment: str) -> tuple:
     if experiment == "e8":
         # E8 reuses E7's measurement columns (same audit, same keys).
         return HEADLINE + E1B_HEADLINE + E7_HEADLINE
+    if experiment == "e9":
+        return HEADLINE + E7_HEADLINE + E9_HEADLINE
     return HEADLINE
 
 
@@ -375,6 +398,24 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
     # arms' e4_*_20k checkpoint columns, never the 30k finals.
     references = ([] if lambda_zero is None
                   else [(ref_label, lambda_zero)])
+    if experiment == "e9" and not smoke:
+        try:
+            rr = [r for r in collect(R.E9_TEACHER_EXPERIMENT, smoke=False)
+                  if r["arm"] == R.E9_TEACHER_ARM]
+        except SystemExit:
+            rr = []
+        if rr:
+            entry = summarise(rr, headline_for(R.E9_TEACHER_EXPERIMENT))[
+                R.E9_TEACHER_ARM]
+            entry["source"] = {
+                "experiment": R.E9_TEACHER_EXPERIMENT,
+                "arm": R.E9_TEACHER_ARM,
+                "role": "fixed three-step crystallization teacher",
+            }
+            references.append((
+                f"{R.E9_TEACHER_ARM} (3-step teacher, from "
+                f"{R.E9_TEACHER_EXPERIMENT})", entry))
+            write_json(out / "references.json", dict(references))
     if experiment == "e4" and not smoke:
         for src_exp, arm_name, role in (
                 ("e1b", R.E4_BASE_ARM, "shared no-treatment base"),
@@ -483,6 +524,13 @@ def aggregate(experiment: str, smoke: bool = False) -> Path:
                   "record (results/e5/e5_a14_equivalence.json) documents any "
                   "environment difference between the A14 reference and the "
                   "E5 battery.", ""]
+    if experiment == "e9" and references:
+        lines += [
+            "A0-free is the completed three-step teacher, attached as a "
+            "labelled reference and never re-run. A25 never reads it; A26 "
+            "copies it and trains without auxiliary forcing; A27 copies it "
+            "and receives the registered boundary-state/logit force. The "
+            "teacher is not part of the deployed one-step model.", ""]
     with open(out / "summary.md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
     return out
@@ -493,7 +541,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Aggregate completed runs")
     ap.add_argument("--experiment", required=True,
                     choices=["e0", "e1", "e1b", "e2", "e3", "e4", "e5",
-                             "e7", "e8"])
+                             "e7", "e8", "e9"])
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     out = aggregate(a.experiment, smoke=a.smoke)

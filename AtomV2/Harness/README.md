@@ -5,6 +5,9 @@ and [../SplitMath.md](../SplitMath.md). Decisions the spec left open are
 registered in [REGISTERED.md](REGISTERED.md) and frozen in
 [atomv2/registered.py](atomv2/registered.py) (code is authoritative).
 
+The Navier-Stokes-inspired three-to-one program compression experiment is
+specified separately in [../H1-Experiment9.md](../H1-Experiment9.md).
+
 Design contract, inherited from V1's standing rules:
 
 1. **Training computes no headline metrics.** `train.py` writes raw artifacts;
@@ -64,6 +67,13 @@ python -m atomv2.run_e0
 python -m atomv2.run_e1
 #    -> runs/e1/..., results/e1/summary.md
 
+# E9 - one-load vortex crystallization (staged; requires completed A0-free)
+python -m atomv2.run_e9 --plan
+python -m atomv2.run_e9 --smoke --allow-dirty
+python -m atomv2.run_e9 --stage screen
+# If the screen names a winner:
+python -m atomv2.run_e9 --stage replicate --arms <winner>
+
 # Interrupted batches: re-run the same command. Complete runs are skipped;
 # a run that trained but died mid-panel resumes at the panel stage.
 ```
@@ -86,6 +96,8 @@ runs/<exp>/<arm>_s<seed>_<gitsha>/
   split_ref.json        frozen split path + sha256
   data_manifest.json    per-task content hashes of the generated data
   init_calibration.json registered rent-vs-task-loss magnitude at init
+  crystallization.json E9-only teacher SHA-256, copy receipt, source metrics
+  concentration/       E9-only L2/L-infinity/effective-support trajectories
   param_counts.json     encoder/decoder/composer/atoms/keys - composer and
                         library are separate line items, never summed
   train_log.jsonl       per-50-step losses (all terms), lr, tau, grad norm
@@ -129,6 +141,8 @@ atomv2/analyze.py      artifacts -> metrics.json
 atomv2/aggregate.py    runs -> tables, E0 pattern verdict + instrument audit
 atomv2/run_e0.py       E0 batch driver (circuit breaker)
 atomv2/run_e1.py       E1 batch driver (gated on the E0 verdict)
+atomv2/crystallization.py E9 teacher copy/loss + concentration instruments
+atomv2/run_e9.py       staged E9 scratch/warm/forced batch driver
 tests/                 54 tests incl. the SplitMath.md diff duty
 splits/split_v2.json   the frozen, derived, hash-pinned split
 ```

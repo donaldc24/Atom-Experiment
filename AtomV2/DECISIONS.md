@@ -349,3 +349,53 @@ boundaries (D1 addendum); reducing it to one load is a training-dynamics
 problem (distill/anneal 3->1), not an architecture-search problem.
 
 demo/ added, read-only inference tooling, no experimental surface.
+
+## E9 registration (2026-09-11): forced concentration, not theorem transfer
+The Navier-Stokes construction's most useful shape for Atom is bounded global
+L2 alongside a growing local L-infinity peak in shrinking support. Its smooth
+external force is load-bearing, so the honest neural experiment must include
+an explicit forcing treatment and unforced controls. E9 therefore implements
+the E8-licensed 3->1 distillation direction as A25 scratch, A26 teacher-copy
+without auxiliary loss, and A27 teacher-copy with a ramped token-boundary
+state/logit loss. Every deployed arm makes one route decision per token; the
+teacher is training-only and SHA-256 pinned. Full protocol, thresholds, and
+interpretation guard are in H1-Experiment9.md.
+
+## E9 smoke (2026-09-11): pipeline valid; no scientific verdict
+Seed-0, 300-step smoke completed end to end (training, panels, analysis,
+checksums, mechanical screen). A25/A26/A27 seen = 0.000/0.529/0.734 and L1 =
+0.000/0.094/0.401. Thus the controls separate and the forcing is active even
+at smoke scale; the mechanical smoke bin is FORCING HELPS BUT INCOMPLETE.
+This is explicitly not the registered seed-1/20k result. All three arms made
+exactly one route decision per token. State-energy span ratios were
+1.0000010/1.0000002/1.0000001 while final peak atom-gradient shares differed
+(0.956/0.327/0.193), demonstrating that the local/global instruments expose
+information hidden by the globally bounded norm. A27's receipt copied all
+2,499,786 student state-dict elements and pins teacher checkpoint SHA-256
+`3ee0c090087dcc28091a2069730dfad24bd54d662f04b57d13d623c6fd9f2f73`.
+
+## E9 close-out (2026-09-12): NO ONE-STEP RESCUE; stop
+The registered seed-1/20k screen completed for all three arms, and every
+run's SHA-256 manifest verifies. A25/A26/A27 final seen hard accuracy was
+0.4626/0.7654/0.7273 and L1 hard accuracy was 0.1378/0.4409/0.3566. All
+three mechanically made exactly one route decision per token. Against the
+paired A0-free teacher (seen 0.9724, L1 0.8191), no student met the joint
+0.90 seen and 80%-of-teacher-L1 deployment gate. A27 was not even an
+incomplete forcing rescue: relative to A26 it lost 3.82 seen points and
+8.44 L1 points, so the fixed 10-point material-help condition is false.
+The mechanical outcome is therefore NO_ONE_STEP_RESCUE, which stops E9
+without seed-0/2 replication.
+
+Predictions 1, 2, and 4 were supported; prediction 3 was refuted. The
+LayerNorm machinery control held tightly: state-energy span ratios were
+1.0000043/1.0000016/1.0000020, far inside the registered 1% band. At the
+same time, peak atom-gradient shares reached 0.9806/0.9993/0.9822 while
+post-clip global gradient norms never exceeded 1. This validates the
+instrumental premise that a bounded global statistic can hide a highly
+localized update. It does not validate the proposed application: local
+gradient concentration occurred in successful and unsuccessful phases,
+and A27's final teacher agreement of 0.9609 coexisted with only 0.7479 seen
+retention and 0.4353 L1 retention. Matching a fixed teacher's local
+boundary state/logits did not compress its three-transition token program
+into one routed call under this intervention. This remains an empirical
+result in the Atom world, not a theorem transfer from Navier-Stokes.

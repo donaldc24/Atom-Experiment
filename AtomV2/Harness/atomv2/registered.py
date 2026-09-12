@@ -541,6 +541,30 @@ E8_SCREEN_SEED = E7_SCREEN_SEED       # 1, same matched-reference rationale
 E8_HEALTH_SEEN_MIN = E7_HEALTH_SEEN_MIN
 E8_BUDGET_CONTROL_MAX = 0.20          # registered prediction bound for A22
 
+# ---------------------------------------------------------------------------
+# E9 (H1-Experiment9.md): vortex crystallization.  The completed A0-free
+# three-step token program is the fixed teacher.  Every result-bearing arm is
+# deployed with one routing decision per token; the arms separate learning
+# from scratch, an unforced warm-start collapse, and a smoothly ramped
+# teacher-forced collapse.  "Forcing" is deliberately named after the forced
+# Navier-Stokes construction: this is a controlled compression experiment,
+# not a claim that SGD spontaneously inherits a fluid theorem.
+# ---------------------------------------------------------------------------
+E9_PROTOCOL_REVISION = "e9-vortex-crystallization"
+E9_TEACHER_EXPERIMENT = "e0"
+E9_TEACHER_ARM = "A0-free"
+E9_ARMS = ("A25", "A26", "A27")
+E9_WARM_START = {"A25": False, "A26": True, "A27": True}
+E9_LAMBDA_STATE = {"A25": 0.0, "A26": 0.0, "A27": 1.0}
+E9_LAMBDA_LOGITS = {"A25": 0.0, "A26": 0.0, "A27": 0.25}
+E9_FORCE_RAMP_STEPS = 1_000
+E9_TOTAL_STEPS = TOTAL_STEPS
+E9_SCREEN_SEED = 1
+E9_TEACHER_SEEN_MIN = 0.90
+E9_STUDENT_SEEN_MIN = 0.90
+E9_L1_RETENTION_MIN = 0.80
+E9_TREATMENT_MARGIN = 0.10
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
@@ -552,4 +576,5 @@ EXPERIMENT_REVISIONS = {
     "e5": E5_PROTOCOL_REVISION,
     "e7": E7_PROTOCOL_REVISION,
     "e8": E8_PROTOCOL_REVISION,
+    "e9": E9_PROTOCOL_REVISION,
 }

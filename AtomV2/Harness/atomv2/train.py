@@ -15,6 +15,11 @@ exists only behind cfg.lambda_producer > 0 (arms A16-A17), quarantined the
 same way; its gradient reaches the emitting atom's MLP alone, THROUGH frozen
 continuation chains.
 
+E9 crystallization exists only behind experiment == 'e9'. A25 is a scratch
+one-step control, A26 copies a fixed teacher then trains on task loss alone,
+and A27 adds the registered frozen-teacher boundary/logit loss. Every E9 arm
+emits the same norm-concentration telemetry; it never changes an update.
+
 Per-run outputs (everything needed to reproduce results without retraining):
   config.json, env.json, split_ref.json, data_manifest.json,
   init_calibration.json, param_counts.json, train_log.jsonl,
@@ -76,6 +81,25 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
     steps_per_epoch = n_examples // cfg.batch_size
 
     model = AtomModel(cfg)
+
+    # E9 vortex crystallization. A25 never reads the teacher. A26/A27 copy its
+    # completed weights before the optimizer exists; only A27 keeps a frozen
+    # teacher for the auxiliary force. The receipt pins the external source
+    # checkpoint and every exceptional tensor-copy rule.
+    crystal_teacher = None
+    crystal_receipt = None
+    crystal_diag = None
+    if cfg.experiment == "e9":
+        from . import crystallization as crystal_mod
+        crystal_teacher, crystal_receipt = crystal_mod.prepare_student(
+            model, cfg)
+        crystal_diag = crystal_mod.diagnostic_batch(bundle, cfg)
+        (run_dir / "concentration").mkdir(exist_ok=True)
+        if crystal_teacher is not None:
+            crystal_receipt["teacher_concentration"] = crystal_mod.measure(
+                crystal_teacher, crystal_diag,
+                crystal_receipt["teacher_metrics"]["final_step"])
+
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr,
                                   betas=cfg.betas, weight_decay=cfg.weight_decay)
     gumbel_gen = torch.Generator().manual_seed(
@@ -129,6 +153,8 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
     write_json(run_dir / "split_ref.json", split_mod.split_ref())
     write_json(run_dir / "data_manifest.json", data_mod.data_manifest(bundle))
     write_json(run_dir / "param_counts.json", param_counts(model))
+    if crystal_receipt is not None:
+        write_json(run_dir / "crystallization.json", crystal_receipt)
     log = JsonlLogger(run_dir / "train_log.jsonl")
     log.log(event="start", run_dir=str(run_dir), arm=cfg.arm, seed=cfg.seed,
             n_train_presentations_per_epoch=n_examples,
@@ -194,6 +220,26 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
             "producer_weighted_init": cfg.lambda_producer * prod0,
             "producer_over_task_init": (cfg.lambda_producer * prod0 / task0
                                         if task0 > 0 else None)})
+    if crystal_teacher is not None:
+        with torch.no_grad():
+            teacher0 = crystal_teacher(xb, tb, nb, mode="hard")
+            crystal0 = crystal_mod.distillation_losses(
+                out0, teacher0, nb, cfg.micro_steps,
+                crystal_teacher.cfg.micro_steps)
+        state0 = float(crystal0["loss_crystal_state"])
+        logits0 = float(crystal0["loss_crystal_logits"])
+        raw_weighted = (cfg.lambda_crystal_state * state0
+                        + cfg.lambda_crystal_logits * logits0)
+        init_cal.update({
+            "loss_crystal_state_init": state0,
+            "loss_crystal_logits_init": logits0,
+            "lambda_crystal_state": cfg.lambda_crystal_state,
+            "lambda_crystal_logits": cfg.lambda_crystal_logits,
+            "crystal_force_ramp_steps": cfg.crystal_force_ramp_steps,
+            "crystal_raw_weighted_init": raw_weighted,
+            "crystal_raw_over_task_init": (
+                raw_weighted / task0 if task0 > 0 else None),
+        })
     write_json(run_dir / "init_calibration.json", init_cal)
     log.log(event="init_calibration", **init_cal)
 
@@ -257,6 +303,32 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                     model, out["states"][0].detach(), producer_state)
                 loss = loss + cfg.lambda_producer * p_terms["loss_producer"]
                 record.update({k: float(v) for k, v in p_terms.items()})
+            if crystal_teacher is not None:
+                # The teacher is deterministic, frozen, and seed-paired. Its
+                # state is sampled only at token boundaries (3 -> 1 support
+                # contraction); no teacher gradient or optimizer state exists.
+                with torch.no_grad():
+                    teacher_out = crystal_teacher(xb, tb, nb, mode="hard")
+                crystal_terms = crystal_mod.distillation_losses(
+                    out, teacher_out, nb, cfg.micro_steps,
+                    crystal_teacher.cfg.micro_steps)
+                force = crystal_mod.force_scale(cfg, step)
+                weighted = force * (
+                    cfg.lambda_crystal_state
+                    * crystal_terms["loss_crystal_state"]
+                    + cfg.lambda_crystal_logits
+                    * crystal_terms["loss_crystal_logits"])
+                loss = loss + weighted
+                record.update({
+                    "loss_crystal_state": float(
+                        crystal_terms["loss_crystal_state"].detach()),
+                    "loss_crystal_logits": float(
+                        crystal_terms["loss_crystal_logits"].detach()),
+                    "loss_crystal_weighted": float(weighted.detach()),
+                    "crystal_force_scale": force,
+                    "crystal_teacher_agreement": float(
+                        crystal_terms["crystal_teacher_agreement"]),
+                })
             if cfg.forced_routing:
                 oracle_terms = oracle.oracle_losses(
                     model, out, xb, tb, nb,
@@ -266,6 +338,13 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
+            next_step = step + 1
+            if (cfg.experiment == "e9"
+                    and (next_step == 1
+                         or next_step % cfg.log_every == 0
+                         or next_step == cfg.total_steps)):
+                record.update(crystal_mod.gradient_concentration(
+                    model, cfg.grad_clip))
             grad_norm = torch.nn.utils.clip_grad_norm_(
                 model.parameters(), cfg.grad_clip)
             optimizer.step()
@@ -348,6 +427,25 @@ def train_run(cfg: Config, out: str | None = None, allow_dirty: bool = False) ->
                             branch_read_mean=pt["branch_read"]["read_mean"],
                             branch_read_spread_mean=pt["branch_read"][
                                 "spread_mean"])
+                if crystal_diag is not None:
+                    ct = crystal_mod.measure(model, crystal_diag, step)
+                    write_json(run_dir / "concentration"
+                               / f"step{step:06d}.json", ct)
+                    log.log(
+                        event="concentration", step=step,
+                        state_energy=ct["state"]["energy_l2_sq_mean"],
+                        state_peak_fraction=ct["state"][
+                            "peak_energy_fraction_mean"],
+                        state_effective_coordinates=ct["state"][
+                            "effective_coordinates_mean"],
+                        update_peak_fraction=ct["token_update"][
+                            "peak_energy_fraction_mean"],
+                        update_effective_coordinates=ct["token_update"][
+                            "effective_coordinates_mean"],
+                        effective_atoms=ct["routing"][
+                            "effective_atoms_excluding_pass"],
+                        one_route_per_token=ct["routing"][
+                            "one_route_per_token"])
                 peak_rss = max(peak_rss, check_rss())
 
             if save_checkpoint:

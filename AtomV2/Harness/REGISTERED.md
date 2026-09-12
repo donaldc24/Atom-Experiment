@@ -268,6 +268,39 @@ Reporting requirement: every E1 result must be published alongside the E0
 context, stating that calibration failed its free-arm criterion and why that
 was judged not to impugn the instrument.
 
+## E9 registration - vortex crystallization (2026-09-11)
+
+Registered before any full E9 run. The motivating Navier-Stokes result is a
+**forced** construction with bounded L2 energy and unbounded L-infinity peak;
+it is not a theorem about learning. E9 preserves that distinction causally:
+
+- Fixed seed-paired teacher: completed `e0/A0-free` final, three routes per
+  token, hard seen accuracy at least 0.90, exact checkpoint SHA-256 recorded.
+- All students use one route per token and the A0-free world otherwise.
+- A25: scratch, task CE only.
+- A26: copy the teacher, task CE only (unforced warm-start control).
+- A27: same copy plus a 1,000-step linear ramp of
+  `1.0 * boundary_state_MSE + 0.25 * final_logit_KL`.
+- Copy rule: every same-shaped tensor is copied; the only allowed mismatch is
+  `composer.micro_emb.weight`, where student row 0 receives teacher row 0.
+- Fixed 20k budget. Screen seed 1; replicate the first sufficient mechanism at
+  seeds 0/2.
+- Deployment gate: seen hard >= 0.90, L1 hard >= 0.80 of the paired teacher,
+  and exactly one route decision per token.
+
+The full outcome order is frozen in `H1-Experiment9.md` and
+`atomv2.run_e9.screen_verdict`: ONE-STEP BASE LEARNS, WARM START SUFFICIENT,
+CONTROLLED CRYSTALLIZATION, FORCING HELPS BUT INCOMPLETE, NO ONE-STEP RESCUE.
+The first passing mechanism wins; no-rescue/incomplete outcomes stop.
+
+At every eval, task-balanced read-only telemetry records state/update L2
+energy, L-infinity peak, peak energy share, inverse-participation effective
+coordinate support, route participation, and the one-route invariant. At
+every training-log step, pre-clip gradients are partitioned by atom transform
+and report global norm, post-clip bound, peak atom share/RMS, and effective
+atom support. These concentration curves are descriptive in E9 and cannot be
+promoted to success gates after inspection.
+
 ## Errata found while building (doc bugs, not code bugs)
 
 - **SplitMath.md G6 table, row P2_P5**: says `train`, but the doc's own Split

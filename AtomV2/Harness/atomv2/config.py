@@ -48,6 +48,9 @@ E7_ARMS = R.E7_ARMS                  # ('A18','A19','A20','A21')
 # E8 (H1-Experiment8.md): capacity rescue on the A18 base; A18 is the
 # failed-screen reference, never re-run.
 E8_ARMS = R.E8_ARMS                  # ('A22','A23','A24')
+# E9 (H1-Experiment9.md): compress a competent three-step token program into
+# one route per token; A0-free is the completed fixed teacher.
+E9_ARMS = R.E9_ARMS                  # ('A25','A26','A27')
 
 
 @dataclass
@@ -135,6 +138,18 @@ class Config:
     # emitting atom's MLP slice ever receives producer gradient; chains and
     # decoder are frozen parameters with live activations.
     lambda_producer: float = 0.0
+
+    # E9 vortex crystallization.  The student always has micro_steps=1.
+    # A26/A27 copy a completed three-step teacher into every shape-compatible
+    # parameter (composer micro-step row 0 is the one explicit slice).  Only
+    # A27 retains the frozen teacher during training and receives the smoothly
+    # ramped boundary-state/logit forcing terms.
+    crystal_warm_start: bool = False
+    crystal_teacher_experiment: str = ""
+    crystal_teacher_arm: str = ""
+    lambda_crystal_state: float = 0.0
+    lambda_crystal_logits: float = 0.0
+    crystal_force_ramp_steps: int = 0
 
     # oracle machinery - ONLY config_for_arm('A0-oracle') may enable these.
     forced_routing: bool = False
@@ -252,6 +267,25 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
         if not smoke:
             cfg.total_steps = R.E8_TOTAL_STEPS[arm]
         return cfg
+    elif arm in E9_ARMS:
+        # E9's exact scratch world is A0-free with the route budget contracted
+        # from three decisions to one per token.  A26/A27 then add ONLY the
+        # registered warm start; A27 additionally adds the teacher force.
+        cfg = config_for_arm(R.E9_TEACHER_ARM, seed, smoke=smoke)
+        cfg.arm = arm
+        cfg.experiment = "e9"
+        cfg.protocol_revision = R.E9_PROTOCOL_REVISION
+        cfg.micro_steps = 1
+        cfg.crystal_warm_start = R.E9_WARM_START[arm]
+        cfg.crystal_teacher_experiment = R.E9_TEACHER_EXPERIMENT
+        cfg.crystal_teacher_arm = R.E9_TEACHER_ARM
+        cfg.lambda_crystal_state = R.E9_LAMBDA_STATE[arm]
+        cfg.lambda_crystal_logits = R.E9_LAMBDA_LOGITS[arm]
+        cfg.crystal_force_ramp_steps = (
+            min(50, cfg.total_steps) if smoke else R.E9_FORCE_RAMP_STEPS)
+        if not smoke:
+            cfg.total_steps = R.E9_TOTAL_STEPS
+        return cfg
     elif arm in E1B_ARMS or arm == E1B_ORACLE_ARM:
         cfg.experiment = "e1b"
         cfg.protocol_revision = R.E1B_PROTOCOL_REVISION
@@ -277,7 +311,8 @@ def config_for_arm(arm: str, seed: int, smoke: bool = False) -> Config:
                          f"{E1_ARMS}, E1b arms {E1B_ARMS + (E1B_ORACLE_ARM,)}, "
                          f"E2 arms {E2_ARMS}, E3 arms {E3_ARMS}, "
                          f"E4 arms {E4_ARMS}, E5 arms {E5_ARMS}, "
-                         f"E7 arms {E7_ARMS}, E8 arms {E8_ARMS}")
+                         f"E7 arms {E7_ARMS}, E8 arms {E8_ARMS}, "
+                         f"E9 arms {E9_ARMS}")
 
     if smoke:
         cfg.examples_per_train_task = 48
