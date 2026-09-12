@@ -399,3 +399,20 @@ retention and 0.4353 L1 retention. Matching a fixed teacher's local
 boundary state/logits did not compress its three-transition token program
 into one routed call under this intervention. This remains an empirical
 result in the Atom world, not a theorem transfer from Navier-Stokes.
+
+## E10 registration (2026-09-12): Reynolds transport, not forced compression
+E9 showed that local concentration can coexist with bounded global statistics
+without producing a useful one-step program. E10 therefore changes the update
+law rather than adding another concentration loss. It introduces a separate
+Reynolds Transport Network: centered signed pulse pairs have zero linear mean,
+their quadratic cross-covariance defines position transport, and log-Sinkhorn
+enforces a doubly stochastic (discrete incompressibility) contract. A fixed
+viscous arm adds periodic heat diffusion. Local-only and parameter-matched
+conventional transport controls separate reaction, transport, quadratic pulse
+factorization, and viscosity. Training uses only final task CE; evaluation adds
+untrained three-/four-token rollouts and a fixed hidden-noise panel. Full
+architecture, constants, gates, outcome order, and stop/replicate rule are
+frozen in H1-Experiment10.md before smoke.
+Pre-smoke invariant testing found that 12 Sinkhorn iterations missed the
+already-frozen `1e-5` conservation tolerance (`6.5e-5` worst column error).
+The iteration count was fixed at 32 before any smoke; the gate was not relaxed.

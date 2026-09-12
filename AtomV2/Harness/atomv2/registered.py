@@ -565,6 +565,50 @@ E9_STUDENT_SEEN_MIN = 0.90
 E9_L1_RETENTION_MIN = 0.80
 E9_TREATMENT_MARGIN = 0.10
 
+# ---------------------------------------------------------------------------
+# E10 (H1-Experiment10.md): Reynolds Transport Network. Unlike E9, this is a
+# new sequential token-operator model rather than an Atom compression arm.
+# Centered signed pulse pairs create a quadratic cross-covariance; log-Sinkhorn
+# projects it to a doubly stochastic transport map. A31 adds fixed periodic
+# heat diffusion. All constants are frozen before smoke.
+# ---------------------------------------------------------------------------
+E10_PROTOCOL_REVISION = "e10-reynolds-transport"
+E10_ARMS = ("A28", "A29", "A30", "A31")
+E10_TRANSPORT = {
+    "A28": "local", "A29": "direct", "A30": "reynolds", "A31": "reynolds"}
+E10_INCOMPRESSIBLE = {"A28": False, "A29": False,
+                      "A30": True, "A31": True}
+E10_VISCOSITY = {"A28": 0.0, "A29": 0.0, "A30": 0.0, "A31": 0.04}
+E10_WIDTH = 48
+E10_TOKEN_DIM = 24
+E10_POS_DIM = 12
+E10_FORCE_HIDDEN = 96
+E10_PULSE_RANK = 3
+E10_SINKHORN_ITERS = 32
+E10_TRANSPORT_TEMP = 0.5
+E10_IDENTITY_BIAS = 1.5
+E10_LR = 5e-4
+E10_BETAS = (0.9, 0.95)
+E10_WEIGHT_DECAY = 1e-4
+E10_WARMUP_STEPS = 300
+E10_BATCH_SIZE = 128
+E10_TOTAL_STEPS = 6_000
+E10_EVAL_EVERY = 1_000
+E10_LOG_EVERY = 100
+E10_GRAD_CLIP = 1.0
+E10_SCREEN_SEED = 1
+E10_REPLICATE_SEEDS = (0, 2)
+E10_EXTRAP_SELECTION_SEED = 20260912
+E10_EXTRAP_TASKS_PER_LENGTH = 64
+E10_EXTRAP_EXAMPLES_PER_TASK = 100
+E10_NOISE_SIGMA = 0.15
+E10_BASE_GATES = {"seen": 0.90, "L1": 0.75, "L2": 0.60,
+                  "L3": 0.60, "triple": 0.60, "quad": 0.50}
+E10_CONSERVATION_MAX = 1e-5
+E10_MATCHED_LONG_HORIZON_TOL = 0.03
+E10_VISCOSITY_NOISE_MARGIN = 0.05
+E10_VISCOSITY_CLEAN_TOL = 0.03
+
 # Which protocol revision each experiment's runs must carry to be pooled.
 EXPERIMENT_REVISIONS = {
     "e0": PROTOCOL_REVISION,
@@ -577,4 +621,5 @@ EXPERIMENT_REVISIONS = {
     "e7": E7_PROTOCOL_REVISION,
     "e8": E8_PROTOCOL_REVISION,
     "e9": E9_PROTOCOL_REVISION,
+    "e10": E10_PROTOCOL_REVISION,
 }

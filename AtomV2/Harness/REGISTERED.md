@@ -301,6 +301,22 @@ and report global norm, post-clip bound, peak atom share/RMS, and effective
 atom support. These concentration curves are descriptive in E9 and cannot be
 promoted to success gates after inspection.
 
+## E10 registration - Reynolds Transport Network (2026-09-12)
+
+Registered before smoke. E10 is a new sequential field model, not an Atom arm
+and not a Navier-Stokes discretization. A28 has pointwise token reaction only;
+A29 adds a conventional row-stochastic 6x6 transport; A30 replaces that matrix
+with a parameter-matched centered-pulse cross-covariance followed by a doubly
+stochastic Sinkhorn projection; A31 adds fixed periodic viscosity 0.04. The
+pointwise decoder cannot mix positions. All arms train for 6k steps on the
+frozen V2 singleton/pair data using final CE only. Fixed evaluation adds 64
+unseen triples, 64 unseen quads, and sigma-0.15 hidden-noise pairs. Primary
+gates, outcome order, and conditional replication are frozen in
+`H1-Experiment10.md`; `atomv2.registered` is the executable constant record.
+The pre-smoke invariant test fixed Sinkhorn normalization at 32 iterations
+after 12 failed the already-frozen `1e-5` column-conservation gate; no gate or
+result was inspected or changed.
+
 ## Errata found while building (doc bugs, not code bugs)
 
 - **SplitMath.md G6 table, row P2_P5**: says `train`, but the doc's own Split

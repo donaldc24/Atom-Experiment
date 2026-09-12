@@ -143,6 +143,9 @@ atomv2/run_e0.py       E0 batch driver (circuit breaker)
 atomv2/run_e1.py       E1 batch driver (gated on the E0 verdict)
 atomv2/crystallization.py E9 teacher copy/loss + concentration instruments
 atomv2/run_e9.py       staged E9 scratch/warm/forced batch driver
+atomv2/flow_model.py   E10 Reynolds Transport Network field update
+atomv2/e10.py          E10 data, training, extrapolation, and flow audits
+atomv2/run_e10.py      staged E10 screen/replication driver and verdict
 tests/                 54 tests incl. the SplitMath.md diff duty
 splits/split_v2.json   the frozen, derived, hash-pinned split
 ```

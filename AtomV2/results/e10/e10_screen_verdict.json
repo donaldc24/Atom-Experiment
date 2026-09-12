@@ -1,0 +1,123 @@
+{
+  "base": {
+    "A28": {
+      "checks": {
+        "L1": false,
+        "L2": false,
+        "L3": false,
+        "quad": false,
+        "seen": false,
+        "triple": false
+      },
+      "passes": false,
+      "values": {
+        "L1": 0.00125,
+        "L2": 0.0,
+        "L3": 0.0,
+        "quad": 0.0,
+        "seen": 0.14404761904761904,
+        "triple": 0.0
+      }
+    },
+    "A29": {
+      "checks": {
+        "L1": false,
+        "L2": false,
+        "L3": false,
+        "quad": false,
+        "seen": false,
+        "triple": false
+      },
+      "passes": false,
+      "values": {
+        "L1": 0.0709375,
+        "L2": 0.07541666666666667,
+        "L3": 0.0,
+        "quad": 0.0,
+        "seen": 0.3893452380952381,
+        "triple": 0.0
+      }
+    },
+    "A30": {
+      "checks": {
+        "L1": false,
+        "L2": false,
+        "L3": false,
+        "quad": false,
+        "seen": false,
+        "triple": false
+      },
+      "passes": false,
+      "values": {
+        "L1": 0.08124999999999999,
+        "L2": 0.0008333333333333334,
+        "L3": 0.0,
+        "quad": 0.0,
+        "seen": 0.4072023809523809,
+        "triple": 0.0
+      }
+    },
+    "A31": {
+      "checks": {
+        "L1": false,
+        "L2": false,
+        "L3": false,
+        "quad": false,
+        "seen": false,
+        "triple": false
+      },
+      "passes": false,
+      "values": {
+        "L1": 0.0834375,
+        "L2": 0.0004166666666666667,
+        "L3": 0.0,
+        "quad": 0.0,
+        "seen": 0.37267857142857136,
+        "triple": 0.0
+      }
+    }
+  },
+  "conservation": {
+    "A28": {
+      "passes": true,
+      "threshold": 1e-05,
+      "value": 0.0
+    },
+    "A29": {
+      "passes": false,
+      "threshold": 1e-05,
+      "value": 0.7967027425765991
+    },
+    "A30": {
+      "passes": false,
+      "threshold": 1e-05,
+      "value": 0.01235768012702465
+    },
+    "A31": {
+      "passes": false,
+      "threshold": 1e-05,
+      "value": 0.009685061872005463
+    }
+  },
+  "interpretation_guard": "A positive result concerns a discrete neural transport operator; it is not a Navier-Stokes solver or theorem transfer.",
+  "outcome": "NO_FLOW_SUCCESS",
+  "registered_winner": null,
+  "reynolds_contrast": {
+    "A29_long_horizon_mean": 0.0,
+    "A30_long_horizon_mean": 0.0,
+    "matched_clean_performance": true,
+    "passes": false,
+    "tolerance": 0.03
+  },
+  "viscosity_contrast": {
+    "A30_long_horizon_mean": 0.0,
+    "A30_noisy_pair": 0.14853174603174604,
+    "A31_long_horizon_mean": 0.0,
+    "A31_noisy_pair": 0.1596825396825397,
+    "clean_tolerance": 0.03,
+    "clean_tolerance_passes": true,
+    "noise_gain": 0.011150793650793661,
+    "passes": false,
+    "required_gain": 0.05
+  }
+}
