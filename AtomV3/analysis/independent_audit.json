@@ -1,0 +1,179 @@
+{
+  "label": "POST_RESULT_INDEPENDENT_IMPLEMENTATION_AUDIT",
+  "created_utc": "2026-09-13T02:33:39.006264+00:00",
+  "scope": "Finite-domain executable correctness and saved deployment evidence; no new training or preregistered claim.",
+  "audit_script_sha256": "b58d5754668605c3feac90313565efb638a8a0e11b0ad67b0387e71fe40cff4a",
+  "audited_artifact_sha256": {
+    "AtomV3/results/verified/runtime_evaluator_plan.json": "df034919064d1652d42132e078b7e2a57df4615856404719572ea13ac950cd58",
+    "AtomV3/results/verified/runtime_plan.json": "465eedff1d40e04f7a10fee6d64f3f8e85b451354a080b6d94e8dbb34043b40d",
+    "AtomV3/results/verified/runtime_output.json": "c1ea366f96fd153604c45d47e1e6736466e01aa0a75514525badfcebf349696c",
+    "AtomV3/results/verified/archive.json": "3ce516aed43c3760a41558f4d40dafdba503f0f73c23b95d549ad5229438b967"
+  },
+  "registration_sha256": "28386da3cb835dc97773c85b8b48439b697fa0952ab5cbe0cfd7dad99808a366",
+  "registered_source_files_checked": 52,
+  "registered_checkpoints_checked": 4,
+  "main_result_hashes_checked": 112,
+  "registered_source_hash_mismatches": [],
+  "registered_checkpoint_hash_mismatches": [],
+  "main_result_hash_mismatches": [],
+  "runtime_per_length": {
+    "2": {
+      "sequences": 64,
+      "examples": 2048,
+      "correct": 2048,
+      "mixed_origin_sequences": 45,
+      "unique_token_sequences": 64
+    },
+    "4": {
+      "sequences": 100,
+      "examples": 3200,
+      "correct": 3200,
+      "mixed_origin_sequences": 99,
+      "unique_token_sequences": 100
+    },
+    "8": {
+      "sequences": 100,
+      "examples": 3200,
+      "correct": 3200,
+      "mixed_origin_sequences": 100,
+      "unique_token_sequences": 100
+    },
+    "16": {
+      "sequences": 100,
+      "examples": 3200,
+      "correct": 3200,
+      "mixed_origin_sequences": 100,
+      "unique_token_sequences": 100
+    },
+    "64": {
+      "sequences": 100,
+      "examples": 3200,
+      "correct": 3200,
+      "mixed_origin_sequences": 100,
+      "unique_token_sequences": 100
+    },
+    "256": {
+      "sequences": 100,
+      "examples": 3200,
+      "correct": 3200,
+      "mixed_origin_sequences": 100,
+      "unique_token_sequences": 100
+    }
+  },
+  "runtime_counterexamples": [],
+  "runtime_operator_calls": 34928,
+  "used_origins": [
+    "a14_s0",
+    "a14_s1",
+    "a14_s2",
+    "a33_s1"
+  ],
+  "admitted_origin_entries": 24,
+  "distinct_token_binaries": 8,
+  "independent_full_domain_certification": {
+    "P1": {
+      "origins": [
+        "a14_s0",
+        "a14_s1",
+        "a14_s2"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "c0c71049b0744a4c9b4c870132c0dffe6e4e424e9041cc1c2d42724678e67cae"
+    },
+    "P2": {
+      "origins": [
+        "a14_s0",
+        "a14_s1",
+        "a33_s1"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "e1358c6638ae5c5bd97cf4b0b80bedf3dd219e9d2e9eb9136748f384b4cce789"
+    },
+    "P3": {
+      "origins": [
+        "a14_s0",
+        "a14_s1",
+        "a14_s2"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "7710c7be0ff3696859446b84297b033a1a6e6bdb36112a980e0f5fb0163fd7ec"
+    },
+    "P5": {
+      "origins": [
+        "a14_s0",
+        "a14_s1",
+        "a14_s2",
+        "a33_s1"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "bdc672af66592cd85b410c9c9e15ce516fcec2ac569a83a6e7124ca616e881a6"
+    },
+    "P6": {
+      "origins": [
+        "a14_s0",
+        "a14_s1",
+        "a33_s1"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "9ef88d286c6e9490c6cd39dea561687a497aff16d5dbc28ac3d7f10659162ce8"
+    },
+    "P7": {
+      "origins": [
+        "a14_s0",
+        "a14_s1",
+        "a33_s1"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "0fc17ac765b390ef62d829d886910aed598d1feb09768143e5f1c061dd1df4ef"
+    },
+    "P8": {
+      "origins": [
+        "a14_s0",
+        "a14_s1",
+        "a14_s2",
+        "a33_s1"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "c0ae8a7cc74594659ee8f552c5b925557da6d28b254705678bdafff0090d1e96"
+    },
+    "P4": {
+      "origins": [
+        "a33_s1"
+      ],
+      "inputs_checked": 1000000,
+      "mismatches": 0,
+      "binary_sha256": "f3243a9d3fcf8251809c7e41c473765608f6df34c5562948b97852d0936f9b3a"
+    }
+  },
+  "independent_initial_a33_closure": {
+    "size": 18,
+    "contains_reversal": false
+  },
+  "independent_final_closure": {
+    "size": 36,
+    "contains_reversal": true
+  },
+  "runtime_request_has_no_truth_or_token_metadata": true,
+  "resource_scope": {
+    "deduplicated_operator_payload_bytes": 528,
+    "all_origin_operator_payload_bytes": 1584,
+    "reported_runtime_peak_rss_bytes": 41181184,
+    "reported_peak_operator_payload_bytes": 66,
+    "caveats": [
+      "Operator payload is not total process memory or filesystem allocation.",
+      "Runtime and neural baseline used different workloads, so their times do not establish a speedup.",
+      "Application bytes read are not measurements of physical disk or PCIe traffic.",
+      "Exact composition follows from finite-domain correct operators and closure; depth256 validates execution, not new learned reasoning.",
+      "P4 is available only from A33; the A14 union alone covers seven tokens."
+    ]
+  },
+  "elapsed_seconds": 8.58494710001105,
+  "passed": true
+}

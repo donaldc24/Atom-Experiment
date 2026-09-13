@@ -1,0 +1,1639 @@
+{
+  "schema_version": 1,
+  "origin": "shuffled_s0",
+  "teacher": "shuffled",
+  "seed": 0,
+  "query_seed": 20260912,
+  "created_utc": "2026-09-13T02:26:59.079069+00:00",
+  "label": "FROZEN_PROTOCOL_BEHAVIORAL_HARVEST",
+  "counts": {
+    "tokens": 8,
+    "calibration_per_token": 2048,
+    "validation_per_token": 2048,
+    "teacher_queries": 32768
+  },
+  "query_data": {
+    "file": "queries.npz",
+    "sha256": "c351337b6409050c6f52a7690835c7bea860cc017bcd92fa4c69bfd38bea34b3",
+    "axis_order": "token, example, digit_position",
+    "token_order": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7",
+      "P8"
+    ],
+    "calibration_validation_disjoint_per_token": true,
+    "sampling": "uniform without replacement from 10^6 input lists; fixed 2048/2048 split"
+  },
+  "provenance": {
+    "kind": "explicit_generator_with_shuffled_calibration_labels_negative_control",
+    "ground_truth_used_for_control_only": true,
+    "oracle_source_sha256": "26ba18b17f81ed493ae5d41c3d4a873252ea87300126619a80e13cc44199653e",
+    "protocol_path": "AtomV3\\PROTOCOL.md",
+    "protocol_sha256": "66c98f8c9ed2d9791aaaa8ab6a06dfc4245eed91d0adab83e95e3bfb341a9796",
+    "harvest_source_sha256": "145771cf6dbf7e6a5ddee90a9a32dd515164f201864658eedf14b9197e260e5e",
+    "compiler_source_sha256": "3908b162f7068a36c71807f05b53d15f2041323f5775edd4e7bfd1e3daa85711",
+    "python": "3.11.5",
+    "numpy": "2.2.4"
+  },
+  "elapsed_seconds": 0.07679440001084004,
+  "peak_rss_bytes": 35532800,
+  "programs": {
+    "P1": {
+      "source": [
+        0,
+        4,
+        1,
+        2,
+        2,
+        3
+      ],
+      "table": [
+        [
+          2,
+          0,
+          7,
+          3,
+          1,
+          7,
+          4,
+          0,
+          1,
+          9
+        ],
+        [
+          1,
+          8,
+          6,
+          8,
+          8,
+          8,
+          5,
+          1,
+          7,
+          3
+        ],
+        [
+          6,
+          5,
+          4,
+          0,
+          0,
+          1,
+          1,
+          7,
+          0,
+          6
+        ],
+        [
+          9,
+          7,
+          4,
+          5,
+          3,
+          1,
+          2,
+          6,
+          9,
+          7
+        ],
+        [
+          7,
+          8,
+          8,
+          5,
+          4,
+          7,
+          4,
+          4,
+          2,
+          6
+        ],
+        [
+          4,
+          0,
+          6,
+          0,
+          1,
+          3,
+          7,
+          9,
+          5,
+          5
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.00048828125,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 0,
+          "source_fit_scores": [
+            0.14111328125,
+            0.13232421875,
+            0.140625,
+            0.134765625,
+            0.12890625,
+            0.138671875
+          ],
+          "winner_fit_score": 0.14111328125,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.00048828125
+        },
+        {
+          "output_position": 1,
+          "source": 4,
+          "source_fit_scores": [
+            0.1298828125,
+            0.13330078125,
+            0.138671875,
+            0.1376953125,
+            0.1396484375,
+            0.1328125
+          ],
+          "winner_fit_score": 0.1396484375,
+          "runnerup_fit_score": 0.138671875,
+          "source_margin": 0.0009765625
+        },
+        {
+          "output_position": 2,
+          "source": 1,
+          "source_fit_scores": [
+            0.1337890625,
+            0.14013671875,
+            0.13134765625,
+            0.1376953125,
+            0.12939453125,
+            0.12744140625
+          ],
+          "winner_fit_score": 0.14013671875,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.00244140625
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.13232421875,
+            0.13232421875,
+            0.1376953125,
+            0.13525390625,
+            0.13037109375,
+            0.13671875
+          ],
+          "winner_fit_score": 0.1376953125,
+          "runnerup_fit_score": 0.13671875,
+          "source_margin": 0.0009765625
+        },
+        {
+          "output_position": 4,
+          "source": 2,
+          "source_fit_scores": [
+            0.1357421875,
+            0.13818359375,
+            0.14306640625,
+            0.14208984375,
+            0.1396484375,
+            0.1298828125
+          ],
+          "winner_fit_score": 0.14306640625,
+          "runnerup_fit_score": 0.14208984375,
+          "source_margin": 0.0009765625
+        },
+        {
+          "output_position": 5,
+          "source": 3,
+          "source_fit_scores": [
+            0.12646484375,
+            0.12939453125,
+            0.13525390625,
+            0.138671875,
+            0.13818359375,
+            0.12646484375
+          ],
+          "winner_fit_score": 0.138671875,
+          "runnerup_fit_score": 0.13818359375,
+          "source_margin": 0.00048828125
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P1",
+      "token": "P1",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P1.bin",
+      "sha256": "41ac9ae32cdb044c435665673e6b4c0916e87567b888a5bcbdbdd4c5e6d51139",
+      "byte_count": 66
+    },
+    "P2": {
+      "source": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      "table": [
+        [
+          9,
+          6,
+          6,
+          1,
+          8,
+          9,
+          6,
+          0,
+          9,
+          2
+        ],
+        [
+          9,
+          6,
+          2,
+          7,
+          4,
+          7,
+          4,
+          1,
+          4,
+          6
+        ],
+        [
+          5,
+          9,
+          3,
+          4,
+          8,
+          7,
+          0,
+          1,
+          0,
+          7
+        ],
+        [
+          3,
+          4,
+          0,
+          2,
+          6,
+          7,
+          2,
+          3,
+          0,
+          4
+        ],
+        [
+          6,
+          1,
+          1,
+          9,
+          8,
+          7,
+          4,
+          9,
+          5,
+          2
+        ],
+        [
+          5,
+          0,
+          8,
+          7,
+          4,
+          7,
+          5,
+          8,
+          4,
+          1
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.0,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 0,
+          "source_fit_scores": [
+            0.134765625,
+            0.12841796875,
+            0.13330078125,
+            0.13427734375,
+            0.1337890625,
+            0.13037109375
+          ],
+          "winner_fit_score": 0.134765625,
+          "runnerup_fit_score": 0.13427734375,
+          "source_margin": 0.00048828125
+        },
+        {
+          "output_position": 1,
+          "source": 0,
+          "source_fit_scores": [
+            0.1376953125,
+            0.1376953125,
+            0.134765625,
+            0.13134765625,
+            0.13134765625,
+            0.1318359375
+          ],
+          "winner_fit_score": 0.1376953125,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.0
+        },
+        {
+          "output_position": 2,
+          "source": 0,
+          "source_fit_scores": [
+            0.140625,
+            0.12890625,
+            0.13623046875,
+            0.13525390625,
+            0.13330078125,
+            0.12890625
+          ],
+          "winner_fit_score": 0.140625,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.00439453125
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.130859375,
+            0.13427734375,
+            0.14453125,
+            0.13623046875,
+            0.1298828125,
+            0.13427734375
+          ],
+          "winner_fit_score": 0.14453125,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.00830078125
+        },
+        {
+          "output_position": 4,
+          "source": 0,
+          "source_fit_scores": [
+            0.14111328125,
+            0.13427734375,
+            0.1376953125,
+            0.13134765625,
+            0.13720703125,
+            0.1328125
+          ],
+          "winner_fit_score": 0.14111328125,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.00341796875
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            0.1357421875,
+            0.130859375,
+            0.13525390625,
+            0.13330078125,
+            0.13427734375,
+            0.13427734375
+          ],
+          "winner_fit_score": 0.1357421875,
+          "runnerup_fit_score": 0.13525390625,
+          "source_margin": 0.00048828125
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P2",
+      "token": "P2",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P2.bin",
+      "sha256": "e1fa43fd994026fc6ff9e9136dfe3d47511b2f8b30b23289e82f9e2557ef524e",
+      "byte_count": 66
+    },
+    "P3": {
+      "source": [
+        4,
+        2,
+        0,
+        2,
+        2,
+        1
+      ],
+      "table": [
+        [
+          9,
+          3,
+          5,
+          3,
+          5,
+          2,
+          4,
+          7,
+          5,
+          5
+        ],
+        [
+          2,
+          3,
+          5,
+          5,
+          1,
+          5,
+          7,
+          4,
+          8,
+          9
+        ],
+        [
+          4,
+          7,
+          4,
+          1,
+          4,
+          2,
+          0,
+          5,
+          9,
+          3
+        ],
+        [
+          9,
+          2,
+          9,
+          4,
+          0,
+          5,
+          3,
+          7,
+          3,
+          1
+        ],
+        [
+          5,
+          2,
+          9,
+          7,
+          3,
+          9,
+          5,
+          2,
+          0,
+          1
+        ],
+        [
+          0,
+          1,
+          3,
+          4,
+          8,
+          0,
+          7,
+          0,
+          4,
+          3
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.0,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 4,
+          "source_fit_scores": [
+            0.1328125,
+            0.138671875,
+            0.130859375,
+            0.13916015625,
+            0.14013671875,
+            0.13525390625
+          ],
+          "winner_fit_score": 0.14013671875,
+          "runnerup_fit_score": 0.13916015625,
+          "source_margin": 0.0009765625
+        },
+        {
+          "output_position": 1,
+          "source": 2,
+          "source_fit_scores": [
+            0.1357421875,
+            0.134765625,
+            0.138671875,
+            0.13623046875,
+            0.138671875,
+            0.12890625
+          ],
+          "winner_fit_score": 0.138671875,
+          "runnerup_fit_score": 0.138671875,
+          "source_margin": 0.0
+        },
+        {
+          "output_position": 2,
+          "source": 0,
+          "source_fit_scores": [
+            0.140625,
+            0.1318359375,
+            0.1337890625,
+            0.140625,
+            0.13916015625,
+            0.13232421875
+          ],
+          "winner_fit_score": 0.140625,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.0
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.1337890625,
+            0.13134765625,
+            0.14013671875,
+            0.1357421875,
+            0.1357421875,
+            0.13427734375
+          ],
+          "winner_fit_score": 0.14013671875,
+          "runnerup_fit_score": 0.1357421875,
+          "source_margin": 0.00439453125
+        },
+        {
+          "output_position": 4,
+          "source": 2,
+          "source_fit_scores": [
+            0.14013671875,
+            0.13330078125,
+            0.14599609375,
+            0.138671875,
+            0.13671875,
+            0.1396484375
+          ],
+          "winner_fit_score": 0.14599609375,
+          "runnerup_fit_score": 0.14013671875,
+          "source_margin": 0.005859375
+        },
+        {
+          "output_position": 5,
+          "source": 1,
+          "source_fit_scores": [
+            0.1337890625,
+            0.13720703125,
+            0.1318359375,
+            0.1328125,
+            0.13232421875,
+            0.13671875
+          ],
+          "winner_fit_score": 0.13720703125,
+          "runnerup_fit_score": 0.13671875,
+          "source_margin": 0.00048828125
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P3",
+      "token": "P3",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P3.bin",
+      "sha256": "b53c7f68064849b5763f6190f58dd7e6b523d31ef1e82437b9b0ab7c19c00f69",
+      "byte_count": 66
+    },
+    "P4": {
+      "source": [
+        3,
+        4,
+        0,
+        1,
+        3,
+        0
+      ],
+      "table": [
+        [
+          9,
+          6,
+          4,
+          9,
+          2,
+          1,
+          0,
+          3,
+          7,
+          2
+        ],
+        [
+          0,
+          5,
+          8,
+          2,
+          1,
+          4,
+          5,
+          6,
+          2,
+          2
+        ],
+        [
+          1,
+          4,
+          3,
+          9,
+          7,
+          3,
+          6,
+          0,
+          9,
+          5
+        ],
+        [
+          1,
+          5,
+          5,
+          1,
+          9,
+          9,
+          9,
+          4,
+          3,
+          0
+        ],
+        [
+          8,
+          3,
+          2,
+          7,
+          2,
+          5,
+          6,
+          1,
+          5,
+          7
+        ],
+        [
+          0,
+          4,
+          9,
+          3,
+          9,
+          8,
+          5,
+          8,
+          3,
+          5
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.0,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 3,
+          "source_fit_scores": [
+            0.13427734375,
+            0.12744140625,
+            0.134765625,
+            0.140625,
+            0.1376953125,
+            0.13671875
+          ],
+          "winner_fit_score": 0.140625,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.0029296875
+        },
+        {
+          "output_position": 1,
+          "source": 4,
+          "source_fit_scores": [
+            0.13232421875,
+            0.1328125,
+            0.138671875,
+            0.13330078125,
+            0.14208984375,
+            0.1328125
+          ],
+          "winner_fit_score": 0.14208984375,
+          "runnerup_fit_score": 0.138671875,
+          "source_margin": 0.00341796875
+        },
+        {
+          "output_position": 2,
+          "source": 0,
+          "source_fit_scores": [
+            0.13623046875,
+            0.13427734375,
+            0.13623046875,
+            0.1357421875,
+            0.13330078125,
+            0.13525390625
+          ],
+          "winner_fit_score": 0.13623046875,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.0
+        },
+        {
+          "output_position": 3,
+          "source": 1,
+          "source_fit_scores": [
+            0.13671875,
+            0.1396484375,
+            0.13818359375,
+            0.1298828125,
+            0.13232421875,
+            0.1328125
+          ],
+          "winner_fit_score": 0.1396484375,
+          "runnerup_fit_score": 0.13818359375,
+          "source_margin": 0.00146484375
+        },
+        {
+          "output_position": 4,
+          "source": 3,
+          "source_fit_scores": [
+            0.13232421875,
+            0.134765625,
+            0.1337890625,
+            0.13671875,
+            0.13037109375,
+            0.13525390625
+          ],
+          "winner_fit_score": 0.13671875,
+          "runnerup_fit_score": 0.13525390625,
+          "source_margin": 0.00146484375
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            0.1396484375,
+            0.134765625,
+            0.1376953125,
+            0.13232421875,
+            0.13671875,
+            0.13330078125
+          ],
+          "winner_fit_score": 0.1396484375,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.001953125
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P4",
+      "token": "P4",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P4.bin",
+      "sha256": "fd96d6218e41b034dcabcaa2dabf350b8552c53193217a9b8001fe2cc4a776cd",
+      "byte_count": 66
+    },
+    "P5": {
+      "source": [
+        3,
+        0,
+        1,
+        0,
+        1,
+        5
+      ],
+      "table": [
+        [
+          6,
+          1,
+          0,
+          3,
+          2,
+          0,
+          2,
+          9,
+          2,
+          8
+        ],
+        [
+          3,
+          5,
+          4,
+          1,
+          7,
+          5,
+          8,
+          9,
+          4,
+          1
+        ],
+        [
+          7,
+          1,
+          6,
+          5,
+          0,
+          9,
+          5,
+          8,
+          6,
+          9
+        ],
+        [
+          7,
+          3,
+          6,
+          0,
+          2,
+          2,
+          4,
+          7,
+          7,
+          0
+        ],
+        [
+          7,
+          3,
+          7,
+          7,
+          6,
+          2,
+          1,
+          2,
+          1,
+          3
+        ],
+        [
+          3,
+          0,
+          8,
+          7,
+          7,
+          4,
+          7,
+          3,
+          6,
+          8
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.0009765625,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 3,
+          "source_fit_scores": [
+            0.13525390625,
+            0.13525390625,
+            0.13134765625,
+            0.1376953125,
+            0.13525390625,
+            0.12939453125
+          ],
+          "winner_fit_score": 0.1376953125,
+          "runnerup_fit_score": 0.13525390625,
+          "source_margin": 0.00244140625
+        },
+        {
+          "output_position": 1,
+          "source": 0,
+          "source_fit_scores": [
+            0.1416015625,
+            0.1376953125,
+            0.13134765625,
+            0.1337890625,
+            0.13330078125,
+            0.13037109375
+          ],
+          "winner_fit_score": 0.1416015625,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.00390625
+        },
+        {
+          "output_position": 2,
+          "source": 1,
+          "source_fit_scores": [
+            0.13427734375,
+            0.14404296875,
+            0.1337890625,
+            0.13134765625,
+            0.12890625,
+            0.13916015625
+          ],
+          "winner_fit_score": 0.14404296875,
+          "runnerup_fit_score": 0.13916015625,
+          "source_margin": 0.0048828125
+        },
+        {
+          "output_position": 3,
+          "source": 0,
+          "source_fit_scores": [
+            0.13916015625,
+            0.13818359375,
+            0.13330078125,
+            0.1337890625,
+            0.1328125,
+            0.134765625
+          ],
+          "winner_fit_score": 0.13916015625,
+          "runnerup_fit_score": 0.13818359375,
+          "source_margin": 0.0009765625
+        },
+        {
+          "output_position": 4,
+          "source": 1,
+          "source_fit_scores": [
+            0.14013671875,
+            0.142578125,
+            0.13427734375,
+            0.13818359375,
+            0.138671875,
+            0.138671875
+          ],
+          "winner_fit_score": 0.142578125,
+          "runnerup_fit_score": 0.14013671875,
+          "source_margin": 0.00244140625
+        },
+        {
+          "output_position": 5,
+          "source": 5,
+          "source_fit_scores": [
+            0.134765625,
+            0.13671875,
+            0.1416015625,
+            0.1396484375,
+            0.13671875,
+            0.14306640625
+          ],
+          "winner_fit_score": 0.14306640625,
+          "runnerup_fit_score": 0.1416015625,
+          "source_margin": 0.00146484375
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P5",
+      "token": "P5",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P5.bin",
+      "sha256": "19065f1bb675fef873b8cab7a97258fccb7e44549ed390b93f0171f40663cad8",
+      "byte_count": 66
+    },
+    "P6": {
+      "source": [
+        5,
+        4,
+        1,
+        1,
+        5,
+        0
+      ],
+      "table": [
+        [
+          0,
+          7,
+          8,
+          1,
+          3,
+          2,
+          2,
+          7,
+          3,
+          0
+        ],
+        [
+          8,
+          9,
+          2,
+          0,
+          1,
+          1,
+          7,
+          2,
+          4,
+          2
+        ],
+        [
+          0,
+          5,
+          6,
+          1,
+          5,
+          1,
+          6,
+          1,
+          0,
+          5
+        ],
+        [
+          4,
+          5,
+          7,
+          6,
+          8,
+          8,
+          3,
+          5,
+          7,
+          0
+        ],
+        [
+          7,
+          4,
+          9,
+          5,
+          6,
+          8,
+          5,
+          8,
+          2,
+          8
+        ],
+        [
+          1,
+          6,
+          6,
+          1,
+          2,
+          9,
+          9,
+          5,
+          0,
+          1
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.00048828125,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 5,
+          "source_fit_scores": [
+            0.13134765625,
+            0.134765625,
+            0.13427734375,
+            0.13623046875,
+            0.13330078125,
+            0.13916015625
+          ],
+          "winner_fit_score": 0.13916015625,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.0029296875
+        },
+        {
+          "output_position": 1,
+          "source": 4,
+          "source_fit_scores": [
+            0.13134765625,
+            0.1337890625,
+            0.13330078125,
+            0.13427734375,
+            0.134765625,
+            0.1298828125
+          ],
+          "winner_fit_score": 0.134765625,
+          "runnerup_fit_score": 0.13427734375,
+          "source_margin": 0.00048828125
+        },
+        {
+          "output_position": 2,
+          "source": 1,
+          "source_fit_scores": [
+            0.134765625,
+            0.13671875,
+            0.134765625,
+            0.1357421875,
+            0.13427734375,
+            0.134765625
+          ],
+          "winner_fit_score": 0.13671875,
+          "runnerup_fit_score": 0.1357421875,
+          "source_margin": 0.0009765625
+        },
+        {
+          "output_position": 3,
+          "source": 1,
+          "source_fit_scores": [
+            0.13525390625,
+            0.1396484375,
+            0.13525390625,
+            0.13134765625,
+            0.1337890625,
+            0.13720703125
+          ],
+          "winner_fit_score": 0.1396484375,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.00244140625
+        },
+        {
+          "output_position": 4,
+          "source": 5,
+          "source_fit_scores": [
+            0.1357421875,
+            0.1298828125,
+            0.13720703125,
+            0.1279296875,
+            0.1328125,
+            0.138671875
+          ],
+          "winner_fit_score": 0.138671875,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.00146484375
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            0.142578125,
+            0.13720703125,
+            0.13525390625,
+            0.13134765625,
+            0.13330078125,
+            0.13037109375
+          ],
+          "winner_fit_score": 0.142578125,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.00537109375
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P6",
+      "token": "P6",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P6.bin",
+      "sha256": "19b9f0af883e120f705438c35789c9bb6ca132f078e964c6de347712518914f7",
+      "byte_count": 66
+    },
+    "P7": {
+      "source": [
+        3,
+        4,
+        4,
+        1,
+        0,
+        1
+      ],
+      "table": [
+        [
+          5,
+          2,
+          8,
+          1,
+          5,
+          1,
+          7,
+          0,
+          6,
+          9
+        ],
+        [
+          2,
+          9,
+          8,
+          8,
+          4,
+          8,
+          2,
+          2,
+          1,
+          1
+        ],
+        [
+          7,
+          7,
+          0,
+          9,
+          5,
+          3,
+          5,
+          7,
+          1,
+          0
+        ],
+        [
+          0,
+          8,
+          1,
+          0,
+          1,
+          3,
+          9,
+          1,
+          3,
+          3
+        ],
+        [
+          8,
+          6,
+          2,
+          0,
+          2,
+          6,
+          4,
+          9,
+          4,
+          6
+        ],
+        [
+          2,
+          9,
+          6,
+          0,
+          5,
+          9,
+          5,
+          4,
+          7,
+          4
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.00048828125,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 3,
+          "source_fit_scores": [
+            0.12646484375,
+            0.13330078125,
+            0.13720703125,
+            0.14306640625,
+            0.12841796875,
+            0.1298828125
+          ],
+          "winner_fit_score": 0.14306640625,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.005859375
+        },
+        {
+          "output_position": 1,
+          "source": 4,
+          "source_fit_scores": [
+            0.13671875,
+            0.138671875,
+            0.13134765625,
+            0.13720703125,
+            0.1396484375,
+            0.13671875
+          ],
+          "winner_fit_score": 0.1396484375,
+          "runnerup_fit_score": 0.138671875,
+          "source_margin": 0.0009765625
+        },
+        {
+          "output_position": 2,
+          "source": 4,
+          "source_fit_scores": [
+            0.13427734375,
+            0.1328125,
+            0.1328125,
+            0.126953125,
+            0.138671875,
+            0.1357421875
+          ],
+          "winner_fit_score": 0.138671875,
+          "runnerup_fit_score": 0.1357421875,
+          "source_margin": 0.0029296875
+        },
+        {
+          "output_position": 3,
+          "source": 1,
+          "source_fit_scores": [
+            0.13818359375,
+            0.146484375,
+            0.140625,
+            0.1396484375,
+            0.138671875,
+            0.1416015625
+          ],
+          "winner_fit_score": 0.146484375,
+          "runnerup_fit_score": 0.1416015625,
+          "source_margin": 0.0048828125
+        },
+        {
+          "output_position": 4,
+          "source": 0,
+          "source_fit_scores": [
+            0.140625,
+            0.134765625,
+            0.1337890625,
+            0.14013671875,
+            0.13427734375,
+            0.1337890625
+          ],
+          "winner_fit_score": 0.140625,
+          "runnerup_fit_score": 0.14013671875,
+          "source_margin": 0.00048828125
+        },
+        {
+          "output_position": 5,
+          "source": 1,
+          "source_fit_scores": [
+            0.13525390625,
+            0.13720703125,
+            0.1279296875,
+            0.13623046875,
+            0.13037109375,
+            0.1328125
+          ],
+          "winner_fit_score": 0.13720703125,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.0009765625
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P7",
+      "token": "P7",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P7.bin",
+      "sha256": "023255b5ead0e8c3ce81b5c9aed36ac087ceb1acb195b581e2753abbc0df667a",
+      "byte_count": 66
+    },
+    "P8": {
+      "source": [
+        2,
+        4,
+        4,
+        2,
+        0,
+        0
+      ],
+      "table": [
+        [
+          4,
+          6,
+          3,
+          7,
+          8,
+          6,
+          5,
+          6,
+          3,
+          1
+        ],
+        [
+          2,
+          7,
+          1,
+          6,
+          6,
+          9,
+          5,
+          1,
+          6,
+          4
+        ],
+        [
+          3,
+          9,
+          8,
+          0,
+          3,
+          5,
+          3,
+          4,
+          5,
+          3
+        ],
+        [
+          1,
+          4,
+          1,
+          3,
+          6,
+          3,
+          6,
+          3,
+          1,
+          8
+        ],
+        [
+          5,
+          3,
+          6,
+          6,
+          5,
+          2,
+          4,
+          2,
+          8,
+          0
+        ],
+        [
+          7,
+          2,
+          5,
+          6,
+          3,
+          8,
+          5,
+          5,
+          4,
+          2
+        ]
+      ],
+      "fit_agreement": 0.0,
+      "validation_agreement": 0.0,
+      "accepted_candidate": false,
+      "gates": {
+        "unique_sources": false,
+        "bijective_tables": false,
+        "validation_agreement": false,
+        "source_predictability_margin": false
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.00048828125,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 2,
+          "source_fit_scores": [
+            0.13623046875,
+            0.1357421875,
+            0.14453125,
+            0.134765625,
+            0.1328125,
+            0.14013671875
+          ],
+          "winner_fit_score": 0.14453125,
+          "runnerup_fit_score": 0.14013671875,
+          "source_margin": 0.00439453125
+        },
+        {
+          "output_position": 1,
+          "source": 4,
+          "source_fit_scores": [
+            0.13623046875,
+            0.1357421875,
+            0.13427734375,
+            0.1357421875,
+            0.1396484375,
+            0.1318359375
+          ],
+          "winner_fit_score": 0.1396484375,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.00341796875
+        },
+        {
+          "output_position": 2,
+          "source": 4,
+          "source_fit_scores": [
+            0.1416015625,
+            0.13525390625,
+            0.13427734375,
+            0.13720703125,
+            0.14404296875,
+            0.14208984375
+          ],
+          "winner_fit_score": 0.14404296875,
+          "runnerup_fit_score": 0.14208984375,
+          "source_margin": 0.001953125
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.138671875,
+            0.138671875,
+            0.13916015625,
+            0.13671875,
+            0.13525390625,
+            0.13037109375
+          ],
+          "winner_fit_score": 0.13916015625,
+          "runnerup_fit_score": 0.138671875,
+          "source_margin": 0.00048828125
+        },
+        {
+          "output_position": 4,
+          "source": 0,
+          "source_fit_scores": [
+            0.13623046875,
+            0.13525390625,
+            0.1357421875,
+            0.13134765625,
+            0.13427734375,
+            0.1298828125
+          ],
+          "winner_fit_score": 0.13623046875,
+          "runnerup_fit_score": 0.1357421875,
+          "source_margin": 0.00048828125
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            0.1455078125,
+            0.13134765625,
+            0.1357421875,
+            0.13232421875,
+            0.1328125,
+            0.130859375
+          ],
+          "winner_fit_score": 0.1455078125,
+          "runnerup_fit_score": 0.1357421875,
+          "source_margin": 0.009765625
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "shuffled_s0_P8",
+      "token": "P8",
+      "origin": "shuffled_s0",
+      "teacher": "shuffled",
+      "candidate_file": "candidates/P8.bin",
+      "sha256": "11b93bdf750eb3eec215422b00ce1a6c43396e895be077cc904fd490ee2963e3",
+      "byte_count": 66
+    }
+  }
+}

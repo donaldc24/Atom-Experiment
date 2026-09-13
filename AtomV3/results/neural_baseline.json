@@ -1,0 +1,53 @@
+{
+  "label": "FIXED_DESCRIPTIVE_BASELINE_NOT_COMPILER_TRAINING",
+  "checkpoint": "AtomV2/runs/e4/A14_s1_e4-stacked-pressures_d0955fd/checkpoints/final.pt",
+  "checkpoint_sha256": "054637fe37d082b3905fe2b1cfbe295904d40532ef51a7610408e4422f7a5871",
+  "checkpoint_step": 30000,
+  "model_parameters": 2499850,
+  "parameter_bytes": 9999400,
+  "groups": {
+    "L1": {
+      "boundary_decode_acc": 0.9915625,
+      "raw_acc": 0.43156249999999996,
+      "self_bottleneck_acc": 0.9862500000000001,
+      "boundary_rel_dist_to_canonical": 0.9776274561882019,
+      "n_tasks": 8,
+      "n_examples": 3200,
+      "raw_correct": 1381,
+      "repaired_correct": 3156
+    },
+    "L2": {
+      "boundary_decode_acc": 0.9920833333333334,
+      "raw_acc": 0.3941666666666667,
+      "self_bottleneck_acc": 0.9833333333333334,
+      "boundary_rel_dist_to_canonical": 0.9774972895781199,
+      "n_tasks": 6,
+      "n_examples": 2400,
+      "raw_correct": 946,
+      "repaired_correct": 2360
+    },
+    "L3": {
+      "boundary_decode_acc": 0.9968333333333333,
+      "raw_acc": 0.0003333333333333333,
+      "self_bottleneck_acc": 0.9931666666666666,
+      "boundary_rel_dist_to_canonical": 0.9931752403577169,
+      "n_tasks": 15,
+      "n_examples": 6000,
+      "raw_correct": 2,
+      "repaired_correct": 5959
+    },
+    "trained": {
+      "boundary_decode_acc": 0.9933823529411764,
+      "raw_acc": 0.9879411764705883,
+      "self_bottleneck_acc": 0.9869852941176472,
+      "boundary_rel_dist_to_canonical": 0.981551847037147,
+      "n_tasks": 34,
+      "n_examples": 13600,
+      "raw_correct": 13436,
+      "repaired_correct": 13423
+    }
+  },
+  "seconds": 8.509964500000933,
+  "torch": "2.9.0+cpu",
+  "limits": "Known-world pair panel; extra decoder/encoder computation in repaired arm; no neural training."
+}

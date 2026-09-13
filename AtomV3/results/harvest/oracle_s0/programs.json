@@ -1,0 +1,1639 @@
+{
+  "schema_version": 1,
+  "origin": "oracle_s0",
+  "teacher": "oracle",
+  "seed": 0,
+  "query_seed": 20260912,
+  "created_utc": "2026-09-13T02:26:58.724435+00:00",
+  "label": "FROZEN_PROTOCOL_BEHAVIORAL_HARVEST",
+  "counts": {
+    "tokens": 8,
+    "calibration_per_token": 2048,
+    "validation_per_token": 2048,
+    "teacher_queries": 32768
+  },
+  "query_data": {
+    "file": "queries.npz",
+    "sha256": "729c78d607198c57d6b8cab45eb418b020602b41260c2f5055eb2729ad3b9748",
+    "axis_order": "token, example, digit_position",
+    "token_order": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7",
+      "P8"
+    ],
+    "calibration_validation_disjoint_per_token": true,
+    "sampling": "uniform without replacement from 10^6 input lists; fixed 2048/2048 split"
+  },
+  "provenance": {
+    "kind": "explicit_generator_positive_control",
+    "ground_truth_used_for_control_only": true,
+    "oracle_source_sha256": "26ba18b17f81ed493ae5d41c3d4a873252ea87300126619a80e13cc44199653e",
+    "protocol_path": "AtomV3\\PROTOCOL.md",
+    "protocol_sha256": "66c98f8c9ed2d9791aaaa8ab6a06dfc4245eed91d0adab83e95e3bfb341a9796",
+    "harvest_source_sha256": "145771cf6dbf7e6a5ddee90a9a32dd515164f201864658eedf14b9197e260e5e",
+    "compiler_source_sha256": "3908b162f7068a36c71807f05b53d15f2041323f5775edd4e7bfd1e3daa85711",
+    "python": "3.11.5",
+    "numpy": "2.2.4"
+  },
+  "elapsed_seconds": 0.07399849999637809,
+  "peak_rss_bytes": 35557376,
+  "programs": {
+    "P1": {
+      "source": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "table": [
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.85986328125,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 5,
+          "source_fit_scores": [
+            0.13671875,
+            0.14013671875,
+            0.1376953125,
+            0.13232421875,
+            0.134765625,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14013671875,
+          "source_margin": 0.85986328125
+        },
+        {
+          "output_position": 1,
+          "source": 4,
+          "source_fit_scores": [
+            0.134765625,
+            0.13037109375,
+            0.1357421875,
+            0.1376953125,
+            1.0,
+            0.13525390625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.8623046875
+        },
+        {
+          "output_position": 2,
+          "source": 3,
+          "source_fit_scores": [
+            0.13720703125,
+            0.12890625,
+            0.13671875,
+            1.0,
+            0.13232421875,
+            0.13525390625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.86279296875
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.1357421875,
+            0.13671875,
+            1.0,
+            0.13720703125,
+            0.1328125,
+            0.13623046875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.86279296875
+        },
+        {
+          "output_position": 4,
+          "source": 1,
+          "source_fit_scores": [
+            0.13232421875,
+            1.0,
+            0.13525390625,
+            0.1328125,
+            0.130859375,
+            0.1396484375
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1396484375,
+          "source_margin": 0.8603515625
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.13330078125,
+            0.13720703125,
+            0.13720703125,
+            0.134765625,
+            0.13525390625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.86279296875
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P1",
+      "token": "P1",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P1.bin",
+      "sha256": "c0c71049b0744a4c9b4c870132c0dffe6e4e424e9041cc1c2d42724678e67cae",
+      "byte_count": 66
+    },
+    "P2": {
+      "source": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        0
+      ],
+      "table": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1
+        ],
+        [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2
+        ],
+        [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.85546875,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 1,
+          "source_fit_scores": [
+            0.1376953125,
+            1.0,
+            0.13525390625,
+            0.13671875,
+            0.1337890625,
+            0.1435546875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1435546875,
+          "source_margin": 0.8564453125
+        },
+        {
+          "output_position": 1,
+          "source": 2,
+          "source_fit_scores": [
+            0.130859375,
+            0.134765625,
+            1.0,
+            0.13720703125,
+            0.13134765625,
+            0.142578125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.142578125,
+          "source_margin": 0.857421875
+        },
+        {
+          "output_position": 2,
+          "source": 3,
+          "source_fit_scores": [
+            0.138671875,
+            0.13623046875,
+            0.1357421875,
+            1.0,
+            0.13427734375,
+            0.14453125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14453125,
+          "source_margin": 0.85546875
+        },
+        {
+          "output_position": 3,
+          "source": 4,
+          "source_fit_scores": [
+            0.1328125,
+            0.1337890625,
+            0.12841796875,
+            0.1337890625,
+            1.0,
+            0.13232421875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1337890625,
+          "source_margin": 0.8662109375
+        },
+        {
+          "output_position": 4,
+          "source": 5,
+          "source_fit_scores": [
+            0.13037109375,
+            0.140625,
+            0.13720703125,
+            0.13916015625,
+            0.1298828125,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.13818359375,
+            0.1337890625,
+            0.13623046875,
+            0.1328125,
+            0.1337890625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13818359375,
+          "source_margin": 0.86181640625
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P2",
+      "token": "P2",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P2.bin",
+      "sha256": "e1358c6638ae5c5bd97cf4b0b80bedf3dd219e9d2e9eb9136748f384b4cce789",
+      "byte_count": 66
+    },
+    "P3": {
+      "source": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "table": [
+        [
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.85302734375,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 5,
+          "source_fit_scores": [
+            0.1337890625,
+            0.13623046875,
+            0.13134765625,
+            0.134765625,
+            0.13525390625,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.86376953125
+        },
+        {
+          "output_position": 1,
+          "source": 4,
+          "source_fit_scores": [
+            0.14697265625,
+            0.14111328125,
+            0.1376953125,
+            0.1416015625,
+            1.0,
+            0.1298828125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14697265625,
+          "source_margin": 0.85302734375
+        },
+        {
+          "output_position": 2,
+          "source": 3,
+          "source_fit_scores": [
+            0.14306640625,
+            0.13427734375,
+            0.138671875,
+            1.0,
+            0.142578125,
+            0.13671875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14306640625,
+          "source_margin": 0.85693359375
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.13720703125,
+            0.13330078125,
+            1.0,
+            0.1357421875,
+            0.140625,
+            0.1298828125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        },
+        {
+          "output_position": 4,
+          "source": 1,
+          "source_fit_scores": [
+            0.1259765625,
+            1.0,
+            0.130859375,
+            0.13525390625,
+            0.140625,
+            0.138671875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.1240234375,
+            0.1337890625,
+            0.14208984375,
+            0.14453125,
+            0.1337890625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14453125,
+          "source_margin": 0.85546875
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P3",
+      "token": "P3",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P3.bin",
+      "sha256": "7710c7be0ff3696859446b84297b033a1a6e6bdb36112a980e0f5fb0163fd7ec",
+      "byte_count": 66
+    },
+    "P4": {
+      "source": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        0
+      ],
+      "table": [
+        [
+          0,
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7
+        ],
+        [
+          0,
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7
+        ],
+        [
+          0,
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7
+        ],
+        [
+          0,
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7
+        ],
+        [
+          0,
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7
+        ],
+        [
+          0,
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.85498046875,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 1,
+          "source_fit_scores": [
+            0.13525390625,
+            1.0,
+            0.1318359375,
+            0.13427734375,
+            0.134765625,
+            0.1328125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13525390625,
+          "source_margin": 0.86474609375
+        },
+        {
+          "output_position": 1,
+          "source": 2,
+          "source_fit_scores": [
+            0.14111328125,
+            0.13037109375,
+            1.0,
+            0.12939453125,
+            0.14013671875,
+            0.138671875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14111328125,
+          "source_margin": 0.85888671875
+        },
+        {
+          "output_position": 2,
+          "source": 3,
+          "source_fit_scores": [
+            0.13720703125,
+            0.13525390625,
+            0.1279296875,
+            1.0,
+            0.13330078125,
+            0.13330078125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.86279296875
+        },
+        {
+          "output_position": 3,
+          "source": 4,
+          "source_fit_scores": [
+            0.13623046875,
+            0.1357421875,
+            0.14111328125,
+            0.13330078125,
+            1.0,
+            0.14501953125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14501953125,
+          "source_margin": 0.85498046875
+        },
+        {
+          "output_position": 4,
+          "source": 5,
+          "source_fit_scores": [
+            0.130859375,
+            0.13330078125,
+            0.13330078125,
+            0.134765625,
+            0.1416015625,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1416015625,
+          "source_margin": 0.8583984375
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.1337890625,
+            0.13916015625,
+            0.1376953125,
+            0.13525390625,
+            0.13330078125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13916015625,
+          "source_margin": 0.86083984375
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P4",
+      "token": "P4",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P4.bin",
+      "sha256": "f3243a9d3fcf8251809c7e41c473765608f6df34c5562948b97852d0936f9b3a",
+      "byte_count": 66
+    },
+    "P5": {
+      "source": [
+        1,
+        0,
+        3,
+        2,
+        5,
+        4
+      ],
+      "table": [
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.859375,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 1,
+          "source_fit_scores": [
+            0.12939453125,
+            1.0,
+            0.140625,
+            0.12939453125,
+            0.13330078125,
+            0.13525390625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        },
+        {
+          "output_position": 1,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.1318359375,
+            0.1337890625,
+            0.134765625,
+            0.13134765625,
+            0.13427734375
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.134765625,
+          "source_margin": 0.865234375
+        },
+        {
+          "output_position": 2,
+          "source": 3,
+          "source_fit_scores": [
+            0.13330078125,
+            0.13671875,
+            0.13671875,
+            1.0,
+            0.13232421875,
+            0.12939453125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13671875,
+          "source_margin": 0.86328125
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.1328125,
+            0.1376953125,
+            1.0,
+            0.13671875,
+            0.12890625,
+            0.1376953125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.8623046875
+        },
+        {
+          "output_position": 4,
+          "source": 5,
+          "source_fit_scores": [
+            0.1376953125,
+            0.134765625,
+            0.13916015625,
+            0.1357421875,
+            0.1357421875,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13916015625,
+          "source_margin": 0.86083984375
+        },
+        {
+          "output_position": 5,
+          "source": 4,
+          "source_fit_scores": [
+            0.13916015625,
+            0.140625,
+            0.1298828125,
+            0.13525390625,
+            1.0,
+            0.1328125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P5",
+      "token": "P5",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P5.bin",
+      "sha256": "bdc672af66592cd85b410c9c9e15ce516fcec2ac569a83a6e7124ca616e881a6",
+      "byte_count": 66
+    },
+    "P6": {
+      "source": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "table": [
+        [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7,
+          0
+        ],
+        [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7,
+          0
+        ],
+        [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7,
+          0
+        ],
+        [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7,
+          0
+        ],
+        [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7,
+          0
+        ],
+        [
+          3,
+          6,
+          9,
+          2,
+          5,
+          8,
+          1,
+          4,
+          7,
+          0
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.859375,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.1318359375,
+            0.13525390625,
+            0.13623046875,
+            0.13720703125,
+            0.140625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        },
+        {
+          "output_position": 1,
+          "source": 1,
+          "source_fit_scores": [
+            0.1298828125,
+            1.0,
+            0.130859375,
+            0.13330078125,
+            0.12744140625,
+            0.13623046875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.86376953125
+        },
+        {
+          "output_position": 2,
+          "source": 2,
+          "source_fit_scores": [
+            0.13330078125,
+            0.13134765625,
+            1.0,
+            0.134765625,
+            0.13427734375,
+            0.13720703125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13720703125,
+          "source_margin": 0.86279296875
+        },
+        {
+          "output_position": 3,
+          "source": 3,
+          "source_fit_scores": [
+            0.1337890625,
+            0.13330078125,
+            0.1328125,
+            1.0,
+            0.13232421875,
+            0.134765625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.134765625,
+          "source_margin": 0.865234375
+        },
+        {
+          "output_position": 4,
+          "source": 4,
+          "source_fit_scores": [
+            0.13525390625,
+            0.12353515625,
+            0.1357421875,
+            0.13427734375,
+            1.0,
+            0.1328125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1357421875,
+          "source_margin": 0.8642578125
+        },
+        {
+          "output_position": 5,
+          "source": 5,
+          "source_fit_scores": [
+            0.13525390625,
+            0.1396484375,
+            0.1376953125,
+            0.13818359375,
+            0.134765625,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1396484375,
+          "source_margin": 0.8603515625
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P6",
+      "token": "P6",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P6.bin",
+      "sha256": "9ef88d286c6e9490c6cd39dea561687a497aff16d5dbc28ac3d7f10659162ce8",
+      "byte_count": 66
+    },
+    "P7": {
+      "source": [
+        1,
+        0,
+        3,
+        2,
+        5,
+        4
+      ],
+      "table": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0
+        ],
+        [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1
+        ],
+        [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2
+        ],
+        [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.85546875,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 1,
+          "source_fit_scores": [
+            0.134765625,
+            1.0,
+            0.13818359375,
+            0.13671875,
+            0.13623046875,
+            0.1357421875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13818359375,
+          "source_margin": 0.86181640625
+        },
+        {
+          "output_position": 1,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.1376953125,
+            0.13330078125,
+            0.1318359375,
+            0.13720703125,
+            0.13330078125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.8623046875
+        },
+        {
+          "output_position": 2,
+          "source": 3,
+          "source_fit_scores": [
+            0.134765625,
+            0.1416015625,
+            0.13134765625,
+            1.0,
+            0.13134765625,
+            0.13671875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1416015625,
+          "source_margin": 0.8583984375
+        },
+        {
+          "output_position": 3,
+          "source": 2,
+          "source_fit_scores": [
+            0.14453125,
+            0.14111328125,
+            1.0,
+            0.1376953125,
+            0.142578125,
+            0.14404296875
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.14453125,
+          "source_margin": 0.85546875
+        },
+        {
+          "output_position": 4,
+          "source": 5,
+          "source_fit_scores": [
+            0.13427734375,
+            0.140625,
+            0.140625,
+            0.1328125,
+            0.13671875,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        },
+        {
+          "output_position": 5,
+          "source": 4,
+          "source_fit_scores": [
+            0.13671875,
+            0.13623046875,
+            0.1376953125,
+            0.1318359375,
+            1.0,
+            0.1298828125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.8623046875
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P7",
+      "token": "P7",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P7.bin",
+      "sha256": "0fc17ac765b390ef62d829d886910aed598d1feb09768143e5f1c061dd1df4ef",
+      "byte_count": 66
+    },
+    "P8": {
+      "source": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        0
+      ],
+      "table": [
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ]
+      ],
+      "fit_agreement": 1.0,
+      "validation_agreement": 1.0,
+      "accepted_candidate": true,
+      "gates": {
+        "unique_sources": true,
+        "bijective_tables": true,
+        "validation_agreement": true,
+        "source_predictability_margin": true
+      },
+      "thresholds": {
+        "validation_agreement_min": 0.98,
+        "source_predictability_margin_min": 0.1
+      },
+      "min_source_margin": 0.859375,
+      "per_position": [
+        {
+          "output_position": 0,
+          "source": 1,
+          "source_fit_scores": [
+            0.13037109375,
+            1.0,
+            0.1376953125,
+            0.13525390625,
+            0.138671875,
+            0.13427734375
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.138671875,
+          "source_margin": 0.861328125
+        },
+        {
+          "output_position": 1,
+          "source": 2,
+          "source_fit_scores": [
+            0.13330078125,
+            0.140625,
+            1.0,
+            0.13232421875,
+            0.1318359375,
+            0.13330078125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.140625,
+          "source_margin": 0.859375
+        },
+        {
+          "output_position": 2,
+          "source": 3,
+          "source_fit_scores": [
+            0.13818359375,
+            0.13623046875,
+            0.13623046875,
+            1.0,
+            0.13916015625,
+            0.134765625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13916015625,
+          "source_margin": 0.86083984375
+        },
+        {
+          "output_position": 3,
+          "source": 4,
+          "source_fit_scores": [
+            0.13134765625,
+            0.1376953125,
+            0.12890625,
+            0.1376953125,
+            1.0,
+            0.134765625
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.1376953125,
+          "source_margin": 0.8623046875
+        },
+        {
+          "output_position": 4,
+          "source": 5,
+          "source_fit_scores": [
+            0.13427734375,
+            0.13427734375,
+            0.1298828125,
+            0.134765625,
+            0.13134765625,
+            1.0
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.134765625,
+          "source_margin": 0.865234375
+        },
+        {
+          "output_position": 5,
+          "source": 0,
+          "source_fit_scores": [
+            1.0,
+            0.1298828125,
+            0.1328125,
+            0.13623046875,
+            0.13037109375,
+            0.1328125
+          ],
+          "winner_fit_score": 1.0,
+          "runnerup_fit_score": 0.13623046875,
+          "source_margin": 0.86376953125
+        }
+      ],
+      "n_calibration": 2048,
+      "n_validation": 2048,
+      "skill_id": "oracle_s0_P8",
+      "token": "P8",
+      "origin": "oracle_s0",
+      "teacher": "oracle",
+      "candidate_file": "candidates/P8.bin",
+      "sha256": "c0ae8a7cc74594659ee8f552c5b925557da6d28b254705678bdafff0090d1e96",
+      "byte_count": 66
+    }
+  }
+}

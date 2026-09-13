@@ -1,0 +1,150 @@
+{
+  "outcome": "PORTABLE_SKILL_ACQUISITION_SUPPORTED_IN_ATOM_WORLD",
+  "checks": {
+    "a14_acquisition": true,
+    "union_eight": true,
+    "initial_reversal_absent": true,
+    "acquired_reversal_present": true,
+    "runtime_all_lengths_exact": true,
+    "runtime_payload_capacity": true,
+    "runtime_no_neural_weights": true,
+    "shuffled_rejected_by_compiler": true,
+    "coherent_wrong_proposed_then_rejected": true
+  },
+  "rig_checks": {
+    "exact_control_exports_all": true,
+    "controls_excluded": true,
+    "query_data": true
+  },
+  "controls": {
+    "oracle": {
+      "candidates": 8,
+      "compiler_accepted": 8,
+      "exhaustively_correct": 8,
+      "accepted_and_correct": 8,
+      "admitted_real_archive": 0
+    },
+    "shuffled": {
+      "candidates": 8,
+      "compiler_accepted": 0,
+      "exhaustively_correct": 0,
+      "accepted_and_correct": 0,
+      "admitted_real_archive": 0
+    },
+    "wrong": {
+      "candidates": 8,
+      "compiler_accepted": 8,
+      "exhaustively_correct": 0,
+      "accepted_and_correct": 0,
+      "admitted_real_archive": 0
+    }
+  },
+  "teacher_certified_counts": {
+    "a14_s0": 7,
+    "a14_s1": 7,
+    "a14_s2": 4,
+    "a33_s1": 6
+  },
+  "initial_permutation_closure_size": 18,
+  "final_permutation_closure_size": 36,
+  "archive_payload_bytes": 1584,
+  "archive_operator_count": 24,
+  "runtime": {
+    "per_length": {
+      "2": {
+        "correct": 2048,
+        "total": 2048,
+        "sequences": 64,
+        "mixed_origin_sequences": 45,
+        "accuracy": 1.0
+      },
+      "4": {
+        "correct": 3200,
+        "total": 3200,
+        "sequences": 100,
+        "mixed_origin_sequences": 99,
+        "accuracy": 1.0
+      },
+      "8": {
+        "correct": 3200,
+        "total": 3200,
+        "sequences": 100,
+        "mixed_origin_sequences": 100,
+        "accuracy": 1.0
+      },
+      "16": {
+        "correct": 3200,
+        "total": 3200,
+        "sequences": 100,
+        "mixed_origin_sequences": 100,
+        "accuracy": 1.0
+      },
+      "64": {
+        "correct": 3200,
+        "total": 3200,
+        "sequences": 100,
+        "mixed_origin_sequences": 100,
+        "accuracy": 1.0
+      },
+      "256": {
+        "correct": 3200,
+        "total": 3200,
+        "sequences": 100,
+        "mixed_origin_sequences": 100,
+        "accuracy": 1.0
+      }
+    },
+    "used_origins": [
+      "a14_s0",
+      "a14_s1",
+      "a14_s2",
+      "a33_s1"
+    ],
+    "all_lengths_exact": true,
+    "counterexamples": [],
+    "runtime": {
+      "python": "3.11.5",
+      "numpy": "2.2.4",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "torch_loaded": false,
+      "harness_loaded": false,
+      "neural_weight_bytes_loaded": 0,
+      "decoded_operator_dtype": "uint8",
+      "payload_views_share_one_bytes_buffer": true
+    },
+    "counters": {
+      "capacity": 1,
+      "loads": 34397,
+      "cache_hits": 531,
+      "evictions": 34396,
+      "calls": 34928,
+      "bytes_read": 2270202,
+      "peak_loaded_operator_payload_bytes": 66,
+      "current_loaded_operator_payload_bytes": 66
+    },
+    "elapsed_seconds": 12.80000810000638,
+    "memory_before": {
+      "rss_bytes": 36773888,
+      "peak_rss_bytes": 40636416,
+      "method": "Windows GetProcessMemoryInfo working set"
+    },
+    "memory_after": {
+      "rss_bytes": 41181184,
+      "peak_rss_bytes": 41181184,
+      "method": "Windows GetProcessMemoryInfo working set"
+    },
+    "memory_note": "Peak operator payload is explicit cached 66-byte binary data. Process RSS additionally includes Python, NumPy, plan metadata, input/output arrays, and allocator overhead; OS file cache is outside this counter.",
+    "subprocess_pid": 30980,
+    "plan_sha256": "465eedff1d40e04f7a10fee6d64f3f8e85b451354a080b6d94e8dbb34043b40d",
+    "output_sha256": "c1ea366f96fd153604c45d47e1e6736466e01aa0a75514525badfcebf349696c",
+    "evaluator_plan_sha256": "df034919064d1652d42132e078b7e2a57df4615856404719572ea13ac950cd58",
+    "subprocess_stderr": "",
+    "payload_capacity_gate": true,
+    "no_neural_weights_gate": true
+  },
+  "source_sha256": {
+    "verify_archive.py": "73c08158d8b2e04a095955a8c004e76ee8b82dd19235a8fd35a33770d20f740d",
+    "runtime.py": "2cc6e15d270749cebc90e633873c9514abda775eed3a060eeed0ce07f87192de"
+  },
+  "archive_metadata_bytes": 195439
+}

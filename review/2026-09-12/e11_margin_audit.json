@@ -1,0 +1,1159 @@
+{
+  "review_date": "2026-09-12",
+  "post_hoc": true,
+  "original_run_artifacts_modified": false,
+  "method": "Analytic independent-digit worst-case margin; float64 evaluation",
+  "scope": "All six-digit inputs for each token independently",
+  "limitations": "Not interval-verified or a formal floating-point proof. Arbitrary-length composition follows in exact arithmetic only for positive-bound tokens, unchanged weights, clean interfaces, and one-hot boundary projection. This post-hoc audit does not change the registered E11 failure verdict.",
+  "runtime": {
+    "python": "3.11.5",
+    "torch": "2.9.0+cpu",
+    "numpy": "2.2.4"
+  },
+  "source_sha256": {
+    "AtomV2/Harness/atomv2/exchange_model.py": "1a6f9251dc2e5d22d58d5484794d86484d88b0d83070d23e54562ba68e0658a1",
+    "AtomV2/Harness/atomv2/ops.py": "26ba18b17f81ed493ae5d41c3d4a873252ea87300126619a80e13cc44199653e",
+    "AtomV2/Harness/atomv2/registered.py": "542672c3225ed46ecf19e585fd799d6db6bb88d4f403ecb4a15fb50b5b61aeb4"
+  },
+  "runs": [
+    {
+      "arm": "A32",
+      "seed": 1,
+      "checkpoint_step": 4000,
+      "checkpoint_path": "AtomV2/runs/e11/A32_s1_e11-canonical-conservative-exchange_285dbb6-dirtyb1eefc9c/checkpoints/final.pt",
+      "checkpoint_sha256": "2ccbf4fe242729b25127fbb725e1b491faab3d69280b11dc28142f7fcbd4de7d",
+      "tokens_with_positive_numeric_bound": [
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8"
+      ],
+      "minimum_positive_token_margin": 0.999982016875335,
+      "tokens": {
+        "P1": {
+          "numeric_sufficient_bound_positive": false,
+          "worst_case_margin_float64": -0.13149761531164653,
+          "position_minima_float64": [
+            0.9999981840436851,
+            -0.1288349717211119,
+            0.9999981596818605,
+            0.9999981183188282,
+            -0.13149761531164653,
+            0.9999981799257989
+          ],
+          "transport_argmax": [
+            5,
+            1,
+            3,
+            2,
+            4,
+            0
+          ],
+          "truth_permutation": [
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              9,
+              1,
+              9,
+              9,
+              9,
+              9
+            ],
+            "output_position_zero_based": 4,
+            "target_digit": 2,
+            "competitor_digit": 0,
+            "truth": [
+              0,
+              0,
+              0,
+              0,
+              2,
+              0
+            ],
+            "prediction_float64": [
+              0,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            "prediction_original_float32": [
+              0,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            "float64_exact_match": false,
+            "original_float32_exact_match": false,
+            "observed_margin_float64": -0.1314976153116465,
+            "observed_margin_original_float32": -0.13149762153625488
+          }
+        },
+        "P2": {
+          "numeric_sufficient_bound_positive": false,
+          "worst_case_margin_float64": -0.17659008225581915,
+          "position_minima_float64": [
+            0.9999979564177267,
+            -0.17659008225581915,
+            0.9999983544456745,
+            0.9999984739627805,
+            0.9999985675849103,
+            -0.17072683813342673
+          ],
+          "transport_argmax": [
+            1,
+            0,
+            3,
+            4,
+            5,
+            2
+          ],
+          "truth_permutation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "output_position_zero_based": 1,
+            "target_digit": 2,
+            "competitor_digit": 8,
+            "truth": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "prediction_float64": [
+              1,
+              8,
+              3,
+              4,
+              5,
+              1
+            ],
+            "prediction_original_float32": [
+              1,
+              8,
+              3,
+              4,
+              5,
+              1
+            ],
+            "float64_exact_match": false,
+            "original_float32_exact_match": false,
+            "observed_margin_float64": -0.17659008225581913,
+            "observed_margin_original_float32": -0.17659007012844086
+          }
+        },
+        "P3": {
+          "numeric_sufficient_bound_positive": false,
+          "worst_case_margin_float64": -0.16812041483378035,
+          "position_minima_float64": [
+            0.9999977699284475,
+            -0.12610546096423128,
+            0.9999974473791318,
+            0.9999973986224184,
+            -0.16812041483378035,
+            0.9999979277136928
+          ],
+          "transport_argmax": [
+            5,
+            1,
+            3,
+            2,
+            4,
+            0
+          ],
+          "truth_permutation": [
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              8,
+              9,
+              8,
+              8,
+              8,
+              8
+            ],
+            "output_position_zero_based": 4,
+            "target_digit": 0,
+            "competitor_digit": 6,
+            "truth": [
+              3,
+              2,
+              1,
+              0,
+              0,
+              8
+            ],
+            "prediction_float64": [
+              3,
+              6,
+              1,
+              0,
+              6,
+              8
+            ],
+            "prediction_original_float32": [
+              3,
+              6,
+              1,
+              0,
+              6,
+              8
+            ],
+            "float64_exact_match": false,
+            "original_float32_exact_match": false,
+            "observed_margin_float64": -0.1681204148337804,
+            "observed_margin_original_float32": -0.16812041401863098
+          }
+        },
+        "P4": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.999982016875335,
+          "position_minima_float64": [
+            0.9999891603467407,
+            0.9999986963302548,
+            0.9999987546823922,
+            0.999982016875335,
+            0.999992055625617,
+            0.9999846652042513
+          ],
+          "transport_argmax": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "truth_permutation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              9,
+              9,
+              9,
+              9,
+              0,
+              9
+            ],
+            "output_position_zero_based": 3,
+            "target_digit": 0,
+            "competitor_digit": 7,
+            "truth": [
+              7,
+              7,
+              7,
+              0,
+              7,
+              7
+            ],
+            "prediction_float64": [
+              7,
+              7,
+              7,
+              0,
+              7,
+              7
+            ],
+            "prediction_original_float32": [
+              7,
+              7,
+              7,
+              0,
+              7,
+              7
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999820168753347,
+            "observed_margin_original_float32": 0.9999825954437256
+          }
+        },
+        "P5": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999976388904646,
+          "position_minima_float64": [
+            0.9999977870510034,
+            0.9999978260691091,
+            0.9999976402898133,
+            0.9999976388904646,
+            0.9999979475879871,
+            0.999997928708511
+          ],
+          "transport_argmax": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "truth_permutation": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "worst_case_witness": {
+            "input": [
+              6,
+              6,
+              4,
+              6,
+              6,
+              6
+            ],
+            "output_position_zero_based": 3,
+            "target_digit": 6,
+            "competitor_digit": 4,
+            "truth": [
+              4,
+              4,
+              4,
+              6,
+              4,
+              4
+            ],
+            "prediction_float64": [
+              4,
+              4,
+              4,
+              6,
+              4,
+              4
+            ],
+            "prediction_original_float32": [
+              4,
+              4,
+              4,
+              6,
+              4,
+              4
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999976388904646,
+            "observed_margin_original_float32": 0.9999975562095642
+          }
+        },
+        "P6": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999987792839186,
+          "position_minima_float64": [
+            0.9999987792839186,
+            0.999998904630135,
+            0.9999989223040715,
+            0.9999988849853952,
+            0.9999988996880443,
+            0.9999988873856032
+          ],
+          "transport_argmax": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "truth_permutation": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "worst_case_witness": {
+            "input": [
+              7,
+              8,
+              8,
+              8,
+              8,
+              8
+            ],
+            "output_position_zero_based": 0,
+            "target_digit": 4,
+            "competitor_digit": 7,
+            "truth": [
+              4,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            "prediction_float64": [
+              4,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            "prediction_original_float32": [
+              4,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999987792839182,
+            "observed_margin_original_float32": 0.9999988079071045
+          }
+        },
+        "P7": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999977184422179,
+          "position_minima_float64": [
+            0.9999979357288651,
+            0.9999977184422179,
+            0.9999986637413075,
+            0.9999985729258267,
+            0.999998595336093,
+            0.9999985626841453
+          ],
+          "transport_argmax": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "truth_permutation": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "worst_case_witness": {
+            "input": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "output_position_zero_based": 1,
+            "target_digit": 2,
+            "competitor_digit": 1,
+            "truth": [
+              0,
+              2,
+              2,
+              3,
+              4,
+              5
+            ],
+            "prediction_float64": [
+              0,
+              2,
+              2,
+              3,
+              4,
+              5
+            ],
+            "prediction_original_float32": [
+              0,
+              2,
+              2,
+              3,
+              4,
+              5
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999977184422182,
+            "observed_margin_original_float32": 0.9999978542327881
+          }
+        },
+        "P8": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999966155084076,
+          "position_minima_float64": [
+            0.9999987335545695,
+            0.9999966155084076,
+            0.999997954061945,
+            0.9999979757779864,
+            0.9999968081014752,
+            0.9999987897483803
+          ],
+          "transport_argmax": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "truth_permutation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              7,
+              7,
+              3,
+              7,
+              7,
+              7
+            ],
+            "output_position_zero_based": 1,
+            "target_digit": 7,
+            "competitor_digit": 3,
+            "truth": [
+              3,
+              7,
+              3,
+              3,
+              3,
+              3
+            ],
+            "prediction_float64": [
+              3,
+              7,
+              3,
+              3,
+              3,
+              3
+            ],
+            "prediction_original_float32": [
+              3,
+              7,
+              3,
+              3,
+              3,
+              3
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999966155084076,
+            "observed_margin_original_float32": 0.9999963641166687
+          }
+        }
+      }
+    },
+    {
+      "arm": "A33",
+      "seed": 1,
+      "checkpoint_step": 4000,
+      "checkpoint_path": "AtomV2/runs/e11/A33_s1_e11-canonical-conservative-exchange_285dbb6-dirtyb1eefc9c/checkpoints/final.pt",
+      "checkpoint_sha256": "0e34e8c9cdc90f230d9306e07f10f208497e064794e1dd7921581ad4a86cc446",
+      "tokens_with_positive_numeric_bound": [
+        "P2",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8"
+      ],
+      "minimum_positive_token_margin": 0.9999988264931844,
+      "tokens": {
+        "P1": {
+          "numeric_sufficient_bound_positive": false,
+          "worst_case_margin_float64": -0.13149411916038983,
+          "position_minima_float64": [
+            0.9999992325156665,
+            -0.1288347052226549,
+            0.9999993120337514,
+            0.9999992785770218,
+            -0.13149411916038983,
+            0.9999992365860355
+          ],
+          "transport_argmax": [
+            5,
+            1,
+            3,
+            2,
+            4,
+            0
+          ],
+          "truth_permutation": [
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              9,
+              1,
+              9,
+              9,
+              9,
+              9
+            ],
+            "output_position_zero_based": 4,
+            "target_digit": 2,
+            "competitor_digit": 0,
+            "truth": [
+              0,
+              0,
+              0,
+              0,
+              2,
+              0
+            ],
+            "prediction_float64": [
+              0,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            "prediction_original_float32": [
+              0,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            "float64_exact_match": false,
+            "original_float32_exact_match": false,
+            "observed_margin_float64": -0.13149411916038986,
+            "observed_margin_original_float32": -0.13149411976337433
+          }
+        },
+        "P2": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999988264931844,
+          "position_minima_float64": [
+            0.9999994481896956,
+            0.9999988264931844,
+            0.999999217036947,
+            0.9999992568893723,
+            0.9999993070599678,
+            0.9999991730975945
+          ],
+          "transport_argmax": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "truth_permutation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              8,
+              8,
+              9,
+              8,
+              8,
+              8
+            ],
+            "output_position_zero_based": 1,
+            "target_digit": 0,
+            "competitor_digit": 9,
+            "truth": [
+              8,
+              0,
+              0,
+              1,
+              2,
+              3
+            ],
+            "prediction_float64": [
+              8,
+              0,
+              0,
+              1,
+              2,
+              3
+            ],
+            "prediction_original_float32": [
+              8,
+              0,
+              0,
+              1,
+              2,
+              3
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999988264931845,
+            "observed_margin_original_float32": 0.9999993443489075
+          }
+        },
+        "P3": {
+          "numeric_sufficient_bound_positive": false,
+          "worst_case_margin_float64": -0.16811504617007486,
+          "position_minima_float64": [
+            0.9999992604229081,
+            -0.12610408986256355,
+            0.999999226352245,
+            0.9999991855276305,
+            -0.16811504617007486,
+            0.9999994033957064
+          ],
+          "transport_argmax": [
+            5,
+            1,
+            3,
+            2,
+            4,
+            0
+          ],
+          "truth_permutation": [
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              8,
+              9,
+              8,
+              8,
+              8,
+              8
+            ],
+            "output_position_zero_based": 4,
+            "target_digit": 0,
+            "competitor_digit": 6,
+            "truth": [
+              3,
+              2,
+              1,
+              0,
+              0,
+              8
+            ],
+            "prediction_float64": [
+              3,
+              6,
+              1,
+              0,
+              6,
+              8
+            ],
+            "prediction_original_float32": [
+              3,
+              6,
+              1,
+              0,
+              6,
+              8
+            ],
+            "float64_exact_match": false,
+            "original_float32_exact_match": false,
+            "observed_margin_float64": -0.16811504617007486,
+            "observed_margin_original_float32": -0.1681150496006012
+          }
+        },
+        "P4": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999988697774836,
+          "position_minima_float64": [
+            0.999999288050692,
+            0.9999992588330442,
+            0.9999988697774836,
+            0.9999993157019974,
+            0.9999993040536721,
+            0.9999992756959413
+          ],
+          "transport_argmax": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "truth_permutation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              8,
+              8,
+              8,
+              4,
+              8,
+              8
+            ],
+            "output_position_zero_based": 2,
+            "target_digit": 2,
+            "competitor_digit": 4,
+            "truth": [
+              4,
+              4,
+              2,
+              4,
+              4,
+              4
+            ],
+            "prediction_float64": [
+              4,
+              4,
+              2,
+              4,
+              4,
+              4
+            ],
+            "prediction_original_float32": [
+              4,
+              4,
+              2,
+              4,
+              4,
+              4
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999988697774839,
+            "observed_margin_original_float32": 0.9999995231628418
+          }
+        },
+        "P5": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999992341903193,
+          "position_minima_float64": [
+            0.9999992341903193,
+            0.9999992762169805,
+            0.9999992685783939,
+            0.9999992717996824,
+            0.9999992719080519,
+            0.9999992513742155
+          ],
+          "transport_argmax": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "truth_permutation": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "worst_case_witness": {
+            "input": [
+              7,
+              3,
+              7,
+              7,
+              7,
+              7
+            ],
+            "output_position_zero_based": 0,
+            "target_digit": 7,
+            "competitor_digit": 3,
+            "truth": [
+              7,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "prediction_float64": [
+              7,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "prediction_original_float32": [
+              7,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999992341903196,
+            "observed_margin_original_float32": 0.9999993443489075
+          }
+        },
+        "P6": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999992941268213,
+          "position_minima_float64": [
+            0.9999992941268213,
+            0.9999994269195907,
+            0.9999994423360995,
+            0.9999993947718824,
+            0.9999994151090136,
+            0.9999994037978717
+          ],
+          "transport_argmax": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "truth_permutation": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "worst_case_witness": {
+            "input": [
+              7,
+              8,
+              8,
+              8,
+              8,
+              8
+            ],
+            "output_position_zero_based": 0,
+            "target_digit": 4,
+            "competitor_digit": 7,
+            "truth": [
+              4,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            "prediction_float64": [
+              4,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            "prediction_original_float32": [
+              4,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999992941268211,
+            "observed_margin_original_float32": 0.9999992847442627
+          }
+        },
+        "P7": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999992157982514,
+          "position_minima_float64": [
+            0.9999994141829308,
+            0.9999992157982514,
+            0.9999993217673312,
+            0.9999992247030921,
+            0.9999993167201494,
+            0.9999992669718469
+          ],
+          "transport_argmax": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "truth_permutation": [
+            1,
+            0,
+            3,
+            2,
+            5,
+            4
+          ],
+          "worst_case_witness": {
+            "input": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "output_position_zero_based": 1,
+            "target_digit": 2,
+            "competitor_digit": 1,
+            "truth": [
+              0,
+              2,
+              2,
+              3,
+              4,
+              5
+            ],
+            "prediction_float64": [
+              0,
+              2,
+              2,
+              3,
+              4,
+              5
+            ],
+            "prediction_original_float32": [
+              0,
+              2,
+              2,
+              3,
+              4,
+              5
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999992157982512,
+            "observed_margin_original_float32": 0.9999994039535522
+          }
+        },
+        "P8": {
+          "numeric_sufficient_bound_positive": true,
+          "worst_case_margin_float64": 0.9999988900975617,
+          "position_minima_float64": [
+            0.9999993009425437,
+            0.9999988900975617,
+            0.9999993102221474,
+            0.9999992884882899,
+            0.9999993058472316,
+            0.9999993208553573
+          ],
+          "transport_argmax": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "truth_permutation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            0
+          ],
+          "worst_case_witness": {
+            "input": [
+              7,
+              7,
+              3,
+              7,
+              7,
+              7
+            ],
+            "output_position_zero_based": 1,
+            "target_digit": 7,
+            "competitor_digit": 3,
+            "truth": [
+              3,
+              7,
+              3,
+              3,
+              3,
+              3
+            ],
+            "prediction_float64": [
+              3,
+              7,
+              3,
+              3,
+              3,
+              3
+            ],
+            "prediction_original_float32": [
+              3,
+              7,
+              3,
+              3,
+              3,
+              3
+            ],
+            "float64_exact_match": true,
+            "original_float32_exact_match": true,
+            "observed_margin_float64": 0.9999988900975614,
+            "observed_margin_original_float32": 0.9999994039535522
+          }
+        }
+      }
+    }
+  ]
+}

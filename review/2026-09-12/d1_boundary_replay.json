@@ -1,0 +1,204 @@
+{
+  "label": "POST_HOC_INDEPENDENT_REPLAY",
+  "scope": "A14 seed 1 final checkpoint, existing frozen evaluation split",
+  "mechanism": "Execute token 1, decode its boundary state with the frozen model's own decoder, re-encode those predicted digits, then execute token 2. Ground-truth intermediate digits are used only to score the boundary decode and canonical-distance diagnostic, never as the repaired input.",
+  "limitations": [
+    "One independently replayed checkpoint on the original task world and split.",
+    "This replay is post-hoc, not a new preregistered experiment.",
+    "The repair adds encoder/decoder computation and a known digit interface.",
+    "Exact-list accuracy; trained group contains held-out inputs of trained pairs only."
+  ],
+  "run_dir": "AtomV2/runs/e4/A14_s1_e4-stacked-pressures_d0955fd",
+  "checkpoint": "AtomV2/runs/e4/A14_s1_e4-stacked-pressures_d0955fd/checkpoints/final.pt",
+  "checkpoint_sha256": "054637fe37d082b3905fe2b1cfbe295904d40532ef51a7610408e4422f7a5871",
+  "checkpoint_step": 30000,
+  "seed": 1,
+  "environment": {
+    "python": "3.11.5",
+    "torch": "2.9.0+cpu",
+    "numpy": "2.2.4",
+    "device": "cpu",
+    "torch_threads": 4
+  },
+  "source_sha256": {
+    "review/2026-09-12/d1_boundary_replay.py": "90e20630d6665d55b5dd71b9c81832c06d58d882e995b0694d34bee83aaf5c91",
+    "AtomV2/Harness/atomv2/e7_audit.py": "c48a06652a63cb647b9e56eb502216f429d435342c4088c326de560125c5ad98",
+    "AtomV2/Harness/atomv2/model.py": "7175ef51e8afa79bf094f07ef4fed031f4252bd3ce47246e43885f2772200b31",
+    "AtomV2/Harness/atomv2/data.py": "d59fd0b3a08b8b7ebf3f2d69012f3af71c6412bbc3abd1c1fb3e4418b93b9496",
+    "AtomV2/Harness/splits/split_v2.json": "d4897888fb7c9f9a01e4effb006aa73c473713d2f2e3c8dddd5e37d7e1b659ff"
+  },
+  "inference_seconds": 10.30283519999648,
+  "groups": {
+    "trained": {
+      "n_tasks": 34,
+      "n_examples": 13600,
+      "examples_per_task": [
+        400
+      ],
+      "correct_examples": {
+        "raw_acc": 13436,
+        "boundary_decode_acc": 13510,
+        "self_bottleneck_acc": 13423
+      },
+      "boundary_decode_acc": 0.9933823529411764,
+      "raw_acc": 0.9879411764705883,
+      "self_bottleneck_acc": 0.9869852941176472,
+      "boundary_rel_dist_to_canonical": 0.981551847037147
+    },
+    "L1": {
+      "n_tasks": 8,
+      "n_examples": 3200,
+      "examples_per_task": [
+        400
+      ],
+      "correct_examples": {
+        "raw_acc": 1381,
+        "boundary_decode_acc": 3173,
+        "self_bottleneck_acc": 3156
+      },
+      "boundary_decode_acc": 0.9915625,
+      "raw_acc": 0.43156249999999996,
+      "self_bottleneck_acc": 0.9862500000000001,
+      "boundary_rel_dist_to_canonical": 0.9776274561882019
+    },
+    "L2": {
+      "n_tasks": 6,
+      "n_examples": 2400,
+      "examples_per_task": [
+        400
+      ],
+      "correct_examples": {
+        "raw_acc": 946,
+        "boundary_decode_acc": 2381,
+        "self_bottleneck_acc": 2360
+      },
+      "boundary_decode_acc": 0.9920833333333334,
+      "raw_acc": 0.3941666666666667,
+      "self_bottleneck_acc": 0.9833333333333334,
+      "boundary_rel_dist_to_canonical": 0.9774972895781199
+    },
+    "L3": {
+      "n_tasks": 15,
+      "n_examples": 6000,
+      "examples_per_task": [
+        400
+      ],
+      "correct_examples": {
+        "raw_acc": 2,
+        "boundary_decode_acc": 5981,
+        "self_bottleneck_acc": 5959
+      },
+      "boundary_decode_acc": 0.9968333333333333,
+      "raw_acc": 0.0003333333333333333,
+      "self_bottleneck_acc": 0.9931666666666666,
+      "boundary_rel_dist_to_canonical": 0.9931752403577169
+    }
+  },
+  "L3_cells": {
+    "P1_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 0.995,
+      "boundary_rel_dist_to_canonical": 0.9388340711593628,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.995
+    },
+    "P2_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 0.9663345217704773,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 1.0
+    },
+    "P3_P1": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 1.0069506168365479,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.995
+    },
+    "P3_P2": {
+      "group": "L3",
+      "boundary_decode_acc": 0.9975,
+      "boundary_rel_dist_to_canonical": 1.0028300285339355,
+      "raw_acc": 0.0025,
+      "self_bottleneck_acc": 0.995
+    },
+    "P3_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 0.9975,
+      "boundary_rel_dist_to_canonical": 1.0034596920013428,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.9975
+    },
+    "P3_P4": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 1.005197286605835,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.965
+    },
+    "P3_P5": {
+      "group": "L3",
+      "boundary_decode_acc": 0.9975,
+      "boundary_rel_dist_to_canonical": 1.001952886581421,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.9975
+    },
+    "P3_P6": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 1.0044530630111694,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.9975
+    },
+    "P3_P7": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 1.0060112476348877,
+      "raw_acc": 0.0025,
+      "self_bottleneck_acc": 0.995
+    },
+    "P3_P8": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 1.0050500631332397,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 1.0
+    },
+    "P4_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 0.97,
+      "boundary_rel_dist_to_canonical": 1.0155339241027832,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.9675
+    },
+    "P5_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 0.995,
+      "boundary_rel_dist_to_canonical": 1.0229203701019287,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 0.9925
+    },
+    "P6_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 0.9466593861579895,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 1.0
+    },
+    "P7_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 0.9783632755279541,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 1.0
+    },
+    "P8_P3": {
+      "group": "L3",
+      "boundary_decode_acc": 1.0,
+      "boundary_rel_dist_to_canonical": 0.9930781722068787,
+      "raw_acc": 0.0,
+      "self_bottleneck_acc": 1.0
+    }
+  }
+}
